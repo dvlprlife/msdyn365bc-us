@@ -3,6 +3,7 @@
 This repository contains the source for the Microsoft Dynamics 365 Business Central application - US Version. This repository updates are from container artifacts for the versions and their updates. Microsoft owns the code contained within this repository. It is used to track the changes between updates, for reference, to better support those using and implementing Microsoft Dynamics 365 Business Central.
 
 For further reference, visit: 
+
 [Dynamics 365 Business Central On-Premises 2022 Release Wave 1 Updates](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/deployment/update-versions-20)
 
 [https://learn.microsoft.com/en-US/dynamics365/business-central/](https://learn.microsoft.com/en-US/dynamics365/business-central/)
