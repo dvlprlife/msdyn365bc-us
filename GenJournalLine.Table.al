@@ -3209,16 +3209,16 @@
                     "Document Type" := "Document Type"::Payment;
                 end;
             else begin
-                    "Account Type" := LastGenJnlLine."Account Type";
-                    "Document Type" := LastGenJnlLine."Document Type";
-                end;
+                "Account Type" := LastGenJnlLine."Account Type";
+                "Document Type" := LastGenJnlLine."Document Type";
+            end;
         end;
         "Source Code" := GenJnlTemplate."Source Code";
         "Reason Code" := GenJnlBatch."Reason Code";
         "Posting No. Series" := GenJnlBatch."Posting No. Series";
 
         IsHandled := false;
-        OnSetUpNewLineOnBeforeSetBalAccount(GenJnlLine, LastGenJnlLine, Balance, IsHandled, GenJnlTemplate, GenJnlBatch, BottomLine, Rec);
+        OnSetUpNewLineOnBeforeSetBalAccount(GenJnlLine, LastGenJnlLine, Balance, IsHandled, GenJnlTemplate, GenJnlBatch, BottomLine, Rec, CurrFieldNo);
         if not IsHandled then begin
             "Bal. Account Type" := GenJnlBatch."Bal. Account Type";
             if ("Account Type" in ["Account Type"::Customer, "Account Type"::Vendor, "Account Type"::"Fixed Asset"]) and
@@ -3592,9 +3592,9 @@
                     "Source No." := "Bal. Account No.";
                 end;
             else begin
-                    "Source Type" := "Source Type"::" ";
-                    "Source No." := '';
-                end;
+                "Source Type" := "Source Type"::" ";
+                "Source No." := '';
+            end;
         end;
 
         OnAfterUpdateSource(Rec, CurrFieldNo);
@@ -6395,6 +6395,9 @@
             GenJournalLine.SetRange("Bal. Account No.", '');
             if GenJournalLine.FindFirst() then begin
                 GenJournalLine.CalcSums(Amount);
+                if GenJournalLine.Amount = 0 then
+                    exit;
+
                 "Document No." := GenJournalLine."Document No.";
                 "Posting Date" := GenJournalLine."Posting Date";
                 Validate(Amount, -GenJournalLine.Amount);
@@ -7842,7 +7845,7 @@
     end;
 
     [IntegrationEvent(false, false)]
-    local procedure OnSetUpNewLineOnBeforeSetBalAccount(var GenJournalLine: Record "Gen. Journal Line"; LastGenJournalLine: Record "Gen. Journal Line"; var Balance: Decimal; var IsHandled: Boolean; GenJnlTemplate: Record "Gen. Journal Template"; GenJnlBatch: Record "Gen. Journal Batch"; BottomLine: Boolean; var Rec: Record "Gen. Journal Line")
+    local procedure OnSetUpNewLineOnBeforeSetBalAccount(var GenJournalLine: Record "Gen. Journal Line"; LastGenJournalLine: Record "Gen. Journal Line"; var Balance: Decimal; var IsHandled: Boolean; GenJnlTemplate: Record "Gen. Journal Template"; GenJnlBatch: Record "Gen. Journal Batch"; BottomLine: Boolean; var Rec: Record "Gen. Journal Line"; CurrentFieldNo: Integer)
     begin
     end;
 
