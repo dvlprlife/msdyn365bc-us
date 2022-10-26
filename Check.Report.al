@@ -732,6 +732,9 @@
                             GenJnlLine3.Validate("Posting Date", GenJnlLine."Posting Date");
                             GenJnlLine3."Document Type" := GenJnlLine."Document Type";
                             GenJnlLine3."Document No." := UseCheckNo;
+
+                            OnAfterAssignGenJnlLineDocumentNo(GenJnlLine3, GenJnlLine."Document No.");
+
                             GenJnlLine3."Account Type" := GenJnlLine3."Account Type"::"Bank Account";
                             GenJnlLine3.Validate("Account No.", BankAcc2."No.");
                             if BalancingType <> BalancingType::"G/L Account" then
@@ -1530,6 +1533,11 @@
 
     [IntegrationEvent(false, false)]
     local procedure OnGenJnlLineOnAfterGetRecordOnAfterBalancingTypeVendorCase(var Vendor: Record Vendor; var GenJnlLine: Record "Gen. Journal Line")
+    begin
+    end;
+
+    [IntegrationEvent(false, false)]
+    local procedure OnAfterAssignGenJnlLineDocumentNo(var GenJnlLine: Record "Gen. Journal Line"; PreviousDocumentNo: Code[20])
     begin
     end;
 }

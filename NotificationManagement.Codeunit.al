@@ -42,7 +42,7 @@ codeunit 1510 "Notification Management"
                         InsertOverdueEntry(ApprovalEntry, OverdueApprovalEntry);
                         NotificationEntry.CreateNotificationEntry(NotificationEntry.Type::Overdue,
                           UserSetup."User ID", OverdueApprovalEntry, WorkflowStepArgument."Link Target Page",
-                          WorkflowStepArgument."Custom Link", '');
+                          WorkflowStepArgument."Custom Link", CopyStr(UserId(), 1, 50));
                     until ApprovalEntry.Next() = 0;
             until UserSetup.Next() = 0;
 
@@ -70,6 +70,7 @@ codeunit 1510 "Notification Management"
             "Document No." := ApprovalEntry."Document No.";
             "Sent to ID" := ApprovalEntry."Approver ID";
             "Sent Date" := Today;
+            Sleep(1); // to make sure Time() is different 
             "Sent Time" := Time;
             "E-Mail" := UserSetup."E-Mail";
             "Sequence No." := ApprovalEntry."Sequence No.";
