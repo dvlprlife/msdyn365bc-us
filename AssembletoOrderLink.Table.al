@@ -138,15 +138,21 @@ table 904 "Assemble-to-Order Link"
         AsmHeader."Shortcut Dimension 2 Code" := NewSalesLine."Shortcut Dimension 2 Code";
         AsmHeader.Modify(true);
 
-        OnAfterUpdateAsm(AsmHeader);
+        OnAfterUpdateAsm(AsmHeader, Rec, NewSalesLine, AsmExists);
     end;
 
     procedure UpdateAsmDimFromSalesLine(SalesLine: Record "Sales Line")
+    begin
+        UpdateAsmDimFromSalesLine(SalesLine, false);
+    end;
+
+    procedure UpdateAsmDimFromSalesLine(SalesLine: Record "Sales Line"; HideValidationDialog: Boolean)
     var
         Window: Dialog;
     begin
         if AsmExistsForSalesLine(SalesLine) then
             if GetAsmHeader then begin
+                AsmHeader.SetHideValidationDialog(HideValidationDialog);
                 Window.Open(GetWindowOpenTextSale(SalesLine));
                 if ChangeDim(SalesLine."Dimension Set ID") then begin
                     AsmHeader."Shortcut Dimension 1 Code" := SalesLine."Shortcut Dimension 1 Code";
@@ -338,9 +344,10 @@ table 904 "Assemble-to-Order Link"
         RestoreItemTracking(TempTrackingSpecification, NewSalesLine);
 
         NewSalesLine.CheckAsmToOrder(AsmHeader);
-        Window.Close;
+        Window.Close();
 
-        AsmHeader.ShowDueDateBeforeWorkDateMsg;
+        AsmHeader.SetWarningsOn();
+        AsmHeader.ShowDueDateBeforeWorkDateMsg();
     end;
 
     procedure MakeAsmOrderLinkedToSalesOrderLine(FromSalesLine: Record "Sales Line"; ToSalesOrderLine: Record "Sales Line")
@@ -1291,7 +1298,7 @@ table 904 "Assemble-to-Order Link"
     end;
 
     [IntegrationEvent(false, false)]
-    local procedure OnAfterUpdateAsm(AsmHeader: Record "Assembly Header")
+    local procedure OnAfterUpdateAsm(var AsmHeader: Record "Assembly Header"; var AssembleToOrderLink: Record "Assemble-to-Order Link"; var SalesLine: Record "Sales Line"; AsmExists: Boolean)
     begin
     end;
 

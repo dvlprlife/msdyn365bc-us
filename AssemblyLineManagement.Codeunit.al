@@ -1,4 +1,4 @@
-codeunit 905 "Assembly Line Management"
+﻿codeunit 905 "Assembly Line Management"
 {
     Permissions = TableData "Assembly Line" = rimd;
 
@@ -11,6 +11,7 @@ codeunit 905 "Assembly Line Management"
         Text002: Label 'Do you want to update the Dimensions on the lines?';
         Text003: Label 'Changing %1 will change all the lines. Do you want to change the %1 from %2 to %3?';
         WarningModeOff: Boolean;
+        HideValidationDialog: Boolean;
         Text004: Label 'This assembly order may have customized lines. Are you sure that you want to reset the lines according to the assembly BOM?';
         Text005: Label 'Due Date %1 is before work date %2 in one or more of the assembly lines.';
         Text006: Label 'Item %1 is not a BOM.';
@@ -280,7 +281,10 @@ codeunit 905 "Assembly Line Management"
         NewLineDueDate: Date;
         IsHandled: Boolean;
     begin
-        OnBeforeUpdateAssemblyLines(AsmHeader, OldAsmHeader, FieldNum, ReplaceLinesFromBOM, CurrFieldNo, CurrentFieldNum);
+        IsHandled := false;
+        OnBeforeUpdateAssemblyLines(AsmHeader, OldAsmHeader, FieldNum, ReplaceLinesFromBOM, CurrFieldNo, CurrentFieldNum, IsHandled);
+        if IsHandled then
+            exit;
 
         if (FieldNum <> CurrentFieldNum) or // Update has been called from OnValidate of another field than was originally intended.
            ((not (FieldNum in [AsmHeader.FieldNo("Item No."),
@@ -415,12 +419,13 @@ codeunit 905 "Assembly Line Management"
                 FieldNo("Quantity to Assemble"):
                     UpdateQtyToConsume := true;
                 FieldNo("Dimension Set ID"):
-                    if "Dimension Set ID" <> OldAsmHeader."Dimension Set ID" then begin
-                        if LinesExist(AsmHeader) then
-                            if GuiAllowed then
-                                if Confirm(Text002) then
-                                    UpdateDimension := true;
-                    end;
+                    if "Dimension Set ID" <> OldAsmHeader."Dimension Set ID" then
+                        if LinesExist(AsmHeader) then begin
+                            UpdateDimension := true;
+                            if GuiAllowed and not HideValidationDialog then
+                                if not Confirm(Text002) then
+                                    UpdateDimension := false;
+                        end;
                 else
                     if CalledFromRefreshBOM(ReplaceLinesFromBOM, FieldNum) then
                         if LinesExist(AsmHeader) then
@@ -709,6 +714,11 @@ codeunit 905 "Assembly Line Management"
         WarningModeOff := true;
     end;
 
+    procedure SetWarningsOn()
+    begin
+        WarningModeOff := false;
+    end;
+
     local procedure GetWarningMode(): Boolean
     begin
         exit(not WarningModeOff);
@@ -723,7 +733,13 @@ codeunit 905 "Assembly Line Management"
     var
         AssemblyLine: Record "Assembly Line";
         ItemTrackingMgt: Codeunit "Item Tracking Management";
+        IsHandled: Boolean;
     begin
+        IsHandled := false;
+        OnBeforeCreateWhseItemTrkgForAsmLines(AsmHeader, IsHandled);
+        if IsHandled then
+            exit;
+
         with AssemblyLine do begin
             SetLinkToItemLines(AsmHeader, AssemblyLine);
             if FindSet() then
@@ -745,6 +761,11 @@ codeunit 905 "Assembly Line Management"
                     TempToAssemblyLine.Insert();
                 end;
             until TempFromAssemblyLine.Next() = 0;
+    end;
+
+    procedure SetHideValidationDialog(NewHideValidationDialog: Boolean)
+    begin
+        HideValidationDialog := NewHideValidationDialog;
     end;
 
     [IntegrationEvent(false, false)]
@@ -788,7 +809,7 @@ codeunit 905 "Assembly Line Management"
     end;
 
     [IntegrationEvent(false, false)]
-    local procedure OnBeforeUpdateAssemblyLines(var AsmHeader: Record "Assembly Header"; OldAsmHeader: Record "Assembly Header"; FieldNum: Integer; ReplaceLinesFromBOM: Boolean; CurrFieldNo: Integer; CurrentFieldNum: Integer)
+    local procedure OnBeforeUpdateAssemblyLines(var AsmHeader: Record "Assembly Header"; OldAsmHeader: Record "Assembly Header"; FieldNum: Integer; ReplaceLinesFromBOM: Boolean; CurrFieldNo: Integer; CurrentFieldNum: Integer; var IsHandled: Boolean)
     begin
     end;
 
@@ -799,6 +820,11 @@ codeunit 905 "Assembly Line Management"
 
     [IntegrationEvent(false, false)]
     local procedure OnBeforeCalcEarliestDueDate(var AsmHeader: Record "Assembly Header")
+    begin
+    end;
+
+    [IntegrationEvent(false, false)]
+    local procedure OnBeforeCreateWhseItemTrkgForAsmLines(var AsmHeader: Record "Assembly Header"; var IsHandled: Boolean)
     begin
     end;
 

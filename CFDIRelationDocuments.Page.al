@@ -26,6 +26,11 @@ page 27006 "CFDI Relation Documents"
                         CurrPage.Update();
                     end;
                 }
+                field("SAT Relation Type"; Rec."SAT Relation Type")
+                {
+                    ApplicationArea = Basic, Suite;
+                    ToolTip = 'Specifies the relation of the CFDI document. ';
+                }
                 field("Fiscal Invoice Number PAC"; "Fiscal Invoice Number PAC")
                 {
                     ApplicationArea = Basic, Suite;

@@ -198,21 +198,9 @@
     internal procedure InitializeCompany()
     var
         GLSetup: Record "General Ledger Setup";
-        ClientTypeManagement: Codeunit "Client Type Management";
     begin
-        if not GuiAllowed() then
-            exit;
-
-        if ClientTypeManagement.GetCurrentClientType() = ClientType::Background then
-            exit;
-
-        if GetExecutionContext() <> ExecutionContext::Normal then
-            exit;
-
-        if GLSetup.Get() then
-            exit;
-
-        CODEUNIT.Run(CODEUNIT::"Company-Initialize");
+        if not GLSetup.Get() then
+            CODEUNIT.Run(CODEUNIT::"Company-Initialize");
     end;
 
     procedure InitSetupTables()
@@ -801,10 +789,18 @@
     [EventSubscriber(ObjectType::Codeunit, Codeunit::"System Initialization", 'OnAfterLogin', '', false, false)]
     local procedure CompanyInitializeOnAfterLogin()
     var
-        GLSetup: Record "General Ledger Setup";
+        ClientTypeManagement: Codeunit "Client Type Management";
     begin
-        if not GLSetup.Get then
-            Codeunit.Run(Codeunit::"Company-Initialize");
+        if not GuiAllowed() then
+            exit;
+
+        if ClientTypeManagement.GetCurrentClientType() = ClientType::Background then
+            exit;
+
+        if GetExecutionContext() <> ExecutionContext::Normal then
+            exit;
+
+        InitializeCompany();
     end;
 }
 
