@@ -555,6 +555,11 @@
 
     [EventSubscriber(ObjectType::Codeunit, Codeunit::"Config. Template Management", 'OnBeforeInsertRecordWithKeyFields', '', false, false)]
     local procedure OnBeforeInsertRecordWithKeyFieldsHandler(var RecRef: RecordRef; ConfigTemplateHeader: Record "Config. Template Header")
+    begin
+        FillItemKeyFromInitSeries(RecRef, ConfigTemplateHeader)
+    end;
+
+    procedure FillItemKeyFromInitSeries(var RecRef: RecordRef; ConfigTemplateHeader: Record "Config. Template Header")
     var
         Item: Record Item;
         NoSeriesManagement: Codeunit NoSeriesManagement;

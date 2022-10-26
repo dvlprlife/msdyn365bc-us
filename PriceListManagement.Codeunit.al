@@ -214,6 +214,7 @@
         else begin
             ToPriceListLine.SetNextLineNo();
             ToPriceListLine.Insert(true);
+            OnCopyLineOnAfterInsertFromPriceListLine(FromPriceListLine, ToPriceListLine);
         end;
     end;
 
@@ -945,6 +946,11 @@
 
     [IntegrationEvent(false, false)]
     local procedure OnBeforeImplementNewPrice(var PriceWorksheetLine: Record "Price Worksheet Line")
+    begin
+    end;
+
+    [IntegrationEvent(false, false)]
+    local procedure OnCopyLineOnAfterInsertFromPriceListLine(FromPriceListLine: Record "Price List Line"; var ToPriceListLine: Record "Price List Line")
     begin
     end;
 }

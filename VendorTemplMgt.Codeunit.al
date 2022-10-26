@@ -531,6 +531,11 @@ codeunit 1385 "Vendor Templ. Mgt."
 
     [EventSubscriber(ObjectType::Codeunit, Codeunit::"Config. Template Management", 'OnBeforeInsertRecordWithKeyFields', '', false, false)]
     local procedure OnBeforeInsertRecordWithKeyFieldsHandler(var RecRef: RecordRef; ConfigTemplateHeader: Record "Config. Template Header")
+    begin
+        FillVendorKeyFromInitSeries(RecRef, ConfigTemplateHeader);
+    end;
+
+    procedure FillVendorKeyFromInitSeries(var RecRef: RecordRef; ConfigTemplateHeader: Record "Config. Template Header")
     var
         Vendor: Record Vendor;
         NoSeriesManagement: Codeunit NoSeriesManagement;

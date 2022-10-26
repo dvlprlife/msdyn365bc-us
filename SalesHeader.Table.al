@@ -108,7 +108,10 @@
                 "Send IC Document" := ("Sell-to IC Partner Code" <> '') and ("IC Direction" = "IC Direction"::Outgoing);
 
                 UpdateShipToCodeFromCust();
-                LocationCode := "Location Code";
+                IsHandled := false;
+                OnValidateSellToCustomerNoOnBeforeValidateLocationCode(Rec, Cust, IsHandled);
+                if not IsHandled then
+                    LocationCode := "Location Code";
 
                 SetBillToCustomerNo(Cust);
 
@@ -1815,6 +1818,8 @@
 
             trigger OnValidate()
             begin
+                if "Prepayment %" > 100 then
+                    error(MaxAllowedValueIs100Err);
                 if xRec."Prepayment %" <> "Prepayment %" then
                     UpdateSalesLinesByFieldNo(FieldNo("Prepayment %"), CurrFieldNo <> 0);
             end;
@@ -3157,6 +3162,7 @@
         Text028: Label 'You cannot change the %1 when the %2 has been filled in.';
         Text030: Label 'Deleting this document will cause a gap in the number series for return receipts. An empty return receipt %1 will be created to fill this gap in the number series.\\Do you want to continue?';
         Text031: Label 'You have modified %1.\\Do you want to update the lines?', Comment = 'You have modified Shipment Date.\\Do you want to update the lines?';
+        MaxAllowedValueIs100Err: Label 'The values must be less than or equal 100.';
         ReadingDataSkippedMsg: Label 'Loading field %1 will be skipped because there was an error when reading the data.\To fix the current data, contact your administrator.\Alternatively, you can overwrite the current data by entering data in the field.', Comment = '%1=field caption';
         SalesSetup: Record "Sales & Receivables Setup";
         GLSetup: Record "General Ledger Setup";
@@ -3264,6 +3270,7 @@
         UpdateDocumentDate: Boolean;
         SkipSellToContact: Boolean;
         SkipBillToContact: Boolean;
+        SkipTaxCalculation: Boolean;
 
     procedure InitInsert()
     var
@@ -5760,7 +5767,7 @@
         if TempSalesLine.FindSet() then
             repeat
                 InitSalesLineDefaultDimSource(DefaultDimSource, TempSalesLine);
-                SalesLine.CreateDim(DefaultDimSource);
+                TempSalesLine.CreateDim(DefaultDimSource);
             until TempSalesLine.Next() = 0;
     end;
 
@@ -5798,6 +5805,8 @@
     local procedure InsertTempSalesLineInBuffer(var TempSalesLine: Record "Sales Line" temporary; SalesLine: Record "Sales Line"; AccountNo: Code[20]; DefaultDimensionsNotExist: Boolean)
     begin
         TempSalesLine.Init();
+        TempSalesLine."Document Type" := SalesLine."Document Type";
+        TempSalesLine."Document No." := SalesLine."Document No.";
         TempSalesLine."Line No." := SalesLine."Line No.";
         TempSalesLine."No." := AccountNo;
         TempSalesLine."Job No." := SalesLine."Job No.";
@@ -7324,6 +7333,16 @@
         GetSalesSetup();
         if SalesSetup."Quote Validity Calculation" <> BlankDateFormula then
             "Quote Valid Until Date" := CalcDate(SalesSetup."Quote Validity Calculation", "Document Date");
+    end;
+
+    procedure CanCalculateTax(): Boolean
+    begin
+        exit(SkipTaxCalculation);
+    end;
+
+    procedure SetSkipTaxCalulation(Skip: Boolean)
+    begin
+        SkipTaxCalculation := Skip;
     end;
 
     procedure TestQuantityShippedField(SalesLine: Record "Sales Line")
@@ -9282,6 +9301,11 @@
 
     [IntegrationEvent(false, false)]
     local procedure OnInitRecordOnBeforeAssignResponsibilityCenter(var SalesHeader: Record "Sales Header"; var IsHandled: Boolean)
+    begin
+    end;
+
+    [IntegrationEvent(false, false)]
+    local procedure OnValidateSellToCustomerNoOnBeforeValidateLocationCode(var SalesHeader: Record "Sales Header"; var Cust: Record Customer; var IsHandled: Boolean)
     begin
     end;
 }

@@ -608,6 +608,11 @@ codeunit 1381 "Customer Templ. Mgt."
 
     [EventSubscriber(ObjectType::Codeunit, Codeunit::"Config. Template Management", 'OnBeforeInsertRecordWithKeyFields', '', false, false)]
     local procedure OnBeforeInsertRecordWithKeyFieldsHandler(var RecRef: RecordRef; ConfigTemplateHeader: Record "Config. Template Header")
+    begin
+        FillCustomerKeyFromInitSeries(RecRef, ConfigTemplateHeader);
+    end;
+
+    procedure FillCustomerKeyFromInitSeries(var RecRef: RecordRef; ConfigTemplateHeader: Record "Config. Template Header")
     var
         Customer: Record Customer;
         NoSeriesManagement: Codeunit NoSeriesManagement;

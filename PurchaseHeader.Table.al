@@ -1775,6 +1775,8 @@
 
             trigger OnValidate()
             begin
+                if "Prepayment %" > 100 then
+                    error(MaxAllowedValueIs100Err);
                 if xRec."Prepayment %" <> "Prepayment %" then
                     UpdatePurchLinesByFieldNo(FieldNo("Prepayment %"), CurrFieldNo <> 0);
             end;
@@ -2597,6 +2599,7 @@
         Text025: Label 'You have modified the %1 field. Note that the recalculation of VAT may cause penny differences, so you must check the amounts afterwards. ';
         Text027: Label 'Do you want to update the %2 field on the lines to reflect the new value of %1?';
         Text028: Label 'Your identification is set up to process from %1 %2 only.';
+        MaxAllowedValueIs100Err: Label 'The values must be less than or equal 100.';
         Text029: Label 'Deleting this document will cause a gap in the number series for return shipments. An empty return shipment %1 will be created to fill this gap in the number series.\\Do you want to continue?', Comment = '%1 = Document No.';
         Text032: Label 'You have modified %1.\\Do you want to update the lines?', Comment = 'You have modified Currency Factor.\\Do you want to update the lines?';
         PurchSetup: Record "Purchases & Payables Setup";
@@ -2690,6 +2693,7 @@
         StatusCheckSuspended: Boolean;
         SkipBuyFromContact: Boolean;
         SkipPayToContact: Boolean;
+        SkipTaxCalculation: Boolean;
 
     procedure InitInsert()
     var
@@ -3170,6 +3174,8 @@
             end;
         end else
             Error(RecreatePurchaseLinesCancelErr, ChangedFieldName);
+
+        OnAfterRecreatePurchLines(Rec, ChangedFieldName);
     end;
 
     local procedure StorePurchCommentLineToTemp(var TempPurchCommentLine: Record "Purch. Comment Line" temporary)
@@ -4542,7 +4548,7 @@
         if TempPurchaseLine.FindSet() then
             repeat
                 InitPurchaseLineDefaultDimSource(DefaultDimSource, TempPurchaseLine);
-                PurchaseLine.CreateDim(DefaultDimSource);
+                TempPurchaseLine.CreateDim(DefaultDimSource);
             until TempPurchaseLine.Next() = 0;
     end;
 
@@ -4583,6 +4589,8 @@
     local procedure InsertTempPurchaseLineInBuffer(var TempPurchaseLine: Record "Purchase Line" temporary; PurchaseLine: Record "Purchase Line"; AccountNo: Code[20]; DefaultDimenstionsNotExist: Boolean)
     begin
         TempPurchaseLine.Init();
+        TempPurchaseLine."Document Type" := PurchaseLine."Document Type";
+        TempPurchaseLine."Document No." := PurchaseLine."Document No.";
         TempPurchaseLine."Line No." := PurchaseLine."Line No.";
         TempPurchaseLine."No." := AccountNo;
         TempPurchaseLine."Job No." := PurchaseLine."Job No.";
@@ -5833,6 +5841,16 @@
         ReportUsage := ReportSelectionsUsage.AsInteger();
         OnAfterGetReportSelectionsUsageFromDocumentType(Rec, ReportUsage, DocTxt);
         ReportSelectionsUsage := "Report Selection Usage".FromInteger(ReportUsage);
+    end;
+
+    procedure CanCalculateTax(): Boolean
+    begin
+        exit(SkipTaxCalculation);
+    end;
+
+    procedure SetSkipTaxCalulation(Skip: Boolean)
+    begin
+        SkipTaxCalculation := Skip;
     end;
 
     procedure ValidateEmptySellToCustomerAndLocation()
@@ -7248,6 +7266,11 @@
 
     [IntegrationEvent(false, false)]
     local procedure OnBeforeLookupPayToContactNo(var PurchaseHeader: Record "Purchase Header"; xPurchaseHeader: Record "Purchase Header"; var IsHandled: Boolean)
+    begin
+    end;
+
+    [IntegrationEvent(false, false)]
+    local procedure OnAfterRecreatePurchLines(var PurchaseHeader: Record "Purchase Header"; ChangedFieldName: Text[100])
     begin
     end;
 }
