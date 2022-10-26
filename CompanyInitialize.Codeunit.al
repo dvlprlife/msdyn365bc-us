@@ -36,10 +36,12 @@
         SatisfactionSurveyMgt: Codeunit "Satisfaction Survey Mgt.";
         UpgradeTag: Codeunit "Upgrade Tag";
         Window: Dialog;
+        InitializeCompanyOnRunLogLbl: Label 'OnRun executed in Codeunit 2 "Company-Initialize". Current language is %1.', Comment = '%1 = The language lcid.';
     begin
         Window.Open(Text000);
 
         OnBeforeOnRun();
+        Session.LogMessage('0000HQL', StrSubstNo(InitializeCompanyOnRunLogLbl, GlobalLanguage()), Verbosity::Normal, DataClassification::SystemMetadata, TelemetryScope::All, 'Category', 'CompanyInitialize'); 
 
         InitSetupTables();
         AddOnIntegrMgt.InitMfgSetup();
@@ -790,7 +792,9 @@
     local procedure CompanyInitializeOnAfterLogin()
     var
         ClientTypeManagement: Codeunit "Client Type Management";
+        InitializeCompanyLogLbl: Label 'CompanyInitializeOnAfterLogin executed InitializeCompany in Codeunit 2 "Company-Initialize". Current language is %1.', Comment = '%1 = The language lcid.';
     begin
+        
         if not GuiAllowed() then
             exit;
 
@@ -800,6 +804,7 @@
         if GetExecutionContext() <> ExecutionContext::Normal then
             exit;
 
+        Session.LogMessage('0000HQ2', StrSubstNo(InitializeCompanyLogLbl, GlobalLanguage()), Verbosity::Normal, DataClassification::SystemMetadata, TelemetryScope::All, 'Category', 'CompanyInitialize');        
         InitializeCompany();
     end;
 }

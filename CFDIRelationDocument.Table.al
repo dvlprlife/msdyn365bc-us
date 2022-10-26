@@ -1,4 +1,4 @@
-table 27006 "CFDI Relation Document"
+﻿table 27006 "CFDI Relation Document"
 {
 
     fields

@@ -2065,6 +2065,10 @@ table 1003 "Job Planning Line"
         if IsHandled then
             exit;
 
+        // Patch for fixing Edit-in-Excel issues due to dependency on xRec. 
+        if not GuiAllowed() then
+            if xRec.Get(xRec.RecordId()) then;
+
         if "Total Price" = 0 then begin
             "Line Amount" := 0;
             "Line Discount Amount" := 0;
@@ -2123,7 +2127,7 @@ table 1003 "Job Planning Line"
         end else
             ClearValues;
 
-        OnUseOnBeforeModify(Rec);
+        OnUseOnBeforeModify(Rec, xRec);
         Modify(true);
     end;
 
@@ -2930,7 +2934,7 @@ table 1003 "Job Planning Line"
     end;
 
     [IntegrationEvent(false, false)]
-    local procedure OnUseOnBeforeModify(var JobPlanningLine: Record "Job Planning Line")
+    local procedure OnUseOnBeforeModify(var JobPlanningLine: Record "Job Planning Line"; xJobPlanningLine: Record "Job Planning Line")
     begin
     end;
 

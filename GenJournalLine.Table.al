@@ -3098,8 +3098,8 @@
         DontShowAgainActionTxt: Label 'Don''t show again.';
         SetDimFiltersActionTxt: Label 'Set dimension filters.';
         SetDimFiltersMessageTxt: Label 'Dimension filters are not set for one or more lines that use the BD Balance by Dimension or RBD Reversing Balance by Dimension options. Do you want to set the filters?';
-        SpecialSymbolsTok: Label '=|&''@()<>', Locked = true;
         VATCalculationTypeErr: Label 'The %1 field must contain Normal VAT, Reverse Charge VAT, or Sales Tax.', Comment = '%1=FIELDCAPTION("VAT Calculation Type")';
+        SpecialSymbolsTok: Label '=|&@()<>', Locked = true;
 
     protected var
         Currency: Record Currency;
@@ -4107,6 +4107,7 @@
         FADeprBook: Record "FA Depreciation Book";
         DefaultFADeprBook: Record "FA Depreciation Book";
     begin
+        OnBeforeGetFADeprBook(Rec, FANo);
         if "Depreciation Book Code" = '' then begin
             FASetup.Get();
 
@@ -4588,7 +4589,7 @@
         else
             TempJobJnlLine.Validate("Posting Date", xRec."Posting Date");
         TempJobJnlLine.Validate(Type, TempJobJnlLine.Type::"G/L Account");
-        
+
         "Job Currency Factor" := 0;
         if "Job Currency Code" <> '' then begin
             if "Posting Date" = 0D then
@@ -5443,12 +5444,15 @@
         OnAfterCleanLine(Rec, xRec);
     end;
 
-    local procedure ReplaceDescription(): Boolean
+    local procedure ReplaceDescription() Result: Boolean
     begin
         if "Bal. Account No." = '' then
-            exit(true);
-        GenJnlBatch.Get("Journal Template Name", "Journal Batch Name");
-        exit(GenJnlBatch."Bal. Account No." <> '');
+            Result := true
+        else begin
+            GenJnlBatch.Get("Journal Template Name", "Journal Batch Name");
+            Result := GenJnlBatch."Bal. Account No." <> '';
+        end;
+        OnAfterReplaceDescription(GenJnlBatch, Result);
     end;
 
     local procedure AddCustVendIC(AccountType: Enum "Gen. Journal Account Type"; AccountNo: Code[20]): Boolean
@@ -6404,11 +6408,8 @@
     begin
         GLAcc.Get("Account No.");
         CheckGLAcc(GLAcc);
-        if ReplaceDescription and (not GLAcc."Omit Default Descr. in Jnl.") then
-            UpdateDescription(GLAcc.Name)
-        else
-            if GLAcc."Omit Default Descr. in Jnl." then
-                Description := '';
+        SetDescriptionFromGLAcc(GLAcc);
+
         if ("Bal. Account No." = '') or
            ("Bal. Account Type" in
             ["Bal. Account Type"::"G/L Account", "Bal. Account Type"::"Bank Account"])
@@ -6435,6 +6436,16 @@
         Validate("Deferral Code", GLAcc."Default Deferral Template Code");
 
         OnAfterAccountNoOnValidateGetGLAccount(Rec, GLAcc, CurrFieldNo);
+    end;
+
+    local procedure SetDescriptionFromGLAcc(GLAccount: Record "G/L Account")
+    begin
+        if ReplaceDescription() and (not GLAccount."Omit Default Descr. in Jnl.") then
+            UpdateDescription(GLAccount.Name)
+        else
+            if GLAccount."Omit Default Descr. in Jnl." then
+                Description := '';
+        OnAfterSetDescriptionFromGLAcc(Rec, GLAccount)
     end;
 
     local procedure GetGLBalAccount()
@@ -7081,6 +7092,11 @@
     end;
 
     [IntegrationEvent(false, false)]
+    local procedure OnAfterSetDescriptionFromGLAcc(var GenJournalLine: Record "Gen. Journal Line"; GLAccount: Record "G/L Account")
+    begin
+    end;
+
+    [IntegrationEvent(false, false)]
     local procedure OnAfterClearCustApplnEntryFields(var CustLedgerEntry: Record "Cust. Ledger Entry")
     begin
     end;
@@ -7512,6 +7528,11 @@
 
     [IntegrationEvent(false, false)]
     local procedure OnBeforeGetDeferralPostDate(GenJournalLine: Record "Gen. Journal Line"; var DeferralPostDate: Date; var IsHandled: Boolean)
+    begin
+    end;
+
+    [IntegrationEvent(false, false)]
+    local procedure OnBeforeGetFADeprBook(var GenJournalLine: Record "Gen. Journal Line"; FANo: Code[20])
     begin
     end;
 
@@ -8441,6 +8462,11 @@
 
     [IntegrationEvent(false, false)]
     local procedure OnAfterRenumberAppliesToID(GenJournalLine: Record "Gen. Journal Line"; OriginalAppliesToID: Code[50]; NewAppliesToID: Code[50]; AccountType: Enum "Gen. Journal Account Type"; AccountNo: Code[20]);
+    begin
+    end;
+
+    [IntegrationEvent(false, false)]
+    local procedure OnAfterReplaceDescription(GenJnlBatch: Record "Gen. Journal Batch"; var Result: Boolean)
     begin
     end;
 

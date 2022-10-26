@@ -1130,7 +1130,13 @@ page 5052 "Contact List"
         [SecurityFiltering(SecurityFilter::Filtered)]
         ContactRec: Record Contact;
         ContactBusinessRelation: Enum "Contact Business Relation";
+        IsHandled: Boolean;
     begin
+        IsHandled := false;
+        OnBeforeUpdateContactBusinessRelationOnContacts(Rec, IsHandled);
+        if IsHandled then
+            exit;
+
         ContactRec.SetRange("Contact Business Relation", ContactBusinessRelation::" ");
         if ContactRec.IsEmpty() then
             exit;
@@ -1200,6 +1206,11 @@ page 5052 "Contact List"
     procedure SetSelection(var Contact: Record Contact)
     begin
         CurrPage.SetSelectionFilter(Contact);
+    end;
+
+    [IntegrationEvent(false, false)]
+    local procedure OnBeforeUpdateContactBusinessRelationOnContacts(Contact: Record Contact; var IsHandled: Boolean)
+    begin
     end;
 }
 

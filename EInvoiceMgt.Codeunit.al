@@ -2015,9 +2015,8 @@
                     AddAttribute(XMLDoc, XMLCurrNode, 'Descuento', FormatDecimal(TempDocumentLine."Line Discount Amount", 6));
                     AddAttribute(XMLDoc, XMLCurrNode, 'ObjetoImp', GetSubjectToTaxCode(TempDocumentLine));
 
-                    if not IsNonTaxableVATLine(TempDocumentLine) then
-                        // Impuestos per line
-                        AddNodeImpuestoPerLine(TempDocumentLine, TempDocumentLineRetention, XMLDoc, XMLCurrNode, XMLNewChild);
+                    // Impuestos per line
+                    AddNodeImpuestoPerLine(TempDocumentLine, TempDocumentLineRetention, XMLDoc, XMLCurrNode, XMLNewChild);
 
                     NumeroPedimento := FormatNumeroPedimento(TempDocumentLine);
                     if NumeroPedimento <> '' then begin
@@ -2119,9 +2118,8 @@
                     AddAttribute(XMLDoc, XMLCurrNode, 'ObjetoImp', GetSubjectToTaxCode(TempDocumentLine));
                     TotalDiscount := TotalDiscount + TempDocumentLine."Line Discount Amount";
 
-                    if not IsNonTaxableVATLine(TempDocumentLine) then
-                        // Impuestos per line
-                        AddNodeImpuestoPerLine(TempDocumentLine, TempDocumentLineRetention, XMLDoc, XMLCurrNode, XMLNewChild);
+                    // Impuestos per line
+                    AddNodeImpuestoPerLine(TempDocumentLine, TempDocumentLineRetention, XMLDoc, XMLCurrNode, XMLNewChild);
 
                     XMLCurrNode := XMLCurrNode.ParentNode;
                 until TempDocumentLine.Next() = 0;
@@ -2590,11 +2588,19 @@
             repeat
                 AddElementCFDI(XMLCurrNode, 'Traslado', '', DocNameSpace, XMLNewChild);
                 XMLCurrNode := XMLNewChild;
-                AddAttribute(XMLDoc, XMLCurrNode, 'Base', FormatAmount(TempVATAmountLine."VAT Base"));
-                AddAttribute(XMLDoc, XMLCurrNode, 'Impuesto', GetTaxCode(TempVATAmountLine."VAT %", TempVATAmountLine."VAT Amount"));
-                AddAttribute(XMLDoc, XMLCurrNode, 'TipoFactor', 'Tasa');
-                AddAttribute(XMLDoc, XMLCurrNode, 'TasaOCuota', PadStr(FormatAmount(TempVATAmountLine."VAT %" / 100), 8, '0'));
-                AddAttribute(XMLDoc, XMLCurrNode, 'Importe', FormatAmount(TempVATAmountLine."VAT Amount"));
+
+                if TempVATAmountLine."Tax Category" = GetTaxCategoryExempt() then begin
+                    AddAttribute(XMLDoc, XMLCurrNode, 'Base', FormatAmount(TempVATAmountLine."VAT Base"));
+                    AddAttribute(XMLDoc, XMLCurrNode, 'Impuesto', GetTaxCode(TempVATAmountLine."VAT %", TempVATAmountLine."VAT Amount"));
+                    AddAttribute(XMLDoc, XMLCurrNode, 'TipoFactor', 'Exento');
+                end else begin
+                    AddAttribute(XMLDoc, XMLCurrNode, 'Base', FormatAmount(TempVATAmountLine."VAT Base"));
+                    AddAttribute(XMLDoc, XMLCurrNode, 'Impuesto', GetTaxCode(TempVATAmountLine."VAT %", TempVATAmountLine."VAT Amount"));
+                    AddAttribute(XMLDoc, XMLCurrNode, 'TipoFactor', 'Tasa');
+                    AddAttribute(XMLDoc, XMLCurrNode, 'TasaOCuota', PadStr(FormatAmount(TempVATAmountLine."VAT %" / 100), 8, '0'));
+                    AddAttribute(XMLDoc, XMLCurrNode, 'Importe', FormatAmount(TempVATAmountLine."VAT Amount"));
+                end;
+
                 XMLCurrNode := XMLCurrNode.ParentNode;
             until TempVATAmountLine.Next() = 0;
             XMLCurrNode := XMLCurrNode.ParentNode; // Traslados
@@ -2719,8 +2725,7 @@
                     WriteOutStr(OutStream, FormatDecimal(TempDocumentLine."Line Discount Amount", 6) + '|'); // Descuento
                     WriteOutStr(OutStream, GetSubjectToTaxCode(TempDocumentLine) + '|'); // ObjetoImp
 
-                    if not IsNonTaxableVATLine(TempDocumentLine) then
-                        AddStrImpuestoPerLine(TempDocumentLine, TempDocumentLineRetention, OutStream);
+                    AddStrImpuestoPerLine(TempDocumentLine, TempDocumentLineRetention, OutStream);
 
                     WriteOutStr(OutStream, RemoveInvalidChars(FormatNumeroPedimento(TempDocumentLine)) + '|'); // NumeroPedimento
                 until TempDocumentLine.Next() = 0;
@@ -2820,8 +2825,7 @@
                     WriteOutStr(OutStream, GetSubjectToTaxCode(TempDocumentLine) + '|'); // ObjetoImp
                     TotalDiscount := TotalDiscount + TempDocumentLine."Line Discount Amount";
 
-                    if not IsNonTaxableVATLine(TempDocumentLine) then
-                        AddStrImpuestoPerLine(TempDocumentLine, TempDocumentLineRetention, OutStream);
+                    AddStrImpuestoPerLine(TempDocumentLine, TempDocumentLineRetention, OutStream);
                 until TempDocumentLine.Next() = 0;
 
             CreateOriginalStr33TaxAmountLines(
@@ -3163,11 +3167,17 @@
         TempVATAmountLine.SetRange(Positive, true);
         if TempVATAmountLine.FindSet() then begin
             repeat
-                WriteOutStr(OutStream, FormatAmount(TempVATAmountLine."VAT Base") + '|'); // Base
-                WriteOutStr(OutStream, GetTaxCode(TempVATAmountLine."VAT %", TempVATAmountLine."VAT Amount") + '|'); // Impuesto
-                WriteOutStr(OutStream, 'Tasa' + '|'); // TipoFactor
-                WriteOutStr(OutStream, PadStr(FormatAmount(TempVATAmountLine."VAT %" / 100), 8, '0') + '|'); // TasaOCuota
-                WriteOutStr(OutStream, FormatAmount(TempVATAmountLine."VAT Amount") + '|'); // Importe
+                if TempVATAmountLine."Tax Category" = GetTaxCategoryExempt() then begin
+                    WriteOutStr(OutStream, FormatAmount(TempVATAmountLine."VAT Base") + '|'); // Base
+                    WriteOutStr(OutStream, GetTaxCode(TempVATAmountLine."VAT %", TempVATAmountLine."VAT Amount") + '|'); // Impuesto
+                    WriteOutStr(OutStream, 'Exento' + '|'); // TipoFactor
+                end else begin
+                    WriteOutStr(OutStream, FormatAmount(TempVATAmountLine."VAT Base") + '|'); // Base
+                    WriteOutStr(OutStream, GetTaxCode(TempVATAmountLine."VAT %", TempVATAmountLine."VAT Amount") + '|'); // Impuesto
+                    WriteOutStr(OutStream, 'Tasa' + '|'); // TipoFactor
+                    WriteOutStr(OutStream, PadStr(FormatAmount(TempVATAmountLine."VAT %" / 100), 8, '0') + '|'); // TasaOCuota
+                    WriteOutStr(OutStream, FormatAmount(TempVATAmountLine."VAT Amount") + '|'); // Importe
+                end;
             until TempVATAmountLine.Next() = 0;
             WriteOutStr(OutStream, FormatAmount(TotalTax) + '|'); // TotalImpuestosTrasladados
         end;
@@ -4568,6 +4578,9 @@
         CustLedgerEntry2: Record "Cust. Ledger Entry";
         CustomerBankAccount: Record "Customer Bank Account";
         TempVATAmountLine: record "VAT Amount Line" temporary;
+        TempVATAmountLinePmt: Record "VAT Amount Line" temporary;
+        TempVATAmountLineTotal: Record "VAT Amount Line" temporary;
+        DetailedCustLedgEntryPmt: Record "Detailed Cust. Ledg. Entry";
         SATUtilities: Codeunit "SAT Utilities";
         XMLCurrNode: DotNet XmlNode;
         XMLNewChild: DotNet XmlNode;
@@ -4579,6 +4592,10 @@
         PaymentAmountLCY: Decimal;
         DomicilioFiscalReceptor: Text;
         SubjectToTax: Text;
+        TipoCambioP: Decimal;
+        CurrencyFactorInvoice: Decimal;
+        CurrencyFactorPayment: Decimal;
+        EquivalenciaDR: Decimal;
     begin
         InitPaymentXML(XMLDoc, XMLCurrNode);
         with TempCustLedgerEntry do begin
@@ -4648,17 +4665,14 @@
             AddAttribute(XMLDoc, XMLCurrNode, 'Version', '2.0');
 
             // Pagos->Pago
-            PaymentAmount := 0;
-            if TempDetailedCustLedgEntry.FindSet() then
-                repeat
-                    PaymentAmount := Abs(TempDetailedCustLedgEntry.Amount);
-                    PaymentAmountLCY := Abs(TempDetailedCustLedgEntry."Amount (LCY)");
-                until TempDetailedCustLedgEntry.Next() = 0;
-            CalcFields(Amount);
-            PaymentAmount := Amount;
+            GetPaymentData(
+              TempDetailedCustLedgEntry, DetailedCustLedgEntryPmt, TempVATAmountLine, TempVATAmountLinePmt, TempVATAmountLineTotal,
+              CurrencyFactorPayment, CurrencyFactorInvoice, PaymentAmount, PaymentAmountLCY, TipoCambioP, "Entry No.");
 
             AddElementPago(XMLCurrNode, 'Totales', '', DocNameSpace, XMLNewChild);
             XMLCurrNode := XMLNewChild;
+
+            AddNodePagoTotales(XMLDoc, XMLCurrNode, TempVATAmountLineTotal);
             AddAttribute(XMLDoc, XMLCurrNode, 'MontoTotalPagos', FormatAmount(PaymentAmountLCY));
             XMLCurrNode := XMLCurrNode.ParentNode;
 
@@ -4667,8 +4681,12 @@
             AddAttribute(XMLDoc, XMLCurrNode, 'FechaPago', FormatAsDateTime("Posting Date", 0T, ''));
             AddAttribute(XMLDoc, XMLCurrNode, 'FormaDePagoP', SATUtilities.GetSATPaymentMethod(TempCustomer."Payment Method Code"));
             AddAttribute(XMLDoc, XMLCurrNode, 'MonedaP', ConvertCurrency("Currency Code"));
+            if GLSetup."Disable CFDI Payment Details" then
+                TipoCambioP := 1 / "Original Currency Factor"
+            else
+                TipoCambioP := PaymentAmountLCY / PaymentAmount;
             if ConvertCurrency("Currency Code") <> GLSetup."LCY Code" then
-                AddAttribute(XMLDoc, XMLCurrNode, 'TipoCambioP', FormatDecimal(PaymentAmountLCY / PaymentAmount, 6))
+                AddAttribute(XMLDoc, XMLCurrNode, 'TipoCambioP', FormatDecimal(TipoCambioP, 6))
             else
                 AddAttribute(XMLDoc, XMLCurrNode, 'TipoCambioP', '1');
 
@@ -4702,9 +4720,21 @@
                     AddAttribute(XMLDoc, XMLCurrNode, 'IdDocumento', UUID);// this needs to be changed
                     AddAttribute(XMLDoc, XMLCurrNode, 'Folio', CustLedgerEntry2."Document No.");
                     AddAttribute(XMLDoc, XMLCurrNode, 'MonedaDR', ConvertCurrency(CustLedgerEntry2."Currency Code"));
-                    AddAttribute(
-                      XMLDoc, XMLCurrNode, 'EquivalenciaDR',
-                      FormatDecimal(CustLedgerEntry2."Original Currency Factor" / "Original Currency Factor", 6));
+
+                    if GLSetup."Disable CFDI Payment Details" then
+                        EquivalenciaDR := CustLedgerEntry2."Original Currency Factor" / "Original Currency Factor"
+                    else begin
+                        CurrencyFactorInvoice := TempDetailedCustLedgEntry.Amount / TempDetailedCustLedgEntry."Amount (LCY)";
+                        if ConvertCurrency(CustLedgerEntry2."Currency Code") = GLSetup."LCY Code" then
+                            EquivalenciaDR := Round(CurrencyFactorInvoice / CurrencyFactorPayment, 0.000001)
+                        else
+                            EquivalenciaDR := Round(CurrencyFactorPayment / CurrencyFactorInvoice, 0.000001);
+                    end;
+                    if ConvertCurrency(CustLedgerEntry2."Currency Code") = ConvertCurrency("Currency Code") then
+                        AddAttribute(XMLDoc, XMLCurrNode, 'EquivalenciaDR', '1')
+                    else
+                        AddAttribute(XMLDoc, XMLCurrNode, 'EquivalenciaDR', FormatDecimal(EquivalenciaDR, 6));
+
                     SumStampedPayments(CustLedgerEntry2, SumOfStamped, PaymentNo);
                     AddAttribute(XMLDoc, XMLCurrNode, 'NumParcialidad', Format(PaymentNo));
                     AddAttribute(
@@ -4720,8 +4750,11 @@
                     XMLCurrNode := XMLCurrNode.ParentNode;
                 until TempDetailedCustLedgEntry.Next() = 0;
 
-            XMLCurrNode := XMLCurrNode.ParentNode;
-            XMLCurrNode := XMLCurrNode.ParentNode;
+            // ImpuestosP
+            AddNodePagoImpuestosP(XMLDoc, XMLCurrNode, XMLNewChild, TempVATAmountLinePmt, DetailedCustLedgEntryPmt."Currency Code");
+
+            XMLCurrNode := XMLCurrNode.ParentNode; // Pago
+            XMLCurrNode := XMLCurrNode.ParentNode; // Pagos
         end;
     end;
 
@@ -4730,6 +4763,9 @@
         CustLedgerEntry2: Record "Cust. Ledger Entry";
         CustomerBankAccount: Record "Customer Bank Account";
         TempVATAmountLine: Record "VAT Amount Line" temporary;
+        TempVATAmountLinePmt: Record "VAT Amount Line" temporary;
+        TempVATAmountLineTotal: Record "VAT Amount Line" temporary;
+        DetailedCustLedgEntryPmt: Record "Detailed Cust. Ledg. Entry";
         SATUtilities: Codeunit "SAT Utilities";
         OutStream: OutStream;
         SumOfStamped: Decimal;
@@ -4740,6 +4776,10 @@
         PaymentAmountLCY: Decimal;
         DomicilioFiscalReceptor: Text;
         SubjectToTax: Text;
+        TipoCambioP: Decimal;
+        CurrencyFactorInvoice: Decimal;
+        CurrencyFactorPayment: Decimal;
+        EquivalenciaDR: Decimal;
     begin
         with TempCustLedgerEntry do begin
             Clear(TempBlob);
@@ -4787,23 +4827,25 @@
             // Pagos
             WriteOutStr(OutStream, '2.0' + '|');// VersionForPagoHCto1.0
 
-            PaymentAmount := 0;
-            if TempDetailedCustLedgEntry.FindSet() then
-                repeat
-                    PaymentAmount := Abs(TempDetailedCustLedgEntry.Amount);
-                    PaymentAmountLCY := Abs(TempDetailedCustLedgEntry."Amount (LCY)");
-                until TempDetailedCustLedgEntry.Next() = 0;
-            CalcFields(Amount);
-            PaymentAmount := Amount;
+            GetPaymentData(
+              TempDetailedCustLedgEntry, DetailedCustLedgEntryPmt, TempVATAmountLine, TempVATAmountLinePmt, TempVATAmountLineTotal,
+              CurrencyFactorPayment, CurrencyFactorInvoice, PaymentAmount, PaymentAmountLCY, TipoCambioP, "Entry No.");
 
                                                 // Pagos->Pago
+            // Totales
+            AddStrPagoTotales(TempVATAmountLineTotal, OutStream);
             WriteOutStr(OutStream, FormatAmount(PaymentAmountLCY) + '|');// Totales/MontoTotalPagos
 
             WriteOutStr(OutStream, FormatAsDateTime("Posting Date", 0T, '') + '|');// FechaPagoSetToPD
             WriteOutStr(OutStream, SATUtilities.GetSATPaymentMethod(TempCustomer."Payment Method Code") + '|');// FormaDePagoP
             WriteOutStr(OutStream, ConvertCurrency("Currency Code") + '|');// MonedaP
+
+            if GLSetup."Disable CFDI Payment Details" then
+                TipoCambioP := 1 / "Original Currency Factor"
+            else
+                TipoCambioP := PaymentAmountLCY / PaymentAmount;
             if ConvertCurrency("Currency Code") <> GLSetup."LCY Code" then
-                WriteOutStr(OutStream, FormatDecimal(PaymentAmountLCY / PaymentAmount, 6) + '|') // TipoCambioP
+                WriteOutStr(OutStream, FormatDecimal(TipoCambioP, 6) + '|') // TipoCambioP
             else
                 WriteOutStr(OutStream, '1|');
 
@@ -4836,8 +4878,20 @@
                     WriteOutStr(OutStream, UUID + '|');// IdDocumento
                     WriteOutStr(OutStream, CustLedgerEntry2."Document No." + '|');// Folio
                     WriteOutStr(OutStream, ConvertCurrency(CustLedgerEntry2."Currency Code") + '|'); // MonedaDR
-                    WriteOutStr(OutStream,
-                      FormatDecimal(CustLedgerEntry2."Original Currency Factor" / "Original Currency Factor", 6) + '|'); // EquivalenciaDR
+
+                    if GLSetup."Disable CFDI Payment Details" then
+                        EquivalenciaDR := CustLedgerEntry2."Original Currency Factor" / "Original Currency Factor"
+                    else begin
+                        CurrencyFactorInvoice := TempDetailedCustLedgEntry.Amount / TempDetailedCustLedgEntry."Amount (LCY)";
+                        if ConvertCurrency(CustLedgerEntry2."Currency Code") = GLSetup."LCY Code" then
+                            EquivalenciaDR := Round(CurrencyFactorInvoice / CurrencyFactorPayment, 0.000001)
+                        else
+                            EquivalenciaDR := Round(CurrencyFactorPayment / CurrencyFactorInvoice, 0.000001);
+                    end;
+                    if ConvertCurrency(CustLedgerEntry2."Currency Code") = ConvertCurrency("Currency Code") then
+                        WriteOutStr(OutStream, '1|') // EquivalenciaDR
+                    else
+                        WriteOutStr(OutStream, FormatDecimal(EquivalenciaDR, 6) + '|'); // EquivalenciaDR
 
                     SumStampedPayments(CustLedgerEntry2, SumOfStamped, PaymentNo);
                     WriteOutStr(OutStream, Format(PaymentNo) + '|');// NumParcialidad
@@ -4850,6 +4904,9 @@
                     
                     AddStrPagoImpuestosDR(TempVATAmountLine, OutStream);
                 until TempDetailedCustLedgEntry.Next() = 0;
+
+            // ImpuestosP
+            AddStrPagoImpuestosP(TempVATAmountLinePmt, OutStream, DetailedCustLedgEntryPmt."Currency Code");
             // Need one more pipe character at end of built string...
             WriteOutStrAllowOneCharacter(OutStream, '|');
         end;
@@ -4883,6 +4940,46 @@
         TempCFDIRelationDocument."SAT Relation Type" := RelationType;
         TempCFDIRelationDocument."Fiscal Invoice Number PAC" := UUID;
         TempCFDIRelationDocument.Insert();
+    end;
+
+    local procedure GetPaymentData(var TempDetailedCustLedgEntry: Record "Detailed Cust. Ledg. Entry" temporary; var DetailedCustLedgEntryPmt: Record "Detailed Cust. Ledg. Entry"; var TempVATAmountLine: Record "VAT Amount Line" temporary; var TempVATAmountLinePmt: Record "VAT Amount Line" temporary; var TempVATAmountLineTotal: Record "VAT Amount Line" temporary; var CurrencyFactorPayment: Decimal; var CurrencyFactorInvoice: Decimal; var PaymentAmount: Decimal; var PaymentAmountLCY: Decimal; var TipoCambioP: Decimal; PaymentEntryNo: Integer)
+    var
+        CustLedgerEntry2: Record "Cust. Ledger Entry";
+        UUID: Text[50];
+        DocAmountInclVAT: Decimal;
+        SubjectToTax: Text;
+    begin
+        GetPmtCustDtldEntry(DetailedCustLedgEntryPmt, PaymentEntryNo);
+        DetailedCustLedgEntryPmt.CalcSums(Amount, "Amount (LCY)");
+        PaymentAmount := Abs(DetailedCustLedgEntryPmt.Amount);
+        PaymentAmountLCY := Abs(DetailedCustLedgEntryPmt."Amount (LCY)");
+        if GLSetup."Disable CFDI Payment Details" then
+            exit;
+
+        CurrencyFactorPayment := DetailedCustLedgEntryPmt.Amount / DetailedCustLedgEntryPmt."Amount (LCY)";
+        if TempDetailedCustLedgEntry.FindSet() then
+            repeat
+                if TempDetailedCustLedgEntry."Document Type" = TempDetailedCustLedgEntry."Document Type"::Payment then
+                    CustLedgerEntry2.Get(TempDetailedCustLedgEntry."Cust. Ledger Entry No.")
+                else
+                    CustLedgerEntry2.Get(TempDetailedCustLedgEntry."Applied Cust. Ledger Entry No.");
+                GetRelatedDocumentData(
+                  TempDetailedCustLedgEntry, CustLedgerEntry2."Document No.", CustLedgerEntry2."Source Code",
+                  TempVATAmountLine, UUID, DocAmountInclVAT, SubjectToTax);
+                CurrencyFactorInvoice := TempDetailedCustLedgEntry.Amount / TempDetailedCustLedgEntry."Amount (LCY)";
+
+                if ConvertCurrency(DetailedCustLedgEntryPmt."Currency Code") = GLSetup."LCY Code" then
+                    TipoCambioP := Round(CurrencyFactorPayment / CurrencyFactorInvoice, 0.000001)
+                else
+                    TipoCambioP := Round(CurrencyFactorInvoice / CurrencyFactorPayment, 0.000001);
+                if ConvertCurrency(CustLedgerEntry2."Currency Code") = GLSetup."LCY Code" then
+                    InsertTempVATAmountLinePmt(TempVATAmountLinePmt, TempVATAmountLine, TipoCambioP)
+                else
+                    InsertTempVATAmountLinePmt(TempVATAmountLinePmt, TempVATAmountLine, 1 / TipoCambioP);
+
+                InsertTempVATAmountLinePmtTotals(
+                  TempVATAmountLineTotal, TempVATAmountLine, CustLedgerEntry2."Original Currency Factor");
+            until TempDetailedCustLedgEntry.Next() = 0;
     end;
 
     local procedure GetPmtDataFromFirstDoc(DetailedCustLedgEntry: Record "Detailed Cust. Ledg. Entry"; var DomicilioFiscalReceptor: Text)
@@ -4919,6 +5016,14 @@
             DATABASE::"Service Cr.Memo Header":
                 ServiceCrMemoHeader.Get(CustLedgerEntry."Document No.");
         end;
+    end;
+
+    local procedure GetPmtCustDtldEntry(var DetailedCustLedgEntryPmt: Record "Detailed Cust. Ledg. Entry"; EntryNo: Integer)
+    begin
+        DetailedCustLedgEntryPmt.SetRange("Entry Type", DetailedCustLedgEntryPmt."Entry Type"::Application);
+        DetailedCustLedgEntryPmt.SetRange("Applied Cust. Ledger Entry No.", EntryNo);
+        DetailedCustLedgEntryPmt.SetRange("Initial Document Type", DetailedCustLedgEntryPmt."Initial Document Type"::Payment);
+        if DetailedCustLedgEntryPmt.FindFirst() then;
     end;
 
     local procedure GetRelatedDocumentTableID(DetailedCustLedgEntry: Record "Detailed Cust. Ledg. Entry"; EntrySourceCode: Code[10]): Integer;
@@ -5184,6 +5289,11 @@
 
     local procedure AddNodeImpuestoPerLine(TempDocumentLine: Record "Document Line" temporary; var TempDocumentLineRetention: Record "Document Line" temporary; var XMLDoc: DotNet XmlDocument; XMLCurrNode: DotNet XmlNode; XMLNewChild: DotNet XmlNode)
     begin
+        if GetSubjectToTaxCode(TempDocumentLine) <> '02' then
+            exit;
+        if IsNonTaxableVATLine(TempDocumentLine) then
+            exit;
+
         // Impuestos->Traslados/Retenciones
         AddElementCFDI(XMLCurrNode, 'Impuestos', '', DocNameSpace, XMLNewChild);
         XMLCurrNode := XMLNewChild;
@@ -5233,6 +5343,11 @@
 
     local procedure AddStrImpuestoPerLine(TempDocumentLine: Record "Document Line" temporary; var TempDocumentLineRetention: Record "Document Line" temporary; var OutStr: OutStream)
     begin
+        if GetSubjectToTaxCode(TempDocumentLine) <> '02' then
+            exit;
+        if IsNonTaxableVATLine(TempDocumentLine) then
+            exit;
+
         AddStrTrasladoRetentionPerLine(
           OutStr,
           TempDocumentLine.Amount, TempDocumentLine."VAT %", TempDocumentLine."Amount Including VAT" - TempDocumentLine.Amount,
@@ -5337,11 +5452,8 @@
     local procedure AddNodePagoImpuestosDR(var TempVATAmountLine: Record "VAT Amount Line" temporary; var XMLDoc: DotNet XmlDocument; XMLCurrNode: DotNet XmlNode;
                                                                                           XMLNewChild: DotNet XmlNode)
     begin
-        TempVATAmountLine.SetFilter("VAT %", '<>0');
         if TempVATAmountLine.IsEmpty then
             exit;
-
-        TempVATAmountLine.SetRange("VAT %");
 
         AddElementPago(XMLCurrNode, 'ImpuestosDR', '', DocNameSpace, XMLNewChild);
         XMLCurrNode := XMLNewChild;
@@ -5352,11 +5464,17 @@
             repeat
                 AddElementPago(XMLCurrNode, 'TrasladoDR', '', DocNameSpace, XMLNewChild);
                 XMLCurrNode := XMLNewChild;
-                AddAttribute(XMLDoc, XMLCurrNode, 'BaseDR', FormatDecimal(TempVATAmountLine."VAT Base", 2));
-                AddAttribute(XMLDoc, XMLCurrNode, 'ImpuestoDR', GetTaxCode(TempVATAmountLine."VAT %", TempVATAmountLine."VAT Amount"));
-                AddAttribute(XMLDoc, XMLCurrNode, 'TipoFactorDR', 'Tasa');
-                AddAttribute(XMLDoc, XMLCurrNode, 'TasaOCuotaDR', PADSTR(FormatAmount(TempVATAmountLine."VAT %" / 100), 8, '0'));
-                AddAttribute(XMLDoc, XMLCurrNode, 'ImporteDR', FormatDecimal(TempVATAmountLine."VAT Amount", 2));
+                if TempVATAmountLine."Tax Category" = GetTaxCategoryExempt() then begin
+                    AddAttribute(XMLDoc, XMLCurrNode, 'BaseDR', FormatDecimal(TempVATAmountLine."VAT Base", 2));
+                    AddAttribute(XMLDoc, XMLCurrNode, 'ImpuestoDR', GetTaxCode(TempVATAmountLine."VAT %", TempVATAmountLine."VAT Amount"));
+                    AddAttribute(XMLDoc, XMLCurrNode, 'TipoFactorDR', 'Exento');
+                end else begin
+                    AddAttribute(XMLDoc, XMLCurrNode, 'BaseDR', FormatDecimal(TempVATAmountLine."VAT Base", 2));
+                    AddAttribute(XMLDoc, XMLCurrNode, 'ImpuestoDR', GetTaxCode(TempVATAmountLine."VAT %", TempVATAmountLine."VAT Amount"));
+                    AddAttribute(XMLDoc, XMLCurrNode, 'TipoFactorDR', 'Tasa');
+                    AddAttribute(XMLDoc, XMLCurrNode, 'TasaOCuotaDR', PadStr(FormatAmount(TempVATAmountLine."VAT %" / 100), 8, '0'));
+                    AddAttribute(XMLDoc, XMLCurrNode, 'ImporteDR', FormatDecimal(TempVATAmountLine."VAT Amount", 2));
+                end;
                 XMLCurrNode := XMLCurrNode.ParentNode;
             until TempVATAmountLine.Next() = 0;
 
@@ -5366,19 +5484,142 @@
 
     local procedure AddStrPagoImpuestosDR(var TempVATAmountLine: Record "VAT Amount Line" temporary; var OutStr: OutStream);
     begin
-        TempVATAmountLine.SetFilter("VAT %", '<>0');
         if TempVATAmountLine.IsEmpty then
             exit;
 
-        TempVATAmountLine.SetRange("VAT %");
-        if TempVATAmountLine.FindFirst() then
+        if TempVATAmountLine.FindSet() then
             repeat
-                WriteOutStr(OutStr, FormatDecimal(TempVATAmountLine."VAT Base", 2) + '|'); // BaseDR
-                WriteOutStr(OutStr, GetTaxCode(TempVATAmountLine."VAT %", TempVATAmountLine."VAT Amount") + '|'); // ImpuestoDR
-                WriteOutStr(OutStr, 'Tasa' + '|'); // TipoFactorDR
-                WriteOutStr(OutStr, PADSTR(FormatAmount(TempVATAmountLine."VAT %" / 100), 8, '0') + '|'); // TasaOCuota
-                WriteOutStr(OutStr, FormatDecimal(TempVATAmountLine."VAT Amount", 2) + '|'); // Importe
+                if TempVATAmountLine."Tax Category" = GetTaxCategoryExempt() then begin
+                    WriteOutStr(OutStr, FormatDecimal(TempVATAmountLine."VAT Base", 2) + '|'); // BaseDR
+                    WriteOutStr(OutStr, GetTaxCode(TempVATAmountLine."VAT %", TempVATAmountLine."VAT Amount") + '|'); // ImpuestoDR
+                    WriteOutStr(OutStr, 'Exento' + '|'); // TipoFactorDR
+                end else begin
+                    WriteOutStr(OutStr, FormatDecimal(TempVATAmountLine."VAT Base", 2) + '|'); // BaseDR
+                    WriteOutStr(OutStr, GetTaxCode(TempVATAmountLine."VAT %", TempVATAmountLine."VAT Amount") + '|'); // ImpuestoDR
+                    WriteOutStr(OutStr, 'Tasa' + '|'); // TipoFactorDR
+                    WriteOutStr(OutStr, PADSTR(FormatAmount(TempVATAmountLine."VAT %" / 100), 8, '0') + '|'); // TasaOCuota
+                    WriteOutStr(OutStr, FormatDecimal(TempVATAmountLine."VAT Amount", 2) + '|'); // Importe
+                end;
             until TempVATAmountLine.Next() = 0;
+    end;
+
+    local procedure AddNodePagoImpuestosP(var XMLDoc: DotNet XmlDocument; XMLCurrNode: DotNet XmlNode; XMLNewChild: DotNet XmlNode; var TempVATAmountLinePmt: Record "VAT Amount Line" temporary; CurrencyCode: Code[10])
+    var
+        Decimals: Integer;
+    begin
+        if TempVATAmountLinePmt.IsEmpty() then
+            exit;
+
+        if ConvertCurrency(CurrencyCode) = GLSetup."LCY Code" then
+            Decimals := 2
+        else
+            Decimals := 6;
+
+        AddElementPago(XMLCurrNode, 'ImpuestosP', '', DocNameSpace, XMLNewChild);
+        XMLCurrNode := XMLNewChild;
+        AddElementPago(XMLCurrNode, 'TrasladosP', '', DocNameSpace, XMLNewChild);
+        XMLCurrNode := XMLNewChild;
+
+        if TempVATAmountLinePmt.FindSet() then
+            repeat
+                AddElementPago(XMLCurrNode, 'TrasladoP', '', DocNameSpace, XMLNewChild);
+                XMLCurrNode := XMLNewChild;
+
+                if TempVATAmountLinePmt."Tax Category" = GetTaxCategoryExempt() then begin
+                    AddAttribute(XMLDoc, XMLCurrNode, 'BaseP', FormatDecimal(Round(TempVATAmountLinePmt."VAT Base", 0.000001, '<'), Decimals));
+                    AddAttribute(XMLDoc, XMLCurrNode, 'ImpuestoP', GetTaxCode(TempVATAmountLinePmt."VAT %", TempVATAmountLinePmt."VAT Amount"));
+                    AddAttribute(XMLDoc, XMLCurrNode, 'TipoFactorP', 'Exento');
+                end else begin
+                    AddAttribute(XMLDoc, XMLCurrNode, 'BaseP', FormatDecimal(Round(TempVATAmountLinePmt."VAT Base", 0.000001, '<'), Decimals));
+                    AddAttribute(XMLDoc, XMLCurrNode, 'ImpuestoP', GetTaxCode(TempVATAmountLinePmt."VAT %", TempVATAmountLinePmt."VAT Amount"));
+                    AddAttribute(XMLDoc, XMLCurrNode, 'TipoFactorP', 'Tasa');
+                    AddAttribute(XMLDoc, XMLCurrNode, 'TasaOCuotaP', PadStr(FormatAmount(TempVATAmountLinePmt."VAT %" / 100), 8, '0'));
+                    AddAttribute(
+                      XMLDoc, XMLCurrNode, 'ImporteP', FormatDecimal(Round(TempVATAmountLinePmt."VAT Amount", 0.000001, '<'), Decimals));
+                end;
+                XMLCurrNode := XMLCurrNode.ParentNode;
+            until TempVATAmountLinePmt.Next() = 0;
+
+        XMLCurrNode := XMLCurrNode.ParentNode;
+        XMLCurrNode := XMLCurrNode.ParentNode;
+    end;
+
+    local procedure AddStrPagoImpuestosP(var TempVATAmountLinePmt: Record "VAT Amount Line" temporary; var OutStr: OutStream; CurrencyCode: Code[10])
+    var
+        Decimals: Integer;
+    begin
+        if TempVATAmountLinePmt.IsEmpty() then
+            exit;
+
+        if ConvertCurrency(CurrencyCode) = GLSetup."LCY Code" then
+            Decimals := 2
+        else
+            Decimals := 6;
+
+        if TempVATAmountLinePmt.FindSet() then
+            repeat
+                if TempVATAmountLinePmt."Tax Category" = GetTaxCategoryExempt() then begin
+                    WriteOutStr(OutStr, FormatDecimal(Round(TempVATAmountLinePmt."VAT Base", 0.000001, '<'), Decimals) + '|'); // BaseP
+                    WriteOutStr(OutStr, GetTaxCode(TempVATAmountLinePmt."VAT %", TempVATAmountLinePmt."VAT Amount") + '|'); // ImpuestoP
+                    WriteOutStr(OutStr, 'Exento' + '|'); // TipoFactorP
+                end else begin
+                    WriteOutStr(OutStr, FormatDecimal(Round(TempVATAmountLinePmt."VAT Base", 0.000001, '<'), Decimals) + '|'); // BaseP
+                    WriteOutStr(OutStr, GetTaxCode(TempVATAmountLinePmt."VAT %", TempVATAmountLinePmt."VAT Amount") + '|'); // ImpuestoP
+                    WriteOutStr(OutStr, 'Tasa' + '|'); // TipoFactorP
+                    WriteOutStr(OutStr, PadStr(FormatAmount(TempVATAmountLinePmt."VAT %" / 100), 8, '0') + '|'); // TasaOCuota
+                    WriteOutStr(OutStr, FormatDecimal(Round(TempVATAmountLinePmt."VAT Amount", 0.000001, '<'), Decimals) + '|'); // ImporteP
+                end;
+            until TempVATAmountLinePmt.Next() = 0;
+    end;
+
+    local procedure AddNodePagoTotales(var XMLDoc: DotNet XmlDocument; XMLCurrNode: DotNet XmlNode; var TempVATAmountLineTotal: Record "VAT Amount Line" temporary)
+    begin
+        if TempVATAmountLineTotal.FindSet() then
+            repeat
+                if TempVATAmountLineTotal.Positive and (TempVATAmountLineTotal."VAT %" = 16) then begin
+                    AddAttribute(XMLDoc, XMLCurrNode, 'TotalTrasladosBaseIVA16', FormatDecimal(TempVATAmountLineTotal."VAT Base", 2));
+                    AddAttribute(XMLDoc, XMLCurrNode, 'TotalTrasladosImpuestoIVA16', FormatDecimal(TempVATAmountLineTotal."VAT Amount", 2));
+                end;
+                if TempVATAmountLineTotal.Positive and (TempVATAmountLineTotal."VAT %" = 8) then begin
+                    AddAttribute(XMLDoc, XMLCurrNode, 'TotalTrasladosBaseIVA8', FormatDecimal(TempVATAmountLineTotal."VAT Base", 2));
+                    AddAttribute(XMLDoc, XMLCurrNode, 'TotalTrasladosImpuestoIVA8', FormatDecimal(TempVATAmountLineTotal."VAT Amount", 2));
+                end;
+                if TempVATAmountLineTotal.Positive and (TempVATAmountLineTotal."VAT %" = 0) then
+                    if TempVATAmountLineTotal."Tax Category" = GetTaxCategoryExempt() then
+                        AddAttribute(XMLDoc, XMLCurrNode, 'TotalTrasladosBaseIVAExento', FormatDecimal(TempVATAmountLineTotal."VAT Base", 2))
+                    else begin
+                        AddAttribute(XMLDoc, XMLCurrNode, 'TotalTrasladosBaseIVA0', FormatDecimal(TempVATAmountLineTotal."VAT Base", 2));
+                        AddAttribute(XMLDoc, XMLCurrNode, 'TotalTrasladosImpuestoIVA0', FormatDecimal(TempVATAmountLineTotal."VAT Amount", 2));
+                    end;
+            until TempVATAmountLineTotal.Next() = 0;
+    end;
+
+    local procedure AddStrPagoTotales(var TempVATAmountLineTotal: Record "VAT Amount Line" temporary; var OutStr: OutStream)
+    begin
+        if TempVATAmountLineTotal.IsEmpty() then
+            exit;
+
+        TempVATAmountLineTotal.SetRange(Positive, true);
+        TempVATAmountLineTotal.SetRange("VAT %", 16);
+        if TempVATAmountLineTotal.FindFirst() then begin
+            WriteOutStr(OutStr, FormatDecimal(TempVATAmountLineTotal."VAT Base", 2) + '|'); // TotalTrasladosBaseIVA16
+            WriteOutStr(OutStr, FormatDecimal(TempVATAmountLineTotal."VAT Amount", 2) + '|'); // TotalTrasladosImpuestoIVA16
+        end;
+        TempVATAmountLineTotal.SetRange("VAT %", 8);
+        if TempVATAmountLineTotal.FindFirst() then begin
+            WriteOutStr(OutStr, FormatDecimal(TempVATAmountLineTotal."VAT Base", 2) + '|'); // TotalTrasladosBaseIVA8
+            WriteOutStr(OutStr, FormatDecimal(TempVATAmountLineTotal."VAT Amount", 2) + '|'); // TotalTrasladosImpuestoIVA8
+        end;
+        TempVATAmountLineTotal.SetRange("VAT %", 0);
+        TempVATAmountLineTotal.SetRange("Tax Category", '');
+        if TempVATAmountLineTotal.FindFirst() then begin
+            WriteOutStr(OutStr, FormatDecimal(TempVATAmountLineTotal."VAT Base", 2) + '|'); // TotalTrasladosBaseIVA0
+            WriteOutStr(OutStr, FormatDecimal(TempVATAmountLineTotal."VAT Amount", 2) + '|'); // TotalTrasladosImpuestoIVA0
+        end;
+        TempVATAmountLineTotal.SetRange("Tax Category", GetTaxCategoryExempt());
+        if TempVATAmountLineTotal.FindFirst then
+            WriteOutStr(OutStr, FormatDecimal(TempVATAmountLineTotal."VAT Base", 2) + '|'); // Exento
+        TempVATAmountLineTotal.Reset();
     end;
 
     local procedure IsInvoicePrepaymentSettle(InvoiceNumber: Code[20]; var AdvanceAmount: Decimal): Boolean
@@ -5521,6 +5762,11 @@
             exit('01');
 
         exit('02');
+    end;
+
+    local procedure GetTaxCategoryExempt(): Code[10]
+    begin
+        exit('E');
     end;
 
     [EventSubscriber(ObjectType::Table, Database::"Service Connection", 'OnRegisterServiceConnection', '', false, false)]
@@ -5681,7 +5927,7 @@
             exit;
 
         VATPostingSetup.Get(TempDocumentLine."VAT Bus. Posting Group", TempDocumentLine."VAT Prod. Posting Group");
-        if VATPostingSetup."CFDI VAT Exemption" then
+        if GetSubjectToTaxCode(TempDocumentLine) <> '02' then
             exit;
 
         if TempDocumentLine."Retention Attached to Line No." = 0 then
@@ -5698,6 +5944,8 @@
             TempVATAmountLine.Insert();
         end;
 
+        if VATPostingSetup."CFDI VAT Exemption" then
+            TempVATAmountLine."Tax Category" := GetTaxCategoryExempt();
         if TempDocumentLine."Retention Attached to Line No." = 0 then begin
             TempVATAmountLine."Amount Including VAT" += TempDocumentLine."Amount Including VAT";
             TempVATAmountLine."VAT %" := TempDocumentLine."VAT %";
@@ -5709,6 +5957,54 @@
             TempVATAmountLine."VAT Amount" += TempDocumentLine.Amount;
             TempVATAmountLine.Modify();
         end;
+    end;
+
+    local procedure InsertTempVATAmountLinePmt(var TempVATAmountLinePmt: Record "VAT Amount Line" temporary; var TempVATAmountLine: Record "VAT Amount Line" temporary; CurrencyFactor: Decimal)
+    begin
+        if not TempVATAmountLine.FindSet then
+            exit;
+
+        repeat
+            if not TempVATAmountLinePmt.Get(
+                 TempVATAmountLine."VAT Identifier", TempVATAmountLine."VAT Calculation Type",
+                 TempVATAmountLine."Tax Group Code", TempVATAmountLine."Tax Group Code",
+                 TempVATAmountLine."Use Tax", TempVATAmountLine.Positive)
+            then begin
+                TempVATAmountLinePmt := TempVATAmountLine;
+                TempVATAmountLinePmt."VAT Base" := 0;
+                TempVATAmountLinePmt."VAT Amount" := 0;
+                TempVATAmountLinePmt."Amount Including VAT" := 0;
+                TempVATAmountLinePmt.Insert;
+            end;
+            TempVATAmountLinePmt."VAT Base" += TempVATAmountLine."VAT Base" / CurrencyFactor;
+            TempVATAmountLinePmt."VAT Amount" += TempVATAmountLine."VAT Amount" / CurrencyFactor;
+            TempVATAmountLinePmt."Amount Including VAT" += TempVATAmountLine."Amount Including VAT" / CurrencyFactor;
+            TempVATAmountLinePmt.Modify;
+        until TempVATAmountLine.Next = 0;
+    end;
+
+    local procedure InsertTempVATAmountLinePmtTotals(var TempVATAmountLineTotal: Record "VAT Amount Line" temporary; var TempVATAmountLine: Record "VAT Amount Line" temporary; CurrencyFactor: Decimal)
+    begin
+        if not TempVATAmountLine.FindSet then
+            exit;
+
+        repeat
+            if not TempVATAmountLineTotal.Get(
+                 TempVATAmountLine."VAT Identifier", TempVATAmountLine."VAT Calculation Type",
+                 TempVATAmountLine."Tax Group Code", TempVATAmountLine."Tax Group Code",
+                 TempVATAmountLine."Use Tax", TempVATAmountLine.Positive)
+            then begin
+                TempVATAmountLineTotal := TempVATAmountLine;
+                TempVATAmountLineTotal."VAT Base" := 0;
+                TempVATAmountLineTotal."VAT Amount" := 0;
+                TempVATAmountLineTotal."Amount Including VAT" := 0;
+                TempVATAmountLineTotal.Insert;
+            end;
+            TempVATAmountLineTotal."VAT Base" += Round(TempVATAmountLine."VAT Base") / CurrencyFactor;
+            TempVATAmountLineTotal."VAT Amount" += Round(TempVATAmountLine."VAT Amount") / CurrencyFactor;
+            TempVATAmountLineTotal."Amount Including VAT" += Round(TempVATAmountLine."Amount Including VAT") / CurrencyFactor;
+            TempVATAmountLineTotal.Modify;
+        until TempVATAmountLine.Next = 0;
     end;
 
     local procedure InsertTempDocRetentionLine(var TempDocumentLineRetention: Record "Document Line" temporary; TempDocumentLine: Record "Document Line" temporary)

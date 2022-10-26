@@ -1,4 +1,4 @@
-page 27006 "CFDI Relation Documents"
+﻿page 27006 "CFDI Relation Documents"
 {
     DelayedInsert = true;
     PageType = List;
