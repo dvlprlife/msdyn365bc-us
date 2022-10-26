@@ -6,17 +6,13 @@ codeunit 1704 "Exp. Pre-Mapping Det Pos. Pay"
     trigger OnRun()
     var
         CheckLedgerEntry: Record "Check Ledger Entry";
-        CheckLedgerEntryView: Text;
         LineNo: Integer;
     begin
-        OnGetFiltersBeforePreparingPosPayDetails(CheckLedgerEntryView);
-        CheckLedgerEntry.SetView(CheckLedgerEntryView);
         CheckLedgerEntry.SetRange("Data Exch. Entry No.", "Entry No.");
         PreparePosPayDetails(CheckLedgerEntry, "Entry No.", LineNo);
 
         // Reset filters and set it on the Data Exch. Voided Entry No.
         CheckLedgerEntry.Reset();
-        CheckLedgerEntry.SetView(CheckLedgerEntryView);
         CheckLedgerEntry.SetRange("Data Exch. Voided Entry No.", "Entry No.");
         PreparePosPayDetails(CheckLedgerEntry, "Entry No.", LineNo);
     end;
@@ -69,11 +65,6 @@ codeunit 1704 "Exp. Pre-Mapping Det Pos. Pay"
 
             Insert(true);
         end;
-    end;
-
-    [IntegrationEvent(false, false)]
-    local procedure OnGetFiltersBeforePreparingPosPayDetails(var CheckLedgerEntryView: Text)
-    begin
     end;
 }
 

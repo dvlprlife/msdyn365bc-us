@@ -605,7 +605,6 @@ page 9807 "User Card"
         exit(false);
     end;
 
-
     local procedure ValidateAuthentication(): Boolean
     var
         ValidationField: Text;

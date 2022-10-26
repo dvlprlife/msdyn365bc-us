@@ -332,48 +332,15 @@ codeunit 8800 "Custom Layout Reporting"
         TempRecordKeyFieldRef := TempRecordRef.Field(ReportDataIteratorFieldRef.Number);
 
         // Set the exclusion filter based on the items we've already reported on and set that filter on top of the filter already applied
-        ExcludeReportedObjects(TempRecordRef, TempRecordKeyFieldRef, ReportedObjects);
+        if TempRecordRef.FindFirst() then
+            repeat
+                if ReportedObjects.Contains(Format(TempRecordKeyFieldRef.Value)) then
+                    SetNextGroupFilter(TempRecordRef, TempRecordKeyFieldRef, StrSubstNo('<>%1', Format(TempRecordKeyFieldRef.Value)));
+            until TempRecordRef.Next() = 0;
 
         // Only run the report if we still have something to report on
         if TempRecordRef.FindFirst() then
             RunReport(TempRecordRef, ReportSelections, PrintIfEmailIsMissing);
-    end;
-
-    local procedure ExcludeReportedObjects(var TempRecordRef: RecordRef; var TempRecordKeyFieldRef: FieldRef; var ReportedObjects: DotNet ArrayList)
-    var
-        SelectionFilterManagement: Codeunit SelectionFilterManagement;
-        FilterStatementsCount: Integer;
-        SafeNumberOfFilterStatements: Integer;
-        ExclusionFilter: Text;
-        AndFilterCharacter: Char;
-    begin
-        if not TempRecordRef.FindFirst() then
-            exit;
-
-        AndFilterCharacter := '&';
-        SafeNumberOfFilterStatements := SelectionFilterManagement.GetMaximumNumberOfParametersInSQLQuery() / 2;
-
-        repeat
-#pragma warning disable AA0005
-            if ReportedObjects.Contains(Format(TempRecordKeyFieldRef.Value)) then begin
-                if FilterStatementsCount < SafeNumberOfFilterStatements then begin
-                    ExclusionFilter += StrSubstNo('<>%1', Format(TempRecordKeyFieldRef.Value)) + AndFilterCharacter;
-                    FilterStatementsCount += 1;
-                end else begin
-                    ExclusionFilter := ExclusionFilter.TrimEnd(AndFilterCharacter);
-                    SetNextGroupFilter(TempRecordRef, TempRecordKeyFieldRef, ExclusionFilter);
-                    Clear(ExclusionFilter);
-                    Clear(FilterStatementsCount);
-                end;
-            end;
-        until TempRecordRef.Next() = 0;
-#pragma warning enable AA0005
-
-        if ExclusionFilter <> '' then begin
-            ExclusionFilter := ExclusionFilter.TrimEnd(AndFilterCharacter);
-            SetNextGroupFilter(TempRecordRef, TempRecordKeyFieldRef, ExclusionFilter);
-            Clear(ExclusionFilter);
-        end;
     end;
 
     local procedure ProcessReportPerObject()

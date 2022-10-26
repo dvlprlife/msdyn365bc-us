@@ -453,12 +453,12 @@
                     Type::Item:
                         ValidateItemDescription();
                     else begin
-                        ReturnValue := FindRecordMgt.FindNoByDescription(Type.AsInteger(), Description, true);
-                        if ReturnValue <> '' then begin
-                            CurrFieldNo := FieldNo("No.");
-                            Validate("No.", CopyStr(ReturnValue, 1, MaxStrLen("No.")));
+                            ReturnValue := FindRecordMgt.FindNoByDescription(Type.AsInteger(), Description, true);
+                            if ReturnValue <> '' then begin
+                                CurrFieldNo := FieldNo("No.");
+                                Validate("No.", CopyStr(ReturnValue, 1, MaxStrLen("No.")));
+                            end;
                         end;
-                    end;
                 end;
 
                 ShouldErrorForFindDescription := ("No." = '') and GuiAllowed() and ApplicationAreaMgmtFacade.IsFoundationEnabled() and ("Document Type" = "Document Type"::Order);
@@ -5712,9 +5712,9 @@
                 '', "No.":
                     Description := xRec.Description;
                 else begin
-                    CurrFieldNo := FieldNo("No.");
-                    Validate("No.", CopyStr(ReturnValue, 1, MaxStrLen(Item."No.")));
-                end;
+                        CurrFieldNo := FieldNo("No.");
+                        Validate("No.", CopyStr(ReturnValue, 1, MaxStrLen(Item."No.")));
+                    end;
             end;
     end;
 
@@ -6445,9 +6445,9 @@
                                                 VATAmountLine.Quantity += "Qty. to Invoice (Base)";
                                             end;
                                         else begin
-                                            QtyToHandle := "Qty. to Invoice";
-                                            VATAmountLine.Quantity += "Qty. to Invoice (Base)";
-                                        end;
+                                                QtyToHandle := "Qty. to Invoice";
+                                                VATAmountLine.Quantity += "Qty. to Invoice (Base)";
+                                            end;
                                     end;
                                     OnCalcVATAmountLinesOnQtyTypeInvoicingOnBeforeCalcAmtToHandle(PurchLine, PurchHeader, QtyToHandle, VATAmountLine);
                                     AmtToHandle := GetLineAmountToHandleInclPrepmt(QtyToHandle);

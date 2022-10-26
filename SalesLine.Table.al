@@ -502,22 +502,22 @@
                                     "No.":
                                         Description := xRec.Description;
                                     else begin
-                                        CurrFieldNo := FieldNo("No.");
-                                        Validate("No.", CopyStr(ReturnValue, 1, MaxStrLen(Item."No.")));
-                                    end;
+                                            CurrFieldNo := FieldNo("No.");
+                                            Validate("No.", CopyStr(ReturnValue, 1, MaxStrLen(Item."No.")));
+                                        end;
                                 end;
                         end;
                     else begin
-                        IsHandled := false;
-                        OnBeforeFindNoByDescription(Rec, xRec, CurrFieldNo, IsHandled);
-                        if not IsHandled then begin
-                            ReturnValue := FindRecordMgt.FindNoByDescription(Type.AsInteger(), Description, true);
-                            if ReturnValue <> '' then begin
-                                CurrFieldNo := FieldNo("No.");
-                                Validate("No.", CopyStr(ReturnValue, 1, MaxStrLen("No.")));
+                            IsHandled := false;
+                            OnBeforeFindNoByDescription(Rec, xRec, CurrFieldNo, IsHandled);
+                            if not IsHandled then begin
+                                ReturnValue := FindRecordMgt.FindNoByDescription(Type.AsInteger(), Description, true);
+                                if ReturnValue <> '' then begin
+                                    CurrFieldNo := FieldNo("No.");
+                                    Validate("No.", CopyStr(ReturnValue, 1, MaxStrLen("No.")));
+                                end;
                             end;
                         end;
-                    end;
                 end;
 
                 IsHandled := false;
@@ -4475,7 +4475,8 @@
             FieldError("Prepayment %", StrSubstNo(Text1020001, xRec."Prepayment %"));
 
         if ("Prepayment %" <> 0) and (Type <> Type::" ") then begin
-            TestField("Document Type", "Document Type"::Order);
+            IF not ("Document Type" In ["Document Type"::Order, "Document Type"::Quote]) then
+                FieldError("Document Type");
             TestField("No.");
             if CurrFieldNo = FieldNo("Prepayment %") then
                 if "System-Created Entry" and not IsServiceChargeLine() then
@@ -6045,9 +6046,9 @@
                                                     VATAmountLine.Quantity += "Qty. to Invoice (Base)";
                                                 end;
                                             else begin
-                                                QtyToHandle := "Qty. to Invoice";
-                                                VATAmountLine.Quantity += "Qty. to Invoice (Base)";
-                                            end;
+                                                    QtyToHandle := "Qty. to Invoice";
+                                                    VATAmountLine.Quantity += "Qty. to Invoice (Base)";
+                                                end;
                                         end;
 
                                     OnCalcVATAmountLinesOnBeforeAssignAmtToHandle(SalesHeader, SalesLine, VATAmountLine, IncludePrepayments, QtyType, QtyToHandle, AmtToHandle);
@@ -7747,7 +7748,7 @@
         "Transaction Specification" := SalesHeader."Transaction Specification";
         "Tax Area Code" := SalesHeader."Tax Area Code";
         "Tax Liable" := SalesHeader."Tax Liable";
-        if not "System-Created Entry" and ("Document Type" = "Document Type"::Order) and HasTypeToFillMandatoryFields() or
+        if not "System-Created Entry" and ("Document Type" In ["Document Type"::Order, "Document Type"::Quote]) and HasTypeToFillMandatoryFields() or
            IsServiceChargeLine()
         then
             "Prepayment %" := SalesHeader."Prepayment %";

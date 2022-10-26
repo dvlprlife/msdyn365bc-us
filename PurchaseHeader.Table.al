@@ -2601,6 +2601,7 @@
         Text028: Label 'Your identification is set up to process from %1 %2 only.';
         MaxAllowedValueIs100Err: Label 'The values must be less than or equal 100.';
         Text029: Label 'Deleting this document will cause a gap in the number series for return shipments. An empty return shipment %1 will be created to fill this gap in the number series.\\Do you want to continue?', Comment = '%1 = Document No.';
+        DoYouWantToKeepExistingDimensionsQst: Label 'This will change the dimension specified on the document. Do you want to keep the existing dimensions?';
         Text032: Label 'You have modified %1.\\Do you want to update the lines?', Comment = 'You have modified Currency Factor.\\Do you want to update the lines?';
         PurchSetup: Record "Purchases & Payables Setup";
         GLSetup: Record "General Ledger Setup";
@@ -3679,10 +3680,32 @@
 
         OnCreateDimOnBeforeUpdateLines(Rec, xRec, CurrFieldNo);
 
+        if (OldDimSetID <> "Dimension Set ID") and (OldDimSetID <> 0) and guiallowed then
+            if CouldDimensionsBeKept() then
+                if Confirm(DoYouWantToKeepExistingDimensionsQst) then
+                    "Dimension Set ID" := OldDimSetID;
+
         if (OldDimSetID <> "Dimension Set ID") and PurchLinesExist then begin
             Modify;
             UpdateAllLineDim("Dimension Set ID", OldDimSetID);
         end;
+    end;
+
+    local procedure CouldDimensionsBeKept(): Boolean;
+    begin
+        if (xRec."Buy-from Vendor No." <> '') and (xRec."Buy-from Vendor No." <> Rec."Buy-from Vendor No.") then
+            exit(false);
+        if (xRec."Pay-to Vendor No." <> '') and (xRec."Pay-to Vendor No." <> Rec."Pay-to Vendor No.") then
+            exit(false);
+
+        if (Rec."Location Code" = '') then
+            exit(true);
+        if (xRec."Location Code" <> '') and (xRec."location Code" <> Rec."Location Code") then
+            exit(true);
+        if (xRec."Purchaser Code" <> '') and (xRec."Purchaser Code" <> Rec."Purchaser Code") then
+            exit(true);
+        if (xRec."Responsibility Center" <> '') and (xRec."Responsibility Center" <> Rec."Responsibility Center") then
+            exit(true);
     end;
 
     procedure ValidateShortcutDimCode(FieldNumber: Integer; var ShortcutDimCode: Code[20])
