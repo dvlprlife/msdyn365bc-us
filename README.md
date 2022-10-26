@@ -11,3 +11,10 @@ For further reference, visit:
 [https://github.com/microsoft/BCTech](https://github.com/microsoft/BCTech)
 
 [https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/)
+
+## Versions
+
+| **Branch**   | **Description**  | Build |
+|    :----:    | :---             | ---:  |
+| us-20 | Microsoft Dynamics 365 Business Central 2022 Wave 1 (Version 20) | 20.5 |
+| us-21 | Microsoft Dynamics 365 Business Central 2022 Wave 2 (Version 21) | 21.0 |
