@@ -56,33 +56,6 @@ codeunit 1351 "Telemetry Subscribers"
         EmailCategoryLbl: Label 'Email', Locked = true;
         UserPlansTelemetryLbl: Label 'User with %1 plans opened the %2 page.', Comment = '%1 - User plans; %2 - page name', Locked = true;
 
-
-    [EventSubscriber(ObjectType::Codeunit, Codeunit::"LogInManagement", 'OnAfterCompanyOpen', '', true, true)]
-    local procedure ScheduleMasterdataTelemetryAfterCompanyOpen()
-    var
-        CodeUnitMetadata: Record "CodeUnit Metadata";
-                TelemetryManagement: Codeunit "Telemetry Management";
-    begin
-        if not IsSaaS() then
-            exit;
-
-        CodeUnitMetadata.ID := CODEUNIT::"Generate Master Data Telemetry";
-        TelemetryManagement.ScheduleCalEventsForTelemetryAsync(CodeUnitMetadata.RecordId, CODEUNIT::"Create Telemetry Cal. Events", 20);
-    end;
-
-    [EventSubscriber(ObjectType::Codeunit, Codeunit::"LogInManagement", 'OnAfterCompanyOpen', '', true, true)]
-    local procedure ScheduleActivityTelemetryAfterCompanyOpen()
-    var
-        CodeUnitMetadata: Record "CodeUnit Metadata";
-        TelemetryManagement: Codeunit "Telemetry Management";
-    begin
-        if not IsSaaS() then
-            exit;
-
-        CodeUnitMetadata.ID := CODEUNIT::"Generate Activity Telemetry";
-        TelemetryManagement.ScheduleCalEventsForTelemetryAsync(CodeUnitMetadata.RecordId, CODEUNIT::"Create Telemetry Cal. Events", 21);
-    end;
-
     [EventSubscriber(ObjectType::Codeunit, Codeunit::"Conf./Personalization Mgt.", 'OnProfileChanged', '', true, true)]
     local procedure SendTraceOnProfileChanged(PrevAllProfile: Record "All Profile"; CurrentAllProfile: Record "All Profile")
     begin
@@ -621,6 +594,17 @@ codeunit 1351 "Telemetry Subscribers"
 
         ConcatenatedUserPlans := '[' + ConcatenatedUserPlans.TrimEnd(Delimiter) + ']';
         exit(ConcatenatedUserPlans);
+    end;
+
+    [EventSubscriber(ObjectType::Codeunit, Codeunit::"Telemetry Management", 'OnSendDailyTelemetry', '', true, true)]
+    local procedure SendTelemetryOnActivityTelemetry()
+    var
+        CheckLedgerEntry: Record "Check Ledger Entry";
+        PostedDepositHeader: Record "Posted Deposit Header";
+        SendDailyTelemetry: Codeunit "Send Daily Telemetry";
+    begin
+        SendDailyTelemetry.EmitTelemetryOnRecordCount(CheckLedgerEntry.TableName(), '0000AHO');
+        SendDailyTelemetry.EmitTelemetryOnRecordCount(PostedDepositHeader.TableName(), '0000AHP');
     end;
 }
 

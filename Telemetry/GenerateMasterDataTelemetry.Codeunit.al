@@ -1,17 +1,21 @@
+#if not CLEAN19
 codeunit 1353 "Generate Master Data Telemetry"
 {
+    ObsoleteReason = 'Replaced by Send Daily Telemetry codeunit.';
+    ObsoleteState = Pending;
+    ObsoleteTag = '19.0';
 
     trigger OnRun()
     begin
-        OnMasterDataTelemetry;
+        OnMasterDataTelemetry();
+        SendMasterDataTelemetry();
     end;
 
     var
         AlCompanyMasterdataCategoryTxt: Label 'AL Company Masterdata', Locked = true;
         MasterdataTelemetryMessageTxt: Label 'CompanyGUID: %1, IsEvaluationCompany: %2, IsDemoCompany: %3, Customers: %4, Vendors: %5, Items: %6, G/L Accounts: %7, Contacts: %8', Locked = true;
 
-    [EventSubscriber(ObjectType::Codeunit, Codeunit::"Generate Master Data Telemetry", 'OnMasterDataTelemetry', '', true, true)]
-    local procedure SendTelemetryOnMasterDataTelemetry()
+    local procedure SendMasterDataTelemetry()
     var
         Customer: Record Customer;
         Vendor: Record Vendor;
@@ -45,7 +49,7 @@ codeunit 1353 "Generate Master Data Telemetry"
     end;
 
     [IntegrationEvent(false, false)]
-    local procedure OnMasterDataTelemetry()
+    internal procedure OnMasterDataTelemetry()
     begin
     end;
 
@@ -58,3 +62,4 @@ codeunit 1353 "Generate Master Data Telemetry"
     end;
 }
 
+#endif

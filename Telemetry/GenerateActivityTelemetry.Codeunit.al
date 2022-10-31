@@ -1,9 +1,14 @@
+#if not CLEAN19
 codeunit 1354 "Generate Activity Telemetry"
 {
+    ObsoleteReason = 'Replaced by Send Daily Telemetry codeunit.';
+    ObsoleteState = Pending;
+    ObsoleteTag = '19.0';
 
     trigger OnRun()
     begin
-        OnActivityTelemetry;
+        OnActivityTelemetry();
+        SendActivityTelemetry();
     end;
 
     var
@@ -12,8 +17,7 @@ codeunit 1354 "Generate Activity Telemetry"
         TraceTagTelemetryMsg: Label '%1: %2', Comment = '%1 = Record Name; %2 = Record Count';
         GLEntriesLbl: Label 'Number of G/L Entries in the Income Statement: %1', Locked = true;
 
-    [EventSubscriber(ObjectType::Codeunit, Codeunit::"Generate Activity Telemetry", 'OnActivityTelemetry', '', true, true)]
-    local procedure SendTelemetryOnActivityTelemetry()
+    local procedure SendActivityTelemetry()
     var
         GLEntry: Record "G/L Entry";
         SalesHeader: Record "Sales Header";
@@ -117,7 +121,7 @@ codeunit 1354 "Generate Activity Telemetry"
     end;
 
     [IntegrationEvent(false, false)]
-    local procedure OnActivityTelemetry()
+    internal procedure OnActivityTelemetry()
     begin
     end;
 
@@ -156,3 +160,4 @@ codeunit 1354 "Generate Activity Telemetry"
     end;
 }
 
+#endif

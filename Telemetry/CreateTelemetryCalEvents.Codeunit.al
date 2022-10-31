@@ -1,5 +1,10 @@
+#if not CLEAN19
 codeunit 1352 "Create Telemetry Cal. Events"
 {
+    ObsoleteReason = 'Replaced by Send Daily Telemetry codeunit.';
+    ObsoleteState = Pending;
+    ObsoleteTag = '19.0';
+
     TableNo = "CodeUnit Metadata";
     Permissions = TableData "Calendar Event" = rimd;
 
@@ -28,3 +33,4 @@ codeunit 1352 "Create Telemetry Cal. Events"
     end;
 }
 
+#endif
