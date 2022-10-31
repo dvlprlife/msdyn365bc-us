@@ -4,11 +4,8 @@ codeunit 1738 "OData Initializer"
 
     var
         EnvironmentInfo: Codeunit "Environment Information";
-        CategoryTxt: Label 'Data initialization', Locked = true;
-        NoTokenTxt: Label 'Access token could not be retrieved.', Locked = true;
+        CategoryTxt: Label 'AL OData Initialization', Locked = true;
         MetadataEndpointCallFailedTxt: Label 'Metadata endpoint call failed.', Locked = true;
-        CallingEndpointTxt: Label 'Calling endpoint %1 with correlation id %2', Locked = true;
-        BearerTxt: Label 'Bearer %1', Locked = true;
 
     trigger OnRun()
     begin
@@ -18,36 +15,20 @@ codeunit 1738 "OData Initializer"
     [NonDebuggable]
     local procedure CallMetadataEndpoint()
     var
-        AzureAdMgt: Codeunit "Azure AD Mgt.";
-        UrlHelper: Codeunit "Url Helper";
+        ODataUtility: Codeunit ODataUtility;
         HttpWebRequestMgt: Codeunit "Http Web Request Mgt.";
         TempBlob: Codeunit "Temp Blob";
         ResponseInStream: InStream;
-        Token: Text;
-        Endpoint: Text;
-        CorrelationId: Guid;
     begin
-        if not EnvironmentInfo.IsSaaS() then
-            exit;
+        TempBlob.CreateInStream(ResponseInStream);
 
-        Endpoint := GetUrl(CLIENTTYPE::ODataV4) + '/$metadata';
-        Token := AzureAdMgt.GetAccessToken(UrlHelper.GetFixedEndpointWebServiceUrl(), '', false);
-        if Token = '' then begin
-            Session.LogMessage('0000E51', NoTokenTxt, Verbosity::Normal, DataClassification::SystemMetadata, TelemetryScope::ExtensionPublisher, 'Category', CategoryTxt);
-            exit;
+        if ODataUtility.CreateMetadataWebRequest(HttpWebRequestMgt) then begin
+            HttpWebRequestMgt.SetUserAgent('BusinessCentral-Warmup'); // Overwrite user agent
+            if HttpWebRequestMgt.GetResponseStream(ResponseInStream) then
+                exit;
         end;
 
-        TempBlob.CreateInStream(ResponseInStream);
-        CorrelationId := CreateGuid();
-        Session.LogMessage('0000E53', StrSubstNo(CallingEndpointTxt, Endpoint, CorrelationId), Verbosity::Normal, DataClassification::SystemMetadata, TelemetryScope::ExtensionPublisher, 'Category', CategoryTxt);
-
-        HttpWebRequestMgt.Initialize(Endpoint);
-        HttpWebRequestMgt.SetMethod('GET');
-        HttpWebRequestMgt.AddHeader('Authorization', StrSubstNo(BearerTxt, Token));
-        HttpWebRequestMgt.AddHeader('x-ms-correlation-id', CorrelationId);
-        HttpWebRequestMgt.SetUserAgent('BusinessCentral-Warmup');
-        if not HttpWebRequestMgt.GetResponseStream(ResponseInStream) then
-            Session.LogMessage('0000E52', MetadataEndpointCallFailedTxt, Verbosity::Normal, DataClassification::SystemMetadata, TelemetryScope::ExtensionPublisher, 'Category', CategoryTxt);
+        Session.LogMessage('0000E52', MetadataEndpointCallFailedTxt, Verbosity::Normal, DataClassification::SystemMetadata, TelemetryScope::ExtensionPublisher, 'Category', CategoryTxt);
     end;
 
     [EventSubscriber(ObjectType::Codeunit, Codeunit::LogInManagement, 'OnAfterLogInEnd', '', false, false)]
