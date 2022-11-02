@@ -535,6 +535,21 @@
                     ApplicationArea = BasicMX;
                     ToolTip = 'Specifies the policy number assigned by the insurer, which covers the risks of the motor transport used for the transfer of goods or merchandise.';
                 }
+                field("Medical Insurer Name"; "Medical Insurer Name")
+                {
+                    ApplicationArea = BasicMX;
+                    ToolTip = 'Specifies the insurer that covers potential damage to the environment if the transport includes materials, residues or remnants, or hazardous waste.';
+                }
+                field("Medical Ins. Policy Number"; "Medical Ins. Policy Number")
+                {
+                    ApplicationArea = BasicMX;
+                    ToolTip = 'Specifies the insurance policy number if the transport includes materials, residues or remnants, or hazardous waste.';
+                }
+                field("SAT Weight Unit Of Measure"; "SAT Weight Unit Of Measure")
+                {
+                    ApplicationArea = BasicMX;
+                    ToolTip = 'Specifies the unit of measurement of the weight of the goods and / or merchandise that are moved in this transport.';
+                }
                 field("Electronic Document Status"; "Electronic Document Status")
                 {
                     ApplicationArea = BasicMX;
@@ -571,6 +586,16 @@
                     ApplicationArea = BasicMX;
                     Importance = Additional;
                     ToolTip = 'Specifies the official invoice number for the electronic document.';
+                }
+                field("CFDI Cancellation Reason Code"; "CFDI Cancellation Reason Code")
+                {
+                    ApplicationArea = BasicMX;
+                    ToolTip = 'Specifies the reason for the cancellation as a code.';
+                }
+                field("Substitution Document No."; "Substitution Document No.")
+                {
+                    ApplicationArea = BasicMX;
+                    ToolTip = 'Specifies the document number that replaces the canceled one. It is required when the cancellation reason is 01.';
                 }
             }
         }

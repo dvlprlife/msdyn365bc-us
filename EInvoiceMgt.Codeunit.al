@@ -855,10 +855,8 @@
 
     local procedure CancelESalesInvoice(var SalesInvHeader: Record "Sales Invoice Header")
     var
-        XMLDOMManagement: Codeunit "XML DOM Management";
+        SalesInvoiceHeaderSubst: Record "Sales Invoice Header";
         XMLDoc: DotNet XmlDocument;
-        XMLCurrNode: DotNet XmlNode;
-        XMLNewChild: DotNet XmlNode;
         Response: Text;
         OutStr: OutStream;
         CancelDateTime: Text[50];
@@ -869,29 +867,17 @@
         DocType := 'Sales Invoice';
         Session.LogMessage('0000C7C', StrSubstNo(CancelDocMsg, DocType), Verbosity::Normal, DataClassification::SystemMetadata, TelemetryScope::ExtensionPublisher, 'Category', MXElectronicInvoicingTok);
 
-        // Create instance
-        if IsNull(XMLDoc) then
-            XMLDoc := XMLDoc.XmlDocument;
+        SalesInvHeader.TestField("CFDI Cancellation Reason Code");
+        if CancellationReasonRequired(SalesInvHeader."CFDI Cancellation Reason Code") then
+            SalesInvoiceHeaderSubst.Get(SalesInvHeader."Substitution Document No.");
 
-        DocNameSpace := 'http://www.sat.gob.mx/cfd/3';
-        XMLDOMManagement.LoadXMLDocumentFromText('<?xml version="1.0" encoding="UTF-8" ?> <CancelaCFD /> ', XMLDoc);
-        XMLCurrNode := XMLDoc.DocumentElement;
-        AddElement(XMLCurrNode, 'Cancelacion', '', '', XMLNewChild);
-        XMLCurrNode := XMLNewChild;
-        with SalesInvHeader do begin
-            CancelDateTime := FormatDateTime(ConvertCurrentDateTimeToTimeZone(GetTimeZoneFromDocument(SalesInvHeader)));
-            AddAttribute(XMLDoc, XMLCurrNode, 'Fecha', CancelDateTime);
-            "Date/Time Canceled" := CancelDateTime;
-            AddAttribute(XMLDoc, XMLCurrNode, 'RfcEmisor', CompanyInfo."RFC No.");
-            AddElement(XMLCurrNode, 'Folios', '', '', XMLNewChild);
-            XMLCurrNode := XMLNewChild;
-            AddElement(XMLCurrNode, 'Folio', '', '', XMLNewChild);
-            XMLCurrNode := XMLNewChild;
-            AddAttribute(XMLDoc, XMLCurrNode, 'FechaTimbrado', "Date/Time Stamped");
-            AddAttribute(XMLDoc, XMLCurrNode, 'UUID', "Fiscal Invoice Number PAC");
-            "Original Document XML".CreateOutStream(OutStr);
-            XMLDoc.Save(OutStr);
-        end;
+        CancelDateTime := FormatDateTime(ConvertCurrentDateTimeToTimeZone(GetTimeZoneFromDocument(SalesInvHeader)));
+        SalesInvHeader."Date/Time Canceled" := CancelDateTime;
+        SalesInvHeader."Original Document XML".CreateOutStream(OutStr);
+        CancelXMLDocument(
+          XMLDoc, OutStr,
+          CancelDateTime, SalesInvHeader."Date/Time Stamped", SalesInvHeader."Fiscal Invoice Number PAC",
+          SalesInvHeader."CFDI Cancellation Reason Code", SalesInvoiceHeaderSubst."Fiscal Invoice Number PAC");
 
         Response := InvokeMethod(XMLDoc, MethodType::Cancel);
 
@@ -910,10 +896,8 @@
 
     local procedure CancelESalesCrMemo(var SalesCrMemoHeader: Record "Sales Cr.Memo Header")
     var
-        XMLDOMManagement: Codeunit "XML DOM Management";
+        SalesCrMemoHeaderSubst: Record "Sales Cr.Memo Header";
         XMLDoc: DotNet XmlDocument;
-        XMLCurrNode: DotNet XmlNode;
-        XMLNewChild: DotNet XmlNode;
         Response: Text;
         OutStr: OutStream;
         CancelDateTime: Text[50];
@@ -924,29 +908,17 @@
         DocType := 'Sales Cr.Memo';
         Session.LogMessage('0000C7C', StrSubstNo(CancelDocMsg, DocType), Verbosity::Normal, DataClassification::SystemMetadata, TelemetryScope::ExtensionPublisher, 'Category', MXElectronicInvoicingTok);
 
-        // Create instance
-        if IsNull(XMLDoc) then
-            XMLDoc := XMLDoc.XmlDocument;
+        SalesCrMemoHeader.TestField("CFDI Cancellation Reason Code");
+        if CancellationReasonRequired(SalesCrMemoHeader."CFDI Cancellation Reason Code") then
+            SalesCrMemoHeaderSubst.Get(SalesCrMemoHeader."Substitution Document No.");
 
-        DocNameSpace := 'http://www.sat.gob.mx/cfd/3';
-        XMLDOMManagement.LoadXMLDocumentFromText('<?xml version="1.0" encoding="UTF-8" ?> <CancelaCFD /> ', XMLDoc);
-        XMLCurrNode := XMLDoc.DocumentElement;
-        AddElement(XMLCurrNode, 'Cancelacion', '', '', XMLNewChild);
-        XMLCurrNode := XMLNewChild;
-        with SalesCrMemoHeader do begin
-            CancelDateTime := FormatDateTime(ConvertCurrentDateTimeToTimeZone(GetTimeZoneFromDocument(SalesCrMemoHeader)));
-            AddAttribute(XMLDoc, XMLCurrNode, 'Fecha', CancelDateTime);
-            "Date/Time Canceled" := CancelDateTime;
-            AddAttribute(XMLDoc, XMLCurrNode, 'RfcEmisor', CompanyInfo."RFC No.");
-            AddElement(XMLCurrNode, 'Folios', '', '', XMLNewChild);
-            XMLCurrNode := XMLNewChild;
-            AddElement(XMLCurrNode, 'Folio', '', '', XMLNewChild);
-            XMLCurrNode := XMLNewChild;
-            AddAttribute(XMLDoc, XMLCurrNode, 'FechaTimbrado', "Date/Time Stamped");
-            AddAttribute(XMLDoc, XMLCurrNode, 'UUID', "Fiscal Invoice Number PAC");
-            "Original Document XML".CreateOutStream(OutStr);
-            XMLDoc.Save(OutStr);
-        end;
+        CancelDateTime := FormatDateTime(ConvertCurrentDateTimeToTimeZone(GetTimeZoneFromDocument(SalesCrMemoHeader)));
+        SalesCrMemoHeader."Date/Time Canceled" := CancelDateTime;
+        SalesCrMemoHeader."Original Document XML".CreateOutStream(OutStr);
+        CancelXMLDocument(
+          XMLDoc, OutStr,
+          CancelDateTime, SalesCrMemoHeader."Date/Time Stamped", SalesCrMemoHeader."Fiscal Invoice Number PAC",
+          SalesCrMemoHeader."CFDI Cancellation Reason Code", SalesCrMemoHeaderSubst."Fiscal Invoice Number PAC");
 
         Response := InvokeMethod(XMLDoc, MethodType::Cancel);
 
@@ -965,10 +937,8 @@
 
     local procedure CancelEServiceInvoice(var ServiceInvHeader: Record "Service Invoice Header")
     var
-        XMLDOMManagement: Codeunit "XML DOM Management";
+        ServiceInvoiceHeaderSubst: Record "Service Invoice Header";
         XMLDoc: DotNet XmlDocument;
-        XMLCurrNode: DotNet XmlNode;
-        XMLNewChild: DotNet XmlNode;
         Response: Text;
         OutStr: OutStream;
         CancelDateTime: Text[50];
@@ -979,29 +949,17 @@
         DocType := 'Service Invoice';
         Session.LogMessage('0000C7C', StrSubstNo(CancelDocMsg, DocType), Verbosity::Normal, DataClassification::SystemMetadata, TelemetryScope::ExtensionPublisher, 'Category', MXElectronicInvoicingTok);
 
-        // Create instance
-        if IsNull(XMLDoc) then
-            XMLDoc := XMLDoc.XmlDocument;
+        ServiceInvHeader.TestField("CFDI Cancellation Reason Code");
+        if CancellationReasonRequired(ServiceInvHeader."CFDI Cancellation Reason Code") then
+            ServiceInvoiceHeaderSubst.Get(ServiceInvHeader."Substitution Document No.");
 
-        DocNameSpace := 'http://www.sat.gob.mx/cfd/3';
-        XMLDOMManagement.LoadXMLDocumentFromText('<?xml version="1.0" encoding="UTF-8" ?> <CancelaCFD /> ', XMLDoc);
-        XMLCurrNode := XMLDoc.DocumentElement;
-        AddElement(XMLCurrNode, 'Cancelacion', '', '', XMLNewChild);
-        XMLCurrNode := XMLNewChild;
-        with ServiceInvHeader do begin
-            CancelDateTime := FormatDateTime(ConvertCurrentDateTimeToTimeZone(GetTimeZoneFromDocument(ServiceInvHeader)));
-            AddAttribute(XMLDoc, XMLCurrNode, 'Fecha', CancelDateTime);
-            "Date/Time Canceled" := CancelDateTime;
-            AddAttribute(XMLDoc, XMLCurrNode, 'RfcEmisor', CompanyInfo."RFC No.");
-            AddElement(XMLCurrNode, 'Folios', '', '', XMLNewChild);
-            XMLCurrNode := XMLNewChild;
-            AddElement(XMLCurrNode, 'Folio', '', '', XMLNewChild);
-            XMLCurrNode := XMLNewChild;
-            AddAttribute(XMLDoc, XMLCurrNode, 'FechaTimbrado', "Date/Time Stamped");
-            AddAttribute(XMLDoc, XMLCurrNode, 'UUID', "Fiscal Invoice Number PAC");
-            "Original Document XML".CreateOutStream(OutStr);
-            XMLDoc.Save(OutStr);
-        end;
+        CancelDateTime := FormatDateTime(ConvertCurrentDateTimeToTimeZone(GetTimeZoneFromDocument(ServiceInvHeader)));
+        ServiceInvHeader."Date/Time Canceled" := CancelDateTime;
+        ServiceInvHeader."Original Document XML".CreateOutStream(OutStr);
+        CancelXMLDocument(
+          XMLDoc, OutStr,
+          CancelDateTime, ServiceInvHeader."Date/Time Stamped", ServiceInvHeader."Fiscal Invoice Number PAC",
+          ServiceInvHeader."CFDI Cancellation Reason Code", ServiceInvoiceHeaderSubst."Substitution Document No.");
 
         Response := InvokeMethod(XMLDoc, MethodType::Cancel);
 
@@ -1020,10 +978,8 @@
 
     local procedure CancelEServiceCrMemo(var ServiceCrMemoHeader: Record "Service Cr.Memo Header")
     var
-        XMLDOMManagement: Codeunit "XML DOM Management";
+        ServiceCrMemoHeaderSubst: Record "Service Cr.Memo Header";
         XMLDoc: DotNet XmlDocument;
-        XMLCurrNode: DotNet XmlNode;
-        XMLNewChild: DotNet XmlNode;
         Response: Text;
         OutStr: OutStream;
         CancelDateTime: Text[50];
@@ -1034,29 +990,17 @@
         DocType := 'Service Cr.Memo';
         Session.LogMessage('0000C7C', StrSubstNo(CancelDocMsg, DocType), Verbosity::Normal, DataClassification::SystemMetadata, TelemetryScope::ExtensionPublisher, 'Category', MXElectronicInvoicingTok);
 
-        // Create instance
-        if IsNull(XMLDoc) then
-            XMLDoc := XMLDoc.XmlDocument;
+        ServiceCrMemoHeader.TestField("CFDI Cancellation Reason Code");
+        if CancellationReasonRequired(ServiceCrMemoHeader."CFDI Cancellation Reason Code") then
+            ServiceCrMemoHeaderSubst.Get(ServiceCrMemoHeader."Substitution Document No.");
 
-        DocNameSpace := 'http://www.sat.gob.mx/cfd/3';
-        XMLDOMManagement.LoadXMLDocumentFromText('<?xml version="1.0" encoding="UTF-8" ?> <CancelaCFD /> ', XMLDoc);
-        XMLCurrNode := XMLDoc.DocumentElement;
-        AddElement(XMLCurrNode, 'Cancelacion', '', '', XMLNewChild);
-        XMLCurrNode := XMLNewChild;
-        with ServiceCrMemoHeader do begin
-            CancelDateTime := FormatDateTime(ConvertCurrentDateTimeToTimeZone(GetTimeZoneFromDocument(ServiceCrMemoHeader)));
-            AddAttribute(XMLDoc, XMLCurrNode, 'Fecha', CancelDateTime);
-            "Date/Time Canceled" := CancelDateTime;
-            AddAttribute(XMLDoc, XMLCurrNode, 'RfcEmisor', CompanyInfo."RFC No.");
-            AddElement(XMLCurrNode, 'Folios', '', '', XMLNewChild);
-            XMLCurrNode := XMLNewChild;
-            AddElement(XMLCurrNode, 'Folio', '', '', XMLNewChild);
-            XMLCurrNode := XMLNewChild;
-            AddAttribute(XMLDoc, XMLCurrNode, 'FechaTimbrado', "Date/Time Stamped");
-            AddAttribute(XMLDoc, XMLCurrNode, 'UUID', "Fiscal Invoice Number PAC");
-            "Original Document XML".CreateOutStream(OutStr);
-            XMLDoc.Save(OutStr);
-        end;
+        CancelDateTime := FormatDateTime(ConvertCurrentDateTimeToTimeZone(GetTimeZoneFromDocument(ServiceCrMemoHeader)));
+        ServiceCrMemoHeader."Date/Time Canceled" := CancelDateTime;
+        ServiceCrMemoHeader."Original Document XML".CreateOutStream(OutStr);
+        CancelXMLDocument(
+          XMLDoc, OutStr,
+          CancelDateTime, ServiceCrMemoHeader."Date/Time Stamped", ServiceCrMemoHeader."Fiscal Invoice Number PAC",
+          ServiceCrMemoHeader."CFDI Cancellation Reason Code", ServiceCrMemoHeaderSubst."Fiscal Invoice Number PAC");
 
         Response := InvokeMethod(XMLDoc, MethodType::Cancel);
 
@@ -1075,39 +1019,25 @@
 
     local procedure CancelESalesShipment(var SalesShipmentHeader: Record "Sales Shipment Header")
     var
-        XMLDOMManagement: Codeunit "XML DOM Management";
+        SalesShipmentHeaderSubst: Record "Sales Shipment Header";
         XMLDoc: DotNet XmlDocument;
-        XMLCurrNode: DotNet XmlNode;
-        XMLNewChild: DotNet XmlNode;
         Response: Text;
         OutStr: OutStream;
         CancelDateTime: Text[50];
     begin
         DocType := 'Sales Shipment';
 
-        // Create instance
-        if IsNull(XMLDoc) then
-            XMLDoc := XMLDoc.XmlDocument();
+        SalesShipmentHeader.TestField("CFDI Cancellation Reason Code");
+        if CancellationReasonRequired(SalesShipmentHeader."CFDI Cancellation Reason Code") then
+            SalesShipmentHeaderSubst.Get(SalesShipmentHeader."Substitution Document No.");
 
-        DocNameSpace := 'http://www.sat.gob.mx/cfd/3';
-        XMLDOMManagement.LoadXMLDocumentFromText('<?xml version="1.0" encoding="UTF-8" ?> <CancelaCFD /> ', XMLDoc);
-        XMLCurrNode := XMLDoc.DocumentElement;
-        AddElement(XMLCurrNode, 'Cancelacion', '', '', XMLNewChild);
-        XMLCurrNode := XMLNewChild;
-        with SalesShipmentHeader do begin
-            CancelDateTime := FormatDateTime(ConvertCurrentDateTimeToTimeZone(GetTimeZoneFromDocument(SalesShipmentHeader)));
-            AddAttribute(XMLDoc, XMLCurrNode, 'Fecha', CancelDateTime);
-            "Date/Time Canceled" := CancelDateTime;
-            AddAttribute(XMLDoc, XMLCurrNode, 'RfcEmisor', CompanyInfo."RFC No.");
-            AddElement(XMLCurrNode, 'Folios', '', '', XMLNewChild);
-            XMLCurrNode := XMLNewChild;
-            AddElement(XMLCurrNode, 'Folio', '', '', XMLNewChild);
-            XMLCurrNode := XMLNewChild;
-            AddAttribute(XMLDoc, XMLCurrNode, 'FechaTimbrado', "Date/Time Stamped");
-            AddAttribute(XMLDoc, XMLCurrNode, 'UUID', "Fiscal Invoice Number PAC");
-            "Original Document XML".CreateOutStream(OutStr);
-            XMLDoc.Save(OutStr);
-        end;
+        CancelDateTime := FormatDateTime(ConvertCurrentDateTimeToTimeZone(GetTimeZoneFromDocument(SalesShipmentHeader)));
+        SalesShipmentHeader."Date/Time Canceled" := CancelDateTime;
+        SalesShipmentHeader."Original Document XML".CreateOutStream(OutStr);
+        CancelXMLDocument(
+          XMLDoc, OutStr,
+          CancelDateTime, SalesShipmentHeader."Date/Time Stamped", SalesShipmentHeader."Fiscal Invoice Number PAC",
+          SalesShipmentHeader."CFDI Cancellation Reason Code", SalesShipmentHeaderSubst."Fiscal Invoice Number PAC");
 
         Response := InvokeMethod(XMLDoc, MethodType::Cancel);
 
@@ -1124,39 +1054,25 @@
 
     local procedure CancelETransferShipment(var TransferShipmentHeader: Record "Transfer Shipment Header")
     var
-        XMLDOMManagement: Codeunit "XML DOM Management";
+        TransferShipmentHeaderSubst: Record "Transfer Shipment Header";
         XMLDoc: DotNet XmlDocument;
-        XMLCurrNode: DotNet XmlNode;
-        XMLNewChild: DotNet XmlNode;
         Response: Text;
         OutStr: OutStream;
         CancelDateTime: Text[50];
     begin
         DocType := 'Transfer Shipment';
 
-        // Create instance
-        if IsNull(XMLDoc) then
-            XMLDoc := XMLDoc.XmlDocument();
+        TransferShipmentHeader.TestField("CFDI Cancellation Reason Code");
+        if CancellationReasonRequired(TransferShipmentHeader."CFDI Cancellation Reason Code") then
+            TransferShipmentHeaderSubst.Get(TransferShipmentHeader."Substitution Document No.");
 
-        DocNameSpace := 'http://www.sat.gob.mx/cfd/3';
-        XMLDOMManagement.LoadXMLDocumentFromText('<?xml version="1.0" encoding="UTF-8" ?> <CancelaCFD /> ', XMLDoc);
-        XMLCurrNode := XMLDoc.DocumentElement;
-        AddElement(XMLCurrNode, 'Cancelacion', '', '', XMLNewChild);
-        XMLCurrNode := XMLNewChild;
-        with TransferShipmentHeader do begin
-            CancelDateTime := FormatDateTime(ConvertCurrentDateTimeToTimeZone(GetTimeZoneFromDocument(TransferShipmentHeader)));
-            AddAttribute(XMLDoc, XMLCurrNode, 'Fecha', CancelDateTime);
-            "Date/Time Canceled" := CancelDateTime;
-            AddAttribute(XMLDoc, XMLCurrNode, 'RfcEmisor', CompanyInfo."RFC No.");
-            AddElement(XMLCurrNode, 'Folios', '', '', XMLNewChild);
-            XMLCurrNode := XMLNewChild;
-            AddElement(XMLCurrNode, 'Folio', '', '', XMLNewChild);
-            XMLCurrNode := XMLNewChild;
-            AddAttribute(XMLDoc, XMLCurrNode, 'FechaTimbrado', "Date/Time Stamped");
-            AddAttribute(XMLDoc, XMLCurrNode, 'UUID', "Fiscal Invoice Number PAC");
-            "Original Document XML".CreateOutStream(OutStr);
-            XMLDoc.Save(OutStr);
-        end;
+        CancelDateTime := FormatDateTime(ConvertCurrentDateTimeToTimeZone(GetTimeZoneFromDocument(TransferShipmentHeader)));
+        TransferShipmentHeader."Date/Time Canceled" := CancelDateTime;
+        TransferShipmentHeader."Original Document XML".CreateOutStream(OutStr);
+        CancelXMLDocument(
+          XMLDoc, OutStr,
+          CancelDateTime, TransferShipmentHeader."Date/Time Stamped", TransferShipmentHeader."Fiscal Invoice Number PAC",
+          TransferShipmentHeader."CFDI Cancellation Reason Code", TransferShipmentHeaderSubst."Fiscal Invoice Number PAC");
 
         Response := InvokeMethod(XMLDoc, MethodType::Cancel);
 
@@ -1173,40 +1089,27 @@
 
     local procedure CancelEPayment(var CustLedgerEntry: Record "Cust. Ledger Entry")
     var
-        XMLDOMManagement: Codeunit "XML DOM Management";
+        CustLedgerEntrySubst: Record "Cust. Ledger Entry";
         OutStr: OutStream;
         XMLDoc: DotNet XmlDocument;
-        XMLCurrNode: DotNet XmlNode;
-        XMLNewChild: DotNet XmlNode;
         Response: Text;
         CancelDateTime: Text[50];
     begin
         DocType := 'payment';
         Session.LogMessage('0000C7C', StrSubstNo(CancelDocMsg, DocType), Verbosity::Normal, DataClassification::SystemMetadata, TelemetryScope::ExtensionPublisher, 'Category', MXElectronicInvoicingTok);
 
-        // Create instance
-        if IsNull(XMLDoc) then
-            XMLDoc := XMLDoc.XmlDocument;
+        CustLedgerEntry.TestField("CFDI Cancellation Reason Code");
+        if CancellationReasonRequired(CustLedgerEntry."CFDI Cancellation Reason Code") then
+            CustLedgerEntrySubst.Get(CustLedgerEntry."Substitution Entry No.");
 
-        DocNameSpace := 'http://www.sat.gob.mx/cfd/3';
-        XMLDOMManagement.LoadXMLDocumentFromText('<?xml version="1.0" encoding="UTF-8" ?> <CancelaCFD /> ', XMLDoc);
-        XMLCurrNode := XMLDoc.DocumentElement;
-        AddElement(XMLCurrNode, 'Cancelacion', '', '', XMLNewChild);
-        XMLCurrNode := XMLNewChild;
-        with CustLedgerEntry do begin
-            CancelDateTime := FormatDateTime(ConvertCurrentDateTimeToTimeZone(GetTimeZoneFromCustomer("Customer No.")));
-            AddAttribute(XMLDoc, XMLCurrNode, 'Fecha', CancelDateTime);
-            "Date/Time Canceled" := CancelDateTime;
-            AddAttribute(XMLDoc, XMLCurrNode, 'RfcEmisor', CompanyInfo."RFC No.");
-            AddElement(XMLCurrNode, 'Folios', '', '', XMLNewChild);
-            XMLCurrNode := XMLNewChild;
-            AddElement(XMLCurrNode, 'Folio', '', '', XMLNewChild);
-            XMLCurrNode := XMLNewChild;
-            AddAttribute(XMLDoc, XMLCurrNode, 'FechaTimbrado', "Date/Time Stamped");
-            AddAttribute(XMLDoc, XMLCurrNode, 'UUID', "Fiscal Invoice Number PAC");
-            "Original Document XML".CreateOutStream(OutStr);
-            XMLDoc.Save(OutStr);
-        end;
+        CancelDateTime :=
+          FormatDateTime(ConvertCurrentDateTimeToTimeZone(GetTimeZoneFromCustomer(CustLedgerEntry."Customer No.")));
+        CustLedgerEntry."Date/Time Canceled" := CancelDateTime;
+        CustLedgerEntry."Original Document XML".CreateOutStream(OutStr);
+        CancelXMLDocument(
+          XMLDoc, OutStr,
+          CancelDateTime, CustLedgerEntry."Date/Time Stamped", CustLedgerEntry."Fiscal Invoice Number PAC",
+          CustLedgerEntry."CFDI Cancellation Reason Code", CustLedgerEntrySubst."Fiscal Invoice Number PAC");
 
         Response := InvokeMethod(XMLDoc, MethodType::Cancel);
 
@@ -1221,6 +1124,35 @@
         CustLedgerEntry.Modify();
 
         Session.LogMessage('0000C7D', StrSubstNo(CancelDocSuccessMsg, DocType), Verbosity::Normal, DataClassification::SystemMetadata, TelemetryScope::ExtensionPublisher, 'Category', MXElectronicInvoicingTok);
+    end;
+
+    local procedure CancelXMLDocument(var XMLDoc: DotNet XmlDocument; var OutStr: OutStream; CancelDateTime: Text[50]; DateTimeStamped: Text; FiscalinvoiceNumberPAC: Text; CancellationReason: Text; SubstitutionDocumentUUID: Text)
+    var
+        XMLDOMManagement: Codeunit "XML DOM Management";
+        XMLCurrNode: DotNet XmlNode;
+        XMLNewChild: DotNet XmlNode;
+    begin
+        // Create instance
+        if IsNull(XMLDoc) then
+            XMLDoc := XMLDoc.XmlDocument;
+
+        DocNameSpace := 'http://www.sat.gob.mx/cfd/3';
+        XMLDOMManagement.LoadXMLDocumentFromText('<?xml version="1.0" encoding="UTF-8" ?> <CancelaCFD /> ', XMLDoc);
+        XMLCurrNode := XMLDoc.DocumentElement;
+        AddElement(XMLCurrNode, 'Cancelacion', '', '', XMLNewChild);
+        XMLCurrNode := XMLNewChild;
+
+        AddAttribute(XMLDoc, XMLCurrNode, 'Fecha', CancelDateTime);
+        AddAttribute(XMLDoc, XMLCurrNode, 'RfcEmisor', CompanyInfo."RFC No.");
+        AddElement(XMLCurrNode, 'Folios', '', '', XMLNewChild);
+        XMLCurrNode := XMLNewChild;
+        AddElement(XMLCurrNode, 'Folio', '', '', XMLNewChild);
+        XMLCurrNode := XMLNewChild;
+        AddAttribute(XMLDoc, XMLCurrNode, 'FechaTimbrado', DateTimeStamped);
+        AddAttribute(XMLDoc, XMLCurrNode, 'UUID', FiscalinvoiceNumberPAC);
+        AddAttribute(XMLDoc, XMLCurrNode, 'MotivoCancelacion', CancellationReason);
+        AddAttribute(XMLDoc, XMLCurrNode, 'FolioSustitucion', SubstitutionDocumentUUID);
+        XMLDoc.Save(OutStr);
     end;
 
     local procedure ProcessResponseESalesInvoice(var SalesInvoiceHeader: Record "Sales Invoice Header"; "Action": Option; Reverse: Boolean)
@@ -2390,6 +2322,8 @@
         XMLCurrNode: DotNet XmlNode;
         XMLNewChild: DotNet XmlNode;
         NumeroPedimento: Text;
+        DestinationRFCNo: Text;
+        HazardousMatExists: Boolean;
     begin
         InitXML33CartaPorte(XMLDoc, XMLCurrNode);
 
@@ -2452,11 +2386,10 @@
         XMLCurrNode := XMLNewChild;
 
         // CartaPorte
-        DocNameSpace := 'http://www.sat.gob.mx/CartaPorte';
+        DocNameSpace := 'http://www.sat.gob.mx/CartaPorte20';
         AddElementCartaPorte(XMLCurrNode, 'CartaPorte', '', DocNameSpace, XMLNewChild);
         XMLCurrNode := XMLNewChild;
-        AddAttribute(XMLDoc, XMLCurrNode, 'xmlns:cartaporte', 'http://www.sat.gob.mx/CartaPorte');
-        AddAttribute(XMLDoc, XMLCurrNode, 'Version', '1.0');
+        AddAttribute(XMLDoc, XMLCurrNode, 'Version', '2.0');
         if TempDocumentHeader."Foreign Trade" then begin
             AddAttribute(XMLDoc, XMLCurrNode, 'TranspInternac', 'Sí');
             AddAttribute(XMLDoc, XMLCurrNode, 'EntradaSalidaMerc', 'Salida');
@@ -2468,37 +2401,28 @@
         // CartaPorte/Ubicaciones
         AddElementCartaPorte(XMLCurrNode, 'Ubicaciones', '', DocNameSpace, XMLNewChild);
         XMLCurrNode := XMLNewChild;
-        AddElementCartaPorte(XMLCurrNode, 'Ubicacion', '', DocNameSpace, XMLNewChild);
-        XMLCurrNode := XMLNewChild;
-        AddAttribute(XMLDoc, XMLCurrNode, 'DistanciaRecorrida', FormatDecimal(TempDocumentHeader."Transit Distance", 6));
-        if TempDocumentHeader."Foreign Trade" then
-            AddAttribute(XMLDoc, XMLCurrNode, 'TipoEstacion', '01');
-        AddElementCartaPorte(XMLCurrNode, 'Origen', '', DocNameSpace, XMLNewChild);
-        XMLCurrNode := XMLNewChild;
-        AddAttribute(XMLDoc, XMLCurrNode, 'FechaHoraSalida', FormatDateTime(TempDocumentHeader."Transit-from Date/Time"));
-        XMLCurrNode := XMLCurrNode.ParentNode; // Origen
-        if TempDocumentHeader."Foreign Trade" then
-            AddNodeCartaPorteDomicilio(TempDocumentHeader."Transit-from Location", XMLDoc, XMLCurrNode, XMLNewChild);
-        XMLCurrNode := XMLCurrNode.ParentNode; // Ubicacion
-        AddElementCartaPorte(XMLCurrNode, 'Ubicacion', '', DocNameSpace, XMLNewChild);
-        XMLCurrNode := XMLNewChild;
-        AddAttribute(XMLDoc, XMLCurrNode, 'DistanciaRecorrida', FormatDecimal(TempDocumentHeader."Transit Distance", 6));
-        AddElementCartaPorte(XMLCurrNode, 'Destino', '', DocNameSpace, XMLNewChild);
-        XMLCurrNode := XMLNewChild;
-        AddAttribute(
-          XMLDoc, XMLCurrNode, 'FechaHoraProgLlegada',
-          FormatDateTime(TempDocumentHeader."Transit-from Date/Time" + TempDocumentHeader."Transit Hours" * 1000 * 60 * 60));
-        XMLCurrNode := XMLCurrNode.ParentNode; // Destino
-        if TempDocumentHeader."Foreign Trade" then
-            AddNodeCartaPorteDomicilio(TempDocumentHeader."Transit-to Location", XMLDoc, XMLCurrNode, XMLNewChild);
-        XMLCurrNode := XMLCurrNode.ParentNode; // Ubicacion
+        AddNodeCartaPorteUbicacion(
+          'Origen', CompanyInfo."RFC No.", TempDocumentHeader."Transit-from Location", 'OR',
+          FormatDateTime(TempDocumentHeader."Transit-from Date/Time"), '', TempDocumentHeader."Foreign Trade",
+          XMLDoc, XMLCurrNode, XMLNewChild);
+        DestinationRFCNo := Customer."RFC No.";
+        if DestinationRFCNo = '' then
+            DestinationRFCNo := CompanyInfo."RFC No.";
+        AddNodeCartaPorteUbicacion(
+          'Destino', DestinationRFCNo, TempDocumentHeader."Transit-to Location", 'DE',
+          FormatDateTime(TempDocumentHeader."Transit-from Date/Time" + TempDocumentHeader."Transit Hours" * 1000 * 60 * 60),
+          FormatDecimal(TempDocumentHeader."Transit Distance", 6), TempDocumentHeader."Foreign Trade",
+          XMLDoc, XMLCurrNode, XMLNewChild);
         XMLCurrNode := XMLCurrNode.ParentNode; // Ubicaciones
 
         // CartaPorte/Mercancias
         AddElementCartaPorte(XMLCurrNode, 'Mercancias', '', DocNameSpace, XMLNewChild);
         XMLCurrNode := XMLNewChild;
         TempDocumentLine.SetRange("Document No.", TempDocumentHeader."No.");
+        TempDocumentLine.CalcSums("Gross Weight");
+        AddAttribute(XMLDoc, XMLCurrNode, 'UnidadPeso', TempDocumentHeader."SAT Weight Unit Of Measure");
         AddAttribute(XMLDoc, XMLCurrNode, 'NumTotalMercancias', FormatDecimal(TempDocumentLine.Count, 0));
+        AddAttribute(XMLDoc, XMLCurrNode, 'PesoBrutoTotal', FormatDecimal(TempDocumentLine."Gross Weight", 3));
         if TempDocumentLine.FindSet() then
             repeat
                 if TempDocumentLine.Type = TempDocumentLine.Type::Item then
@@ -2509,9 +2433,11 @@
                 XMLCurrNode := XMLNewChild;
                 AddAttribute(
                   XMLDoc, XMLCurrNode, 'BienesTransp', SATUtilities.GetSATItemClassification(TempDocumentLine.Type, TempDocumentLine."No."));
+                AddAttribute(XMLDoc, XMLCurrNode, 'Descripcion', EncodeString(TempDocumentLine.Description));
                 AddAttribute(XMLDoc, XMLCurrNode, 'Cantidad', Format(TempDocumentLine.Quantity, 0, 9));
                 AddAttribute(XMLDoc, XMLCurrNode, 'ClaveUnidad', SATUtilities.GetSATUnitofMeasure(TempDocumentLine."Unit of Measure Code"));
                 if Item."SAT Hazardous Material" <> '' then begin
+                    HazardousMatExists := true;
                     AddAttribute(XMLDoc, XMLCurrNode, 'MaterialPeligroso', 'Sí');
                     AddAttribute(XMLDoc, XMLCurrNode, 'CveMaterialPeligroso', Item."SAT Hazardous Material");
                     AddAttribute(XMLDoc, XMLCurrNode, 'Embalaje', Item."SAT Packaging Type");
@@ -2527,18 +2453,28 @@
             until TempDocumentLine.Next() = 0;
 
         FixedAsset.Get(TempDocumentHeader."Vehicle Code");
-        AddElementCartaPorte(XMLCurrNode, 'AutotransporteFederal', '', DocNameSpace, XMLNewChild);
+        AddElementCartaPorte(XMLCurrNode, 'Autotransporte', '', DocNameSpace, XMLNewChild);
         XMLCurrNode := XMLNewChild;
         AddAttribute(XMLDoc, XMLCurrNode, 'PermSCT', CompanyInfo."SCT Permission Type");
         AddAttribute(XMLDoc, XMLCurrNode, 'NumPermisoSCT', CompanyInfo."SCT Permission Number");
-        AddAttribute(XMLDoc, XMLCurrNode, 'NombreAseg', TempDocumentHeader."Insurer Name");
-        AddAttribute(XMLDoc, XMLCurrNode, 'NumPolizaSeguro', TempDocumentHeader."Insurer Policy Number");
         AddElementCartaPorte(XMLCurrNode, 'IdentificacionVehicular', '', DocNameSpace, XMLNewChild);
         XMLCurrNode := XMLNewChild;
         AddAttribute(XMLDoc, XMLCurrNode, 'ConfigVehicular', FixedAsset."SAT Federal Autotransport");
         AddAttribute(XMLDoc, XMLCurrNode, 'PlacaVM', FixedAsset."Vehicle Licence Plate");
         AddAttribute(XMLDoc, XMLCurrNode, 'AnioModeloVM', Format(FixedAsset."Vehicle Year"));
         XMLCurrNode := XMLCurrNode.ParentNode; // IdentificacionVehicular
+
+        // Seguros
+        AddElementCartaPorte(XMLCurrNode, 'Seguros', '', DocNameSpace, XMLNewChild);
+        XMLCurrNode := XMLNewChild;
+        AddAttribute(XMLDoc, XMLCurrNode, 'AseguraRespCivil', TempDocumentHeader."Insurer Name");
+        AddAttribute(XMLDoc, XMLCurrNode, 'PolizaRespCivil', TempDocumentHeader."Insurer Policy Number");
+        if HazardousMatExists then begin
+            AddAttribute(XMLDoc, XMLCurrNode, 'AseguraMedAmbiente', TempDocumentHeader."Medical Insurer Name");
+            AddAttribute(XMLDoc, XMLCurrNode, 'PolizaMedAmbiente', TempDocumentHeader."Medical Ins. Policy Number");
+        end;
+        XMLCurrNode := XMLCurrNode.ParentNode; // Seguros
+
         if (TempDocumentHeader."Trailer 1" <> '') or (TempDocumentHeader."Trailer 2" <> '') then begin
             AddElementCartaPorte(XMLCurrNode, 'Remolques', '', DocNameSpace, XMLNewChild);
             XMLCurrNode := XMLNewChild;
@@ -2558,28 +2494,24 @@
             end;
             XMLCurrNode := XMLCurrNode.ParentNode; // Remolques
         end;
-        XMLCurrNode := XMLCurrNode.ParentNode; // AutotransporteFederal
+        XMLCurrNode := XMLCurrNode.ParentNode; // Autotransporte
         XMLCurrNode := XMLCurrNode.ParentNode; // Mercancias
 
         // CartaPorte/FiguraTransporte
         AddElementCartaPorte(XMLCurrNode, 'FiguraTransporte', '', DocNameSpace, XMLNewChild);
         XMLCurrNode := XMLNewChild;
-        AddAttribute(XMLDoc, XMLCurrNode, 'CveTransporte', '01'); // 01 - Autotransporte Federal
-        AddElementCartaPorte(XMLCurrNode, 'Operadores', '', DocNameSpace, XMLNewChild); // Drivers
-        XMLCurrNode := XMLNewChild;
         CFDITransportOperator.SetRange("Document Table ID", TempDocumentHeader."Document Table ID");
         CFDITransportOperator.SetRange("Document No.", TempDocumentHeader."No.");
         if CFDITransportOperator.FindSet() then
             repeat
-                Employee.Get(CFDITransportOperator."Operator Code");
-                AddElementCartaPorte(XMLCurrNode, 'Operador', '', DocNameSpace, XMLNewChild);
+                AddElementCartaPorte(XMLCurrNode, 'TiposFigura', '', DocNameSpace, XMLNewChild);
                 XMLCurrNode := XMLNewChild;
-                AddAttribute(XMLDoc, XMLCurrNode, 'RFCOperador', Employee."RFC No.");
+                Employee.Get(CFDITransportOperator."Operator Code");
+                AddAttribute(XMLDoc, XMLCurrNode, 'TipoFigura', '01'); // 01 - Autotransporte Federal
+                AddAttribute(XMLDoc, XMLCurrNode, 'RFCFigura', Employee."RFC No.");
                 AddAttribute(XMLDoc, XMLCurrNode, 'NumLicencia', Employee."License No.");
-                AddAttribute(XMLDoc, XMLCurrNode, 'ResidenciaFiscalOperador', 'MEX');
-                XMLCurrNode := XMLCurrNode.ParentNode; // Operador
-            until CFDITransportOperator.Next() = 0;
-        XMLCurrNode := XMLCurrNode.ParentNode; // Operadores
+                XMLCurrNode := XMLCurrNode.ParentNode; // TiposFigura
+            until CFDITransportOperator.Next = 0;
         XMLCurrNode := XMLCurrNode.ParentNode; // FiguraTransporte
 
         XMLCurrNode := XMLCurrNode.ParentNode; // CartaPorte
@@ -3011,6 +2943,8 @@
         CFDITransportOperator: Record "CFDI Transport Operator";
         SATUtilities: Codeunit "SAT Utilities";
         OutStream: OutStream;
+        DestinationRFCNo: Text;
+        HazardousMatExists: Boolean;
     begin
         Clear(TempBlob);
         TempBlob.CreateOutStream(OutStream);
@@ -3050,28 +2984,34 @@
             until TempDocumentLine.Next() = 0;
 
         // CartaPorte/Ubicaciones
-        WriteOutStr(OutStream, '1.0|'); // Version
+        WriteOutStr(OutStream, '2.0|'); // Version
         if TempDocumentHeader."Foreign Trade" then begin
             WriteOutStr(OutStream, 'Sí'); // TranspInternac 
             WriteOutStr(OutStream, 'Salida|'); // EntradaSalidaMerc
             WriteOutStr(OutStream, '01|'); // ViaEntradaSalida
         end else
             WriteOutStr(OutStream, 'No|'); // TranspInternac
+
         WriteOutStr(OutStream, FormatDecimal(TempDocumentHeader."Transit Distance", 6) + '|'); // TotalDistRec
-        WriteOutStr(OutStream, FormatDecimal(TempDocumentHeader."Transit Distance", 6) + '|'); // Origen: DistanciaRecorrida
-        if TempDocumentHeader."Foreign Trade" then
-            WriteOutStr(OutStream, '01|'); // TipoEstacion
-        if TempDocumentHeader."Foreign Trade" then
-            AddStrCartaPorteDomicilio(TempDocumentHeader."Transit-from Location", OutStream);
-        WriteOutStr(OutStream, FormatDateTime(TempDocumentHeader."Transit-from Date/Time") + '|'); // Origen: FechaHoraSalida
-        WriteOutStr(OutStream, FormatDecimal(TempDocumentHeader."Transit Distance", 6) + '|'); // Destino: DistanciaRecorrida
-        WriteOutStr(OutStream,
-            FormatDateTime(TempDocumentHeader."Transit-from Date/Time" + TempDocumentHeader."Transit Hours" * 1000 * 60 * 60) + '|'); // FechaHoraProgLlegada
-        if TempDocumentHeader."Foreign Trade" then
-            AddStrCartaPorteDomicilio(TempDocumentHeader."Transit-to Location", OutStream);
+
+        AddStrCartaPorteUbicacion(
+          'Origen', CompanyInfo."RFC No.", TempDocumentHeader."Transit-from Location", 'OR',
+          FormatDateTime(TempDocumentHeader."Transit-from Date/Time"), '', TempDocumentHeader."Foreign Trade",
+          OutStream);
+        DestinationRFCNo := Customer."RFC No.";
+        if DestinationRFCNo = '' then
+            DestinationRFCNo := CompanyInfo."RFC No.";
+        AddStrCartaPorteUbicacion(
+          'Destino', DestinationRFCNo, TempDocumentHeader."Transit-to Location", 'DE',
+          FormatDateTime(TempDocumentHeader."Transit-from Date/Time" + TempDocumentHeader."Transit Hours" * 1000 * 60 * 60),
+          FormatDecimal(TempDocumentHeader."Transit Distance", 6), TempDocumentHeader."Foreign Trade",
+          OutStream);
 
         // CartaPorte/Mercancias
         TempDocumentLine.SetRange("Document No.", TempDocumentHeader."No.");
+        TempDocumentLine.CalcSums("Gross Weight");
+        WriteOutStr(OutStream, FormatDecimal(TempDocumentLine."Gross Weight", 3) + '|'); // PesoBrutoTotal
+        WriteOutStr(OutStream, TempDocumentHeader."SAT Weight Unit Of Measure" + '|'); // UnidadPeso
         WriteOutStr(OutStream, FormatDecimal(TempDocumentLine.Count, 0) + '|'); // NumTotalMercancias
         if TempDocumentLine.FindSet() then
             repeat
@@ -3080,9 +3020,11 @@
                 else
                     Item.Init();
                 WriteOutStr(OutStream, SATUtilities.GetSATItemClassification(TempDocumentLine.Type, TempDocumentLine."No.") + '|'); // BienesTransp
+                WriteOutStr(OutStream, EncodeString(TempDocumentLine.Description) + '|'); // Descripcion
                 WriteOutStr(OutStream, Format(TempDocumentLine.Quantity, 0, 9) + '|'); // Cantidad
                 WriteOutStr(OutStream, SATUtilities.GetSATUnitofMeasure(TempDocumentLine."Unit of Measure Code") + '|'); // ClaveUnidad
                 if Item."SAT Hazardous Material" <> '' then begin
+                    HazardousMatExists := true;
                     WriteOutStr(OutStream, 'Sí|'); // MaterialPeligroso
                     WriteOutStr(OutStream, Item."SAT Hazardous Material" + '|'); // CveMaterialPeligroso
                     WriteOutStr(OutStream, Item."SAT Packaging Type" + '|'); // Embalaje
@@ -3099,11 +3041,17 @@
         FixedAsset.Get(TempDocumentHeader."Vehicle Code");
         WriteOutStr(OutStream, CompanyInfo."SCT Permission Type" + '|'); // PermSCT
         WriteOutStr(OutStream, CompanyInfo."SCT Permission Number" + '|'); // NumPermisoSCT
-        WriteOutStr(OutStream, TempDocumentHeader."Insurer Name" + '|'); // NombreAseg // Insurer
-        WriteOutStr(OutStream, TempDocumentHeader."Insurer Policy Number" + '|'); // NumPolizaSeguro
         WriteOutStr(OutStream, FixedAsset."SAT Federal Autotransport" + '|'); // ConfigVehicular
         WriteOutStr(OutStream, FixedAsset."Vehicle Licence Plate" + '|'); // PlacaVM
         WriteOutStr(OutStream, Format(FixedAsset."Vehicle Year") + '|'); // AnioModeloVM
+
+        // Seguros
+        WriteOutStr(OutStream, TempDocumentHeader."Insurer Name" + '|'); // AseguraRespCivil
+        WriteOutStr(OutStream, TempDocumentHeader."Insurer Policy Number" + '|'); // PolizaRespCivil
+        if HazardousMatExists then begin
+            WriteOutStr(OutStream, TempDocumentHeader."Medical Insurer Name" + '|'); // AseguraMedAmbiente
+            WriteOutStr(OutStream, TempDocumentHeader."Medical Ins. Policy Number" + '|'); // PolizaMedAmbiente
+        end;
 
         if (TempDocumentHeader."Trailer 1" <> '') or (TempDocumentHeader."Trailer 2" <> '') then begin
             if FixedAsset.Get(TempDocumentHeader."Trailer 1") then begin
@@ -3117,15 +3065,14 @@
         end;
 
         // CartaPorte/FiguraTransporte
-        WriteOutStr(OutStream, '01|'); // CveTransporte
         CFDITransportOperator.SetRange("Document Table ID", TempDocumentHeader."Document Table ID");
         CFDITransportOperator.SetRange("Document No.", TempDocumentHeader."No.");
         if CFDITransportOperator.FindSet() then
             repeat
                 Employee.Get(CFDITransportOperator."Operator Code");
-                WriteOutStr(OutStream, Employee."RFC No." + '|'); // RFCOperador
+                WriteOutStr(OutStream, '01|'); // TipoFigura
+                WriteOutStr(OutStream, Employee."RFC No." + '|'); // RFCFigura
                 WriteOutStr(OutStream, Employee."License No." + '|'); // NumLicencia
-                WriteOutStr(OutStream, 'MEX|'); // ResidenciaFiscalOperador
             until CFDITransportOperator.Next() = 0;
 
         WriteOutStrAllowOneCharacter(OutStream, '|');
@@ -4028,6 +3975,9 @@
                     TempDocumentHeader."CFDI Purpose" := 'P01';
                     TempDocumentHeader."Transit-from Location" := TransferShipmentHeader."Transfer-from Code";
                     TempDocumentHeader."Transit-to Location" := TransferShipmentHeader."Transfer-to Code";
+                    TempDocumentHeader."Medical Insurer Name" := TransferShipmentHeader."Medical Insurer Name";
+                    TempDocumentHeader."Medical Ins. Policy Number" := TransferShipmentHeader."Medical Ins. Policy Number";
+                    TempDocumentHeader."SAT Weight Unit Of Measure" := TransferShipmentHeader."SAT Weight Unit Of Measure";
                     TempDocumentHeader."Document Table ID" := RecRef.Number;
                     UpdateAbstractDocument(TempDocumentHeader);
                     TempDocumentHeader.Insert();
@@ -5134,13 +5084,51 @@
             WriteOutStr(OutStr, 'Exento' + '|'); // TipoFactor
     end;
 
-    local procedure AddNodeCartaPorteDomicilio(LocationCode: Code[10]; var XMLDoc: DotNet XmlDocument; XMLCurrNode: DotNet XmlNode; XMLNewChild: DotNet XmlNode)
+    local procedure AddNodeCartaPorteUbicacion(TipoUbicacion: Text; RFCNo: Text; LocationCode: Code[10]; LocationPrefix: Text[2]; FechaHoraSalidaLlegada: Text; DistanciaRecorrida: Text; ForeignTrade: Boolean; var XMLDoc: DotNet XmlDocument; XMLCurrNode: DotNet XmlNode; XMLNewChild: DotNet XmlNode)
     var
         Location: Record Location;
+    begin
+        Location.Get(LocationCode);
+        AddElementCartaPorte(XMLCurrNode, 'Ubicacion', '', DocNameSpace, XMLNewChild);
+        XMLCurrNode := XMLNewChild;
+        AddAttribute(XMLDoc, XMLCurrNode, 'TipoUbicacion', TipoUbicacion);
+        if Location."ID Ubicacion" <> 0 then
+            AddAttribute(XMLDoc, XMLCurrNode, 'IDUbicacion', LocationPrefix + Format(Location."ID Ubicacion"));
+        AddAttribute(XMLDoc, XMLCurrNode, 'RFCRemitenteDestinatario', RFCNo);
+        AddAttribute(XMLDoc, XMLCurrNode, 'FechaHoraSalidaLlegada', FechaHoraSalidaLlegada);
+        if ForeignTrade then
+            AddAttribute(XMLDoc, XMLCurrNode, 'TipoEstacion', '01');
+        if DistanciaRecorrida <> '' then
+            AddAttribute(XMLDoc, XMLCurrNode, 'DistanciaRecorrida', DistanciaRecorrida);
+
+        AddNodeCartaPorteDomicilio(Location, XMLDoc, XMLCurrNode, XMLNewChild);
+        XMLCurrNode := XMLCurrNode.ParentNode; // Ubicacion
+    end;
+
+    local procedure AddStrCartaPorteUbicacion(TipoUbicacion: Text; RFCNo: Text; LocationCode: Code[10]; LocationPrefix: Text[2]; FechaHoraSalidaLlegada: Text; DistanciaRecorrida: Text; ForeignTrade: Boolean; var OutStr: OutStream)
+    var
+        Location: Record Location;
+    begin
+        Location.Get(LocationCode);
+
+        WriteOutStr(OutStr, TipoUbicacion + '|'); // TipoUbicacion
+        if Location."ID Ubicacion" <> 0 then
+            WriteOutStr(OutStr, LocationPrefix + Format(Location."ID Ubicacion") + '|'); // IDUbicacion
+        WriteOutStr(OutStr, RFCNo + '|'); // RFCRemitenteDestinatario
+        WriteOutStr(OutStr, FechaHoraSalidaLlegada + '|'); // FechaHoraSalidaLlegada
+        if ForeignTrade then
+            WriteOutStr(OutStr, '01|'); // TipoEstacion
+        if DistanciaRecorrida <> '' then
+            WriteOutStr(OutStr, DistanciaRecorrida + '|'); // DistanciaRecorrida
+
+        AddStrCartaPorteDomicilio(Location, OutStr);
+    end;
+
+    local procedure AddNodeCartaPorteDomicilio(Location: Record Location; var XMLDoc: DotNet XmlDocument; XMLCurrNode: DotNet XmlNode; XMLNewChild: DotNet XmlNode)
+    var
         SATSuburb: Record "SAT Suburb";
         SATUtilities: Codeunit "SAT Utilities";
     begin
-        Location.Get(LocationCode);
         SATSuburb.Get(Location."SAT Suburb ID");
         AddElementCartaPorte(XMLCurrNode, 'Domicilio', '', DocNameSpace, XMLNewChild);
         XMLCurrNode := XMLNewChild;
@@ -5154,21 +5142,19 @@
         XMLCurrNode := XMLCurrNode.ParentNode; // Domicilio
     end;
 
-    local procedure AddStrCartaPorteDomicilio(LocationCode: Code[10]; var OutStr: OutStream)
+    local procedure AddStrCartaPorteDomicilio(Location: Record Location; var OutStr: OutStream)
     var
-        Location: Record Location;
         SATSuburb: Record "SAT Suburb";
         SATUtilities: Codeunit "SAT Utilities";
     begin
-        Location.Get(LocationCode);
         SATSuburb.Get(Location."SAT Suburb ID");
         WriteOutStr(OutStr, Location.Address + '|'); // Calle
+        WriteOutStr(OutStr, SATSuburb."Suburb Code" + '|'); // Colonia
         WriteOutStr(OutStr, Location."SAT Locality Code" + '|'); // Localidad
         WriteOutStr(OutStr, Location."SAT Municipality Code" + '|'); // Municipio
         WriteOutStr(OutStr, Location."SAT State Code" + '|'); // Estado
         WriteOutStr(OutStr, SATUtilities.GetSATCountryCode(Location."Country/Region Code") + '|'); // Pais
         WriteOutStr(OutStr, SATSuburb."Postal Code" + '|'); // CodigoPostal
-        WriteOutStr(OutStr, SATSuburb."Suburb Code" + '|'); // Colonia
     end;
 
     local procedure IsInvoicePrepaymentSettle(InvoiceNumber: Code[20]; var AdvanceAmount: Decimal): Boolean
@@ -5643,6 +5629,7 @@
             LogIfEmpty(DocumentVariant, DocumentHeader.FieldNo("Insurer Name"), "Message Type"::Error);
             LogIfEmpty(DocumentVariant, DocumentHeader.FieldNo("Insurer Policy Number"), "Message Type"::Error);
             LogIfEmpty(DocumentVariant, DocumentHeader.FieldNo("Vehicle Code"), "Message Type"::Error);
+            LogIfEmpty(DocumentVariant, DocumentHeader.FieldNo("SAT Weight Unit Of Measure"), "Message Type"::Error);
             CFDITransportOperator.SetRange("Document Table ID", DocumentHeader."Document Table ID");
             CFDITransportOperator.SetRange("Document No.", DocumentHeader."No.");
             if not CFDITransportOperator.FindSet() then
@@ -5656,19 +5643,18 @@
             CheckAutotransport(TempErrorMessage, DocumentHeader."Vehicle Code", false);
             CheckAutotransport(TempErrorMessage, DocumentHeader."Trailer 1", true);
             CheckAutotransport(TempErrorMessage, DocumentHeader."Trailer 2", true);
-            if DocumentHeader."Foreign Trade" then
-                case DocumentHeader."Document Table ID" of
-                    DATABASE::"Sales Shipment Header":
-                        begin
-                            CheckLocation(TempErrorMessage, DocumentVariant, DocumentHeader."Transit-from Location", 10055);
-                            CheckLocation(TempErrorMessage, DocumentVariant, DocumentHeader."Transit-to Location", 28);
-                        end;
-                    DATABASE::"Transfer Shipment Header":
-                        begin
-                            CheckLocation(TempErrorMessage, DocumentVariant, DocumentHeader."Transit-from Location", 2);
-                            CheckLocation(TempErrorMessage, DocumentVariant, DocumentHeader."Transit-to Location", 11);
-                        end;
-                end;
+            case DocumentHeader."Document Table ID" of
+                DATABASE::"Sales Shipment Header":
+                    begin
+                        CheckLocation(TempErrorMessage, DocumentVariant, DocumentHeader."Transit-from Location", 10055);
+                        CheckLocation(TempErrorMessage, DocumentVariant, DocumentHeader."Transit-to Location", 28);
+                    end;
+                DATABASE::"Transfer Shipment Header":
+                    begin
+                        CheckLocation(TempErrorMessage, DocumentVariant, DocumentHeader."Transit-from Location", 2);
+                        CheckLocation(TempErrorMessage, DocumentVariant, DocumentHeader."Transit-to Location", 11);
+                    end;
+            end;
         end;
     end;
 
@@ -5899,8 +5885,17 @@
             LogIfEmpty(Location, Location.FieldNo("SAT Municipality Code"), "Message Type"::Error);
             LogIfEmpty(Location, Location.FieldNo("SAT Locality Code"), "Message Type"::Error);
             LogIfEmpty(Location, Location.FieldNo("SAT Suburb ID"), "Message Type"::Error);
-            LogIfEmpty(Location, Location.FieldNo(Address), "Message Type"::Error);
+            LogIfEmpty(Location, Location.FieldNo(Address), "Message Type"::Warning);
         end;
+    end;
+
+    local procedure CancellationReasonRequired(ReasonCode: Code[10]): Boolean
+    var
+        CFDICancellationReason: Record "CFDI Cancellation Reason";
+    begin
+        if not CFDICancellationReason.Get(ReasonCode) then
+            exit(false);
+        exit(CFDICancellationReason."Substitution Number Required");
     end;
 
     local procedure GetLineVarFromDocumentLine(var LineVariant: Variant; var TableCaption: Text; TableID: Integer; DocumentLine: Record "Document Line")
@@ -5999,6 +5994,13 @@
     local procedure TransferShipmentHeaserInsertCFDIOperators(var TransferHeader: Record "Transfer Header"; var TransferShipmentHeader: Record "Transfer Shipment Header")
     begin
         InsertTransferShipmentCFDITransportOperators(TransferHeader, TransferShipmentHeader."No.");
+    end;
+
+    [EventSubscriber(ObjectType::Codeunit, 103, 'OnBeforeCustLedgEntryModify', '', false, false)]
+    local procedure UpdateCustomerLedgerEntry(var CustLedgEntry: Record "Cust. Ledger Entry"; FromCustLedgEntry: Record "Cust. Ledger Entry")
+    begin
+        CustLedgEntry.Validate("CFDI Cancellation Reason Code", FromCustLedgEntry."CFDI Cancellation Reason Code");
+        CustLedgEntry.Validate("Substitution Entry No.", FromCustLedgEntry."Substitution Entry No.");
     end;
 
     [IntegrationEvent(false, false)]
