@@ -91,6 +91,8 @@ codeunit 1336 "Item Templ. Mgt."
             end;
         end;
 
+        OnApplyTemplateOnBeforeValidateFields(ItemRecRef, ItemTemplRecRef);
+
         for i := 1 to FieldValidationList.Count do begin
             ItemTemplFldRef := ItemTemplRecRef.Field(FieldValidationList.Get(i));
             ItemFldRef := ItemRecRef.Field(ItemTemplFldRef.Number);
@@ -584,6 +586,11 @@ codeunit 1336 "Item Templ. Mgt."
 
     [IntegrationEvent(false, false)]
     local procedure OnAfterCreateItemFromTemplate(var Item: Record Item; ItemTempl: Record "Item Templ.");
+    begin
+    end;
+
+    [IntegrationEvent(false, false)]
+    local procedure OnApplyTemplateOnBeforeValidateFields(var ItemRecRef: RecordRef; var ItemTemplRecRef: RecordRef)
     begin
     end;
 }
