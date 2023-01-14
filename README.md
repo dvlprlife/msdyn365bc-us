@@ -19,6 +19,6 @@ For further reference, visit:
 | **Branch**   | **Description**  | Committed Build |
 |    :----:    | :---             | ---:  |
 | us-18 | Microsoft Dynamics 365 Business Central 2021 Wave 1 (Version 18) | 18.18|
-| us-19 | Microsoft Dynamics 365 Business Central 2021 Wave 2 (Version 19) | 19.13|
+| us-19 | Microsoft Dynamics 365 Business Central 2021 Wave 2 (Version 19) | 19.15|
 | us-20 | Microsoft Dynamics 365 Business Central 2022 Wave 1 (Version 20) | 20.7 |
-| us-21 | Microsoft Dynamics 365 Business Central 2022 Wave 2 (Version 21) | 21.1 |
+| us-21 | Microsoft Dynamics 365 Business Central 2022 Wave 2 (Version 21) | 21.3 |
