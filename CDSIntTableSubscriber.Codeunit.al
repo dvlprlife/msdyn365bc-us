@@ -75,9 +75,6 @@ codeunit 7205 "CDS Int. Table. Subscriber"
 
     [EventSubscriber(ObjectType::Codeunit, Codeunit::"CRM Integration Management", 'OnGetCDSIntegrationUserId', '', true, true)]
     local procedure HandleOnGetCDSIntegrationUserId(var IntegrationUserId: Guid; var handled: Boolean)
-    var
-        CDSConnectionSetup: Record "CDS Connection Setup";
-        CDSSystemuser: Record "CRM Systemuser";
     begin
         if handled then
             exit;
@@ -85,10 +82,7 @@ codeunit 7205 "CDS Int. Table. Subscriber"
         if not CDSIntegrationImpl.IsIntegrationEnabled() then
             exit;
 
-        CDSConnectionSetup.Get();
-        FilterCDSSystemUser(CDSSystemuser, CDSConnectionSetup);
-        if CDSSystemuser.FindFirst() then
-            IntegrationUserId := CDSSystemuser.SystemUserId;
+        IntegrationUserId := FindIntegrationUserId();
 
         handled := true;
         if IsNullGuid(IntegrationUserId) then
@@ -1228,7 +1222,7 @@ codeunit 7205 "CDS Int. Table. Subscriber"
                     NewValue := CRMID; // Blank GUID
                     IsValueFound := true;
                 end else begin
-                    if CRMSynchHelper.FindRecordIDByPK(SourceFieldRef.Relation(), SourceFieldRef.Value(), RecID) then
+                    if CRMSynchHelper.FindRecordIDByPK(IntegrationTableMapping."Table ID", SourceFieldRef.Value(), RecID) then
                         if CRMIntegrationRecord.FindIDFromRecordID(RecID, NewValue) then
                             exit(true);
                     if CRMSynchHelper.IsClearValueOnFailedSync(SourceFieldRef, DestinationFieldRef) then begin
@@ -1244,7 +1238,7 @@ codeunit 7205 "CDS Int. Table. Subscriber"
                         NewValue := '';
                         IsValueFound := true;
                     end else begin
-                        if CRMIntegrationRecord.FindRecordIDFromID(CRMID, DestinationFieldRef.Relation(), RecID) then
+                        if CRMIntegrationRecord.FindRecordIDFromID(CRMID, IntegrationTableMapping."Table ID", RecID) then
                             if CRMSynchHelper.FindPKByRecordID(RecID, NewValue) then
                                 exit(true);
                         if CRMSynchHelper.IsClearValueOnFailedSync(DestinationFieldRef, SourceFieldRef) then begin
@@ -1482,14 +1476,24 @@ codeunit 7205 "CDS Int. Table. Subscriber"
         exit('877d4577-dafa-4b91-9a03-9f7c6402d883');
     end;
 
-    local procedure FilterCDSSystemUser(var CDSSystemuser: Record "CRM Systemuser"; CDSConnectionSetup: Record "CDS Connection Setup")
+    local procedure FindIntegrationUserId(): Guid
+    var
+        CDSConnectionSetup: Record "CDS Connection Setup";
+        CRMSystemuser: Record "CRM Systemuser";
+        IntegrationUserId: Guid;
     begin
+        CDSConnectionSetup.Get();
         case CDSConnectionSetup."Authentication Type" of
             CDSConnectionSetup."Authentication Type"::Office365, CDSConnectionSetup."Authentication Type"::OAuth:
-                CDSSystemuser.SetRange(InternalEMailAddress, CDSConnectionSetup."User Name");
+                CRMSystemuser.SetRange(InternalEMailAddress, CDSConnectionSetup."User Name");
             CDSConnectionSetup."Authentication Type"::AD, CDSConnectionSetup."Authentication Type"::IFD:
-                CDSSystemuser.SetRange(DomainName, CDSConnectionSetup."User Name");
+                CRMSystemuser.SetRange(DomainName, CDSConnectionSetup."User Name");
         end;
+
+        if CRMSystemuser.FindFirst() then
+            IntegrationUserId := CRMSystemuser.SystemUserId;
+
+        exit(IntegrationUserId);
     end;
 
     [IntegrationEvent(false, false)]
