@@ -4632,7 +4632,7 @@
 
     local procedure TaxCodeFromTaxRate(TaxRate: Decimal; TaxType: Option Translado,Retencion): Code[10]
     begin
-        if (TaxType = TaxType::Translado) and (TaxRate = 0.16) then
+        if (TaxType = TaxType::Translado) and (TaxRate in [0.16, 0.08]) then
             exit('002'); // IVA
 
         if (TaxType = TaxType::Retencion) and (TaxRate = 0.1) then
@@ -5511,10 +5511,11 @@
     local procedure GetPmtCustDtldEntry(var DetailedCustLedgEntryPmt: Record "Detailed Cust. Ledg. Entry"; EntryNo: Integer)
     begin
         DetailedCustLedgEntryPmt.SetFilter(
-            "Entry Type", '%1|%2|%3',
+            "Entry Type", '%1|%2|%3|%4',
             DetailedCustLedgEntryPmt."Entry Type"::Application,
             DetailedCustLedgEntryPmt."Entry Type"::"Realized Gain",
-            DetailedCustLedgEntryPmt."Entry Type"::"Realized Loss");
+            DetailedCustLedgEntryPmt."Entry Type"::"Realized Loss",
+            DetailedCustLedgEntryPmt."Entry Type"::"Correction of Remaining Amount");
         DetailedCustLedgEntryPmt.SetRange("Cust. Ledger Entry No.", EntryNo);
         DetailedCustLedgEntryPmt.SetRange("Initial Document Type", DetailedCustLedgEntryPmt."Initial Document Type"::Payment);
         if DetailedCustLedgEntryPmt.FindFirst() then;
