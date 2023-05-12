@@ -4,8 +4,6 @@ This repository contains the source for the Microsoft Dynamics 365 Business Cent
 
 For further reference, visit: 
 
-[Dynamics 365 Business Central On-Premises 2022 Release Wave 1 Updates](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/deployment/update-versions-20)
-
 [https://learn.microsoft.com/en-US/dynamics365/business-central/](https://learn.microsoft.com/en-US/dynamics365/business-central/)
 
 [https://github.com/microsoft/navcontainerhelper](https://github.com/microsoft/navcontainerhelper)
@@ -19,6 +17,7 @@ For further reference, visit:
 | **Branch**   | **Description**  | Committed Build |
 |    :----:    | :---             | ---:  |
 | us-18 | Microsoft Dynamics 365 Business Central 2021 Wave 1 (Version 18) | 18.18|
-| us-19 | Microsoft Dynamics 365 Business Central 2021 Wave 2 (Version 19) | 19.17|
+| us-19 | Microsoft Dynamics 365 Business Central 2021 Wave 2 (Version 19) | 19.18|
 | us-20 | Microsoft Dynamics 365 Business Central 2022 Wave 1 (Version 20) | 20.11|
-| us-21 | Microsoft Dynamics 365 Business Central 2022 Wave 2 (Version 21) | 21.5 |
+| us-21 | Microsoft Dynamics 365 Business Central 2022 Wave 2 (Version 21) | 21.13|
+| us-22 | Microsoft Dynamics 365 Business Central 2022 Wave 2 (Version 22) | 22.1 |
