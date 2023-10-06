@@ -1,3 +1,18 @@
+namespace System.Security.AccessControl;
+
+using Microsoft.Foundation.Comment;
+using Microsoft.CRM.Contact;
+using Microsoft.CRM.Profiling;
+using Microsoft.Finance.Currency;
+using Microsoft.Sales.Receivables;
+using Microsoft.Sales.Customer;
+using Microsoft.Finance.Dimension;
+using Microsoft.Inventory.Item.Catalog;
+using Microsoft.Inventory.Location;
+using Microsoft.Sales.FinanceCharge;
+using Microsoft.Service.Document;
+using Microsoft.Foundation.Shipping;
+
 permissionset 4970 "Customer - View"
 {
     Access = Public;
@@ -13,9 +28,6 @@ permissionset 4970 "Customer - View"
                   tabledata "Customer Bank Account" = R,
                   tabledata "Default Dimension" = R,
                   tabledata "Detailed Cust. Ledg. Entry" = R,
-#if not CLEAN19
-                  tabledata "Item Cross Reference" = R,
-#endif
                   tabledata "Item Reference" = R,
                   tabledata Location = R,
                   tabledata "My Customer" = Rimd,

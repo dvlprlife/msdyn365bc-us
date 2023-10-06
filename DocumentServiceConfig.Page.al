@@ -1,13 +1,25 @@
+﻿#if not CLEAN21
+namespace Microsoft.EServices.EDocument;
+
+using System.Environment;
+using System.Environment.Configuration;
+using System.Integration;
+using System.Security.AccessControl;
+using System.Security.Authentication;
+using System.Security.Encryption;
+
 page 9551 "Document Service Config"
 {
-    ApplicationArea = Basic, Suite;
     Caption = 'Microsoft SharePoint Connection Setup';
     DelayedInsert = true;
     InsertAllowed = false;
     PageType = Card;
-    Permissions = TableData "Document Service" = rimd;
+    Permissions = TableData "Document Service" = rimd, TableData "Document Service Scenario" = r;
     SourceTable = "Document Service";
-    UsageCategory = Administration;
+
+    ObsoleteReason = 'Use the new Document Service Setup page to configure the Document Service';
+    ObsoleteTag = '21.0';
+    ObsoleteState = Pending;
 
     layout
     {
@@ -16,25 +28,25 @@ page 9551 "Document Service Config"
             group(General)
             {
                 Caption = 'General';
-                field("Service ID"; "Service ID")
+                field("Service ID"; Rec."Service ID")
                 {
                     ApplicationArea = Basic, Suite;
                     Caption = 'Service ID';
                     ToolTip = 'Specifies a unique code for the service that you use for document storage and usage.';
                 }
-                field(Description; Description)
+                field(Description; Rec.Description)
                 {
                     ApplicationArea = Basic, Suite;
                     Caption = 'Description';
                     ToolTip = 'Specifies a description for the document service.';
                 }
-                field(Location; Location)
+                field(Location; Rec.Location)
                 {
                     ApplicationArea = Basic, Suite;
                     Caption = 'Location';
                     ToolTip = 'Specifies the URI for where your documents are stored, such as your site on SharePoint Online.';
                 }
-                field(Folder; Folder)
+                field(Folder; Rec.Folder)
                 {
                     ApplicationArea = Basic, Suite;
                     Caption = 'Folder';
@@ -44,13 +56,13 @@ page 9551 "Document Service Config"
             group("Shared documents")
             {
                 Caption = 'Shared Documents';
-                field("Document Repository"; "Document Repository")
+                field("Document Repository"; Rec."Document Repository")
                 {
                     ApplicationArea = Basic, Suite;
                     Caption = 'Document Repository';
                     ToolTip = 'Specifies the location where your document service provider stores your documents, if you want to store documents in a shared document repository.';
                 }
-                field("User Name"; "User Name")
+                field("User Name"; Rec."User Name")
                 {
                     ApplicationArea = Basic, Suite;
                     Caption = 'User Name';
@@ -59,23 +71,23 @@ page 9551 "Document Service Config"
                     var
                         User: Record User;
                     begin
-                        if "Authentication Type" = "Authentication Type"::OAuth2 then
+                        if Rec."Authentication Type" = Rec."Authentication Type"::OAuth2 then
                             if User.Get(UserSecurityId()) then
-                                "User Name" := CopyStr(User."Authentication Email", 1, MaxStrLen("User Name"));
+                                Rec."User Name" := CopyStr(User."Authentication Email", 1, MaxStrLen(Rec."User Name"));
                     end;
 
                     trigger OnValidate()
                     var
                         User: Record User;
                     begin
-                        if "User Name" <> '' then
+                        if Rec."User Name" <> '' then
                             if not IsLegacyAuthentication then
                                 if User.Get(UserSecurityId()) then
-                                    if "User Name" <> User."Authentication Email" then
+                                    if Rec."User Name" <> User."Authentication Email" then
                                         Error(ChangeToCurrentUserErr);
                     end;
                 }
-                field("Authentication Type"; "Authentication Type")
+                field("Authentication Type"; Rec."Authentication Type")
                 {
                     ApplicationArea = Basic, Suite;
                     Caption = 'Authentication Type';
@@ -84,14 +96,14 @@ page 9551 "Document Service Config"
                     var
                         User: Record User;
                     begin
-                        if "Authentication Type" = "Authentication Type"::Legacy then
+                        if Rec."Authentication Type" = Rec."Authentication Type"::Legacy then
                             IsLegacyAuthentication := true
                         else begin
                             IsLegacyAuthentication := false;
                             if User.Get(UserSecurityId()) then
-                                if User."Authentication Email" <> "User Name" then begin
-                                    "User Name" := '';
-                                    Modify(false);
+                                if User."Authentication Email" <> Rec."User Name" then begin
+                                    Rec."User Name" := '';
+                                    Rec.Modify(false);
                                     CurrPage.Update(false);
                                 end;
                         end;
@@ -102,34 +114,35 @@ page 9551 "Document Service Config"
             {
                 Caption = 'Authentication';
                 Visible = not SoftwareAsAService and not IsLegacyAuthentication;
-                field("Client Id"; "Client Id")
+                field("Client Id"; Rec."Client Id")
                 {
                     ApplicationArea = Suite;
                     Caption = 'Client Id';
-                    ToolTip = 'Specifies the id of the Azure Active Directory application that will be used to connect to the SharePoint environment.', Comment = 'SharePoint and Azure Active Directory are names of a Microsoft service and a Microsoft Azure resource and should not be translated.';
+                    ToolTip = 'Specifies the id of the Microsoft Entra application that will be used to connect to the SharePoint environment.', Comment = 'SharePoint and Microsoft Entra are names of a Microsoft service and a Microsoft Azure resource and should not be translated.';
                 }
                 field("Client Secret"; ClientSecret)
                 {
                     ApplicationArea = Basic, Suite;
                     Caption = 'Client Secret';
+                    Enabled = DynamicEditable;
                     ExtendedDatatype = Masked;
-                    ToolTip = 'Specifies the secret of the Azure Active Directory application that will be used to connect to the SharePoint environment.', Comment = 'SharePoint and Azure Active Directory are names of a Microsoft service and a Microsoft Azure resource and should not be translated.';
+                    ToolTip = 'Specifies the secret of the Microsoft Entra application that will be used to connect to the SharePoint environment.', Comment = 'SharePoint and Microsoft Entra are names of a Microsoft service and a Microsoft Azure resource and should not be translated.';
 
                     trigger OnValidate()
                     var
                         DocumentServiceManagement: Codeunit "Document Service Management";
                     begin
-                        if not IsTemporary() then
+                        if not Rec.IsTemporary() then
                             if (ClientSecret <> '') and (not EncryptionEnabled()) then
                                 if Confirm(EncryptionIsNotActivatedQst) then
                                     Page.RunModal(Page::"Data Encryption Management");
                         DocumentServiceManagement.SetClientSecret(ClientSecret);
                     end;
                 }
-                field("Redirect URL"; "Redirect URL")
+                field("Redirect URL"; Rec."Redirect URL")
                 {
                     ApplicationArea = Basic, Suite;
-                    ToolTip = 'Specifies the Redirect URL of the Azure Active Directory application that will be used to connect to the SharePoint environment.', Comment = 'SharePoint and Azure Active Directory are names of a Microsoft service and a Microsoft Azure resource and should not be translated.';
+                    ToolTip = 'Specifies the Redirect URL of the Microsoft Entra application that will be used to connect to the SharePoint environment.', Comment = 'SharePoint and Microsoft Entra are names of a Microsoft service and a Microsoft Azure resource and should not be translated.';
                 }
             }
             group(PrivacyNotice)
@@ -176,8 +189,6 @@ page 9551 "Document Service Config"
                 Caption = 'Test Connection';
                 Image = ValidateEmailLoggingSetup;
                 Visible = IsLegacyAuthentication;
-                Promoted = true;
-                PromotedCategory = Process;
                 ToolTip = 'Test the configuration settings against the online document storage service.';
 
                 trigger OnAction()
@@ -193,19 +204,30 @@ page 9551 "Document Service Config"
                 Visible = IsLegacyAuthentication;
                 Enabled = DynamicEditable;
                 Image = EncryptionKeys;
-                Promoted = true;
-                PromotedCategory = Process;
                 ToolTip = 'Set the password for the current User Name';
 
                 trigger OnAction()
                 var
                     DocumentServiceAccPwd: Page "Document Service Acc. Pwd.";
                 begin
-                    if DocumentServiceAccPwd.RunModal = ACTION::OK then begin
+                    if DocumentServiceAccPwd.RunModal() = ACTION::OK then
                         if Confirm(ChangePwdQst) then
-                            Password := DocumentServiceAccPwd.GetData();
-                    end;
+                            Rec.Password := DocumentServiceAccPwd.GetData();
                 end;
+            }
+        }
+        area(Promoted)
+        {
+            group(Category_Process)
+            {
+                Caption = 'Process';
+
+                actionref("Test Connection_Promoted"; "Test Connection")
+                {
+                }
+                actionref("Set Password_Promoted"; "Set Password")
+                {
+                }
             }
         }
     }
@@ -228,28 +250,38 @@ page 9551 "Document Service Config"
     end;
 
     trigger OnOpenPage()
+    var
+        DocumentServiceScenario: Record "Document Service Scenario";
     begin
-        if not FindFirst() then begin
-            Init();
-            "Service ID" := 'Service 1';
-            "Authentication Type" := "Authentication Type"::OAuth2;
+        if not Rec.FindFirst() then begin
+            Rec.Init();
+            Rec."Service ID" := 'Service 1';
+            Rec."Authentication Type" := Rec."Authentication Type"::OAuth2;
             InitializeDefaultRedirectUrl();
-            Insert(false);
+            Rec.Insert(false);
             IsLegacyAuthentication := false;
         end else begin
             IsLegacyAuthentication := Rec."Authentication Type" = Rec."Authentication Type"::Legacy;
             if not IsLegacyAuthentication then begin
                 ClientSecret := GetClientSecret();
-                if "Redirect URL" = '' then
+                if Rec."Redirect URL" = '' then
                     InitializeDefaultRedirectUrl();
             end;
-            Modify(false);
+            Rec.Modify(false);
         end;
+
+        if not DocumentServiceScenario.IsEmpty() then begin
+            CurrPage.Editable := false;
+            ShowDeprecatedNotifiation();
+        end else
+            ShowNewSetupNotifiation();
     end;
 
     trigger OnQueryClosePage(CloseAction: Action): Boolean
+    var
+        DocumentServiceScenario: Record "Document Service Scenario";
     begin
-        if (not ConnectionTested) and IsLegacyAuthentication then
+        if DocumentServiceScenario.IsEmpty() and (not ConnectionTested) and IsLegacyAuthentication then
             if not Confirm(StrSubstNo(TestServiceQst, CurrPage.Caption()), true) then
                 exit(false);
     end;
@@ -263,6 +295,11 @@ page 9551 "Document Service Config"
         PrivacyStatementTxt: Label 'Privacy and cookies';
         PrivacyStatementSaaSTxt: Label 'By using this integration, you consent to your data being shared with Microsoft services that might be outside of your organization''s selected geographic boundaries and might have different compliance and security standards than %1. Your privacy is important to us, and you can choose whether to share data with the service. To learn more, follow the link below.', Comment = '%1 = the full marketing name, such as Microsoft Dynamics 365 Business Central.';
         PrivacyStatementOnPremTxt: Label 'By using this integration, you consent to your data being shared with services that might be outside of your organization''s selected geographic boundaries and might have different compliance and security standards than %1. Your privacy is important to us, and you can choose whether to share data with the service. To learn more, follow the link below.', Comment = '%1 = the full marketing name, such as Microsoft Dynamics 365 Business Central.';
+        DeprecatedNotificationTok: Label '4c66d0a6-de59-4b2a-876c-33c77ebc0d7c', Locked = true;
+        NewSetupNotificationTok: Label '090b1330-c42d-46ee-bb2e-826a59e08872', Locked = true;
+        DeprecatedNotificationTxt: Label 'We''re introducing a new setup experience and this page will soon be removed. The connection to OneDrive has already been configured through the new setup experience. To modify this setup, go to the new experience.';
+        NewSetupNotificationTxt: Label 'We''re introducing a new setup experience and this page will soon be removed.';
+        OpenSetupTxt: Label 'Go to new OneDrive setup';
         [NonDebuggable]
         ClientSecret: Text;
         DynamicEditable: Boolean;
@@ -278,7 +315,7 @@ page 9551 "Document Service Config"
         RedirectUrl: Text;
     begin
         OAuth2.GetDefaultRedirectUrl(RedirectUrl);
-        "Redirect URL" := CopyStr(RedirectUrl, 1, MaxStrLen("Redirect URL"));
+        Rec."Redirect URL" := CopyStr(RedirectUrl, 1, MaxStrLen(Rec."Redirect URL"));
     end;
 
     [NonDebuggable]
@@ -299,11 +336,39 @@ page 9551 "Document Service Config"
         DocumentServiceManagement: Codeunit "Document Service Management";
     begin
         // Save record to make sure the credentials are reset.
-        Modify();
+        Rec.Modify();
         Commit();
         DocumentServiceManagement.TestConnection();
         ConnectionTested := true;
         Message(ValidateSuccessMsg);
     end;
-}
 
+    local procedure ShowDeprecatedNotifiation()
+    var
+        NotificationLifecycleMgt: Codeunit "Notification Lifecycle Mgt.";
+        UseSetupGuideNotification: Notification;
+    begin
+        UseSetupGuideNotification.Id := DeprecatedNotificationTok;
+        UseSetupGuideNotification.Message := DeprecatedNotificationTxt;
+        UseSetupGuideNotification.Scope := NOTIFICATIONSCOPE::LocalScope;
+
+        UseSetupGuideNotification.AddAction(OpenSetupTxt, CODEUNIT::"Document Service Management", 'RunDocumentServiceSetup');
+
+        NotificationLifecycleMgt.SendNotification(UseSetupGuideNotification, Rec.RecordId());
+    end;
+
+    local procedure ShowNewSetupNotifiation()
+    var
+        NotificationLifecycleMgt: Codeunit "Notification Lifecycle Mgt.";
+        UseSetupGuideNotification: Notification;
+    begin
+        UseSetupGuideNotification.Id := NewSetupNotificationTok;
+        UseSetupGuideNotification.Message := NewSetupNotificationTxt;
+        UseSetupGuideNotification.Scope := NOTIFICATIONSCOPE::LocalScope;
+
+        UseSetupGuideNotification.AddAction(OpenSetupTxt, CODEUNIT::"Document Service Management", 'RunDocumentServiceSetup');
+
+        NotificationLifecycleMgt.SendNotification(UseSetupGuideNotification, Rec.RecordId());
+    end;
+}
+#endif

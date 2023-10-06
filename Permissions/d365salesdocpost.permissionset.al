@@ -1,3 +1,41 @@
+namespace System.Security.AccessControl;
+
+using Microsoft.Finance.VAT.Ledger;
+using Microsoft.Projects.Project.Planning;
+using Microsoft.Projects.Project.Setup;
+using Microsoft.Finance.VAT.Setup;
+using Microsoft.Finance.Analysis;
+using Microsoft.Sales.Customer;
+using Microsoft.Purchases.Vendor;
+using Microsoft.Bank.Ledger;
+using Microsoft.Bank.Check;
+using Microsoft.Integration.D365Sales;
+using Microsoft.Sales.Reminder;
+using Microsoft.Sales.Receivables;
+using Microsoft.Finance.GeneralLedger.Account;
+using Microsoft.Inventory.Ledger;
+using Microsoft.Finance.GeneralLedger.Ledger;
+using Microsoft.CRM.Interaction;
+using Microsoft.Inventory.Item;
+using Microsoft.Purchases.Document;
+using System.Environment.Configuration;
+using Microsoft.Inventory.Availability;
+using Microsoft.Inventory.Costing;
+using Microsoft.Warehouse.History;
+using Microsoft.Pricing.Asset;
+using Microsoft.Pricing.Calculation;
+using Microsoft.Pricing.PriceList;
+using Microsoft.Pricing.Source;
+using Microsoft.Pricing.Worksheet;
+using Microsoft.Purchases.History;
+using Microsoft.Inventory.Tracking;
+using Microsoft.Inventory.Location;
+using Microsoft.Warehouse.Request;
+using Microsoft.Foundation.BatchProcessing;
+using Microsoft.Sales.Document;
+using Microsoft.Finance.VAT.Registration;
+using Microsoft.Finance.VAT.Calculation;
+
 permissionset 9977 "D365 SALES DOC, POST"
 {
     Access = Public;
@@ -9,6 +47,8 @@ permissionset 9977 "D365 SALES DOC, POST"
     Permissions = tabledata "Analysis View" = rimd,
                   tabledata "Analysis View Entry" = rim,
                   tabledata "Analysis View Filter" = r,
+                  tabledata "Alt. Customer Posting Group" = RM,
+                  tabledata "Alt. Vendor Posting Group" = RM,
                   tabledata "Avg. Cost Adjmt. Entry Point" = RIM,
                   tabledata "Bank Account Ledger Entry" = rim,
                   tabledata "Batch Processing Parameter" = Rimd,
@@ -29,9 +69,6 @@ permissionset 9977 "D365 SALES DOC, POST"
                   tabledata "Item Charge" = R,
                   tabledata "Item Charge Assignment (Purch)" = RIMD,
                   tabledata "Item Charge Assignment (Sales)" = RIMD,
-#if not CLEAN19
-                  tabledata "Item Cross Reference" = RIMD,
-#endif
                   tabledata "Item Entry Relation" = R,
                   tabledata "Item Ledger Entry" = Rimd,
                   tabledata "Item Register" = Rimd,
@@ -60,6 +97,8 @@ permissionset 9977 "D365 SALES DOC, POST"
                   tabledata "VAT Entry" = Rimd,
                   tabledata "VAT Business Posting Group" = RM,
                   tabledata "VAT Registration No. Format" = R,
+                  tabledata "VAT Setup" = R,
+                  tabledata "VAT Posting Parameters" = R,
                   tabledata "Warehouse Request" = RIMD,
                   tabledata "Whse. Pick Request" = RIMD;
 }

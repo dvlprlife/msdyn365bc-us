@@ -1,3 +1,20 @@
+namespace System.Security.AccessControl;
+
+using Microsoft.Foundation.Comment;
+using Microsoft.Finance.Dimension;
+using Microsoft.Pricing.Calculation;
+using Microsoft.Pricing.PriceList;
+using Microsoft.Pricing.Asset;
+using Microsoft.Pricing.Source;
+using Microsoft.Pricing.Worksheet;
+using Microsoft.Projects.Project.Job;
+#if not CLEAN21
+using Microsoft.Projects.Project.Pricing;
+#endif
+using Microsoft.Projects.Project.Ledger;
+using Microsoft.Projects.Project.Planning;
+using Microsoft.Projects.Project.WIP;
+
 permissionset 1087 "Jobs - Read"
 {
     Access = Public;
@@ -9,7 +26,7 @@ permissionset 1087 "Jobs - Read"
                   tabledata "Dtld. Price Calculation Setup" = R,
                   tabledata "Duplicate Price Line" = R,
                   tabledata Job = R,
-#if not CLEAN19
+#if not CLEAN21
                   tabledata "Job G/L Account Price" = R,
                   tabledata "Job Item Price" = R,
 #endif
@@ -17,7 +34,7 @@ permissionset 1087 "Jobs - Read"
                   tabledata "Job Planning Line - Calendar" = R,
                   tabledata "Job Planning Line" = R,
                   tabledata "Job Planning Line Invoice" = R,
-#if not CLEAN19
+#if not CLEAN21
                   tabledata "Job Resource Price" = R,
 #endif
                   tabledata "Job Task" = R,

@@ -1,3 +1,9 @@
+// ------------------------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+// ------------------------------------------------------------------------------------------------
+namespace System.Integration;
+
 table 1800 "Data Migrator Registration"
 {
     Caption = 'Data Migrator Registration';
@@ -32,10 +38,10 @@ table 1800 "Data Migrator Registration"
 
     procedure RegisterDataMigrator(DataMigratorNo: Integer; DataMigratorDescription: Text[250]): Boolean
     begin
-        Init;
+        Init();
         "No." := DataMigratorNo;
         Description := DataMigratorDescription;
-        exit(Insert);
+        exit(Insert());
     end;
 
     [IntegrationEvent(TRUE, false)]

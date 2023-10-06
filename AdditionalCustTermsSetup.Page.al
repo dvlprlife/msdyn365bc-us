@@ -1,3 +1,9 @@
+// ------------------------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+// ------------------------------------------------------------------------------------------------
+namespace Microsoft;
+
 page 180 "Additional Cust. Terms Setup"
 {
     Caption = 'Additional Customer Terms Setup Card';
@@ -15,19 +21,19 @@ page 180 "Additional Cust. Terms Setup"
             group(General)
             {
                 Caption = 'General';
-                field(Accepted; Accepted)
+                field(Accepted; Rec.Accepted)
                 {
                     ApplicationArea = Basic, Suite;
                     Editable = false;
                     ToolTip = 'Specifies if the license agreement was accepted.';
                 }
-                field("Accepted By"; "Accepted By")
+                field("Accepted By"; Rec."Accepted By")
                 {
                     ApplicationArea = Basic, Suite;
                     Editable = false;
                     ToolTip = 'Specifies the person that accepted the license agreement.';
                 }
-                field("Accepted On"; "Accepted On")
+                field("Accepted On"; Rec."Accepted On")
                 {
                     ApplicationArea = Basic, Suite;
                     Editable = false;
@@ -47,15 +53,12 @@ page 180 "Additional Cust. Terms Setup"
                 Caption = 'Activate';
                 Enabled = NOT Active;
                 Image = Agreement;
-                Promoted = true;
-                PromotedCategory = Process;
-                PromotedIsBig = true;
                 ToolTip = 'Activate the current customer terms setup.';
 
                 trigger OnAction()
                 begin
-                    Validate("Effective Date", Today);
-                    Modify
+                    Rec.Validate("Effective Date", Today);
+                    Rec.Modify();
                 end;
             }
             action(Deactivate)
@@ -64,15 +67,12 @@ page 180 "Additional Cust. Terms Setup"
                 Caption = 'Deactivate';
                 Enabled = Active;
                 Image = Stop;
-                Promoted = true;
-                PromotedCategory = Process;
-                PromotedIsBig = true;
                 ToolTip = 'Deactivate the current customer terms setup.';
 
                 trigger OnAction()
                 begin
-                    Validate("Effective Date", 0D);
-                    Modify
+                    Rec.Validate("Effective Date", 0D);
+                    Rec.Modify();
                 end;
             }
             action(Reset)
@@ -81,29 +81,43 @@ page 180 "Additional Cust. Terms Setup"
                 Caption = 'Reset';
                 Enabled = Active;
                 Image = ResetStatus;
-                Promoted = true;
-                PromotedCategory = Process;
-                PromotedIsBig = true;
                 ToolTip = 'Reset the current customer terms setup.';
 
                 trigger OnAction()
                 begin
-                    Validate(Accepted, false);
-                    Modify
+                    Rec.Validate(Accepted, false);
+                    Rec.Modify();
                 end;
+            }
+        }
+        area(Promoted)
+        {
+            group(Category_Process)
+            {
+                Caption = 'Process';
+
+                actionref(Activate_Promoted; Activate)
+                {
+                }
+                actionref(Deactivate_Promoted; Deactivate)
+                {
+                }
+                actionref(Reset_Promoted; Reset)
+                {
+                }
             }
         }
     }
 
     trigger OnAfterGetRecord()
     begin
-        Active := GetActive
+        Active := Rec.GetActive();
     end;
 
     trigger OnOpenPage()
     begin
-        if not Get then
-            Insert
+        if not Rec.Get() then
+            Rec.Insert();
     end;
 
     var

@@ -1,3 +1,5 @@
+namespace System.Reflection;
+
 page 9622 "Table Field Types ListPart"
 {
     Caption = 'Table Field Types ListPart';
@@ -14,12 +16,12 @@ page 9622 "Table Field Types ListPart"
         {
             repeater(Group)
             {
-                field("Display Name"; "Display Name")
+                field("Display Name"; Rec."Display Name")
                 {
                     ApplicationArea = Basic, Suite;
                     ToolTip = 'Specifies Name displayed to users.';
                 }
-                field(Description; Description)
+                field(Description; Rec.Description)
                 {
                     ApplicationArea = Basic, Suite;
                     ToolTip = 'Specifies description.';
@@ -34,7 +36,7 @@ page 9622 "Table Field Types ListPart"
 
     trigger OnAfterGetRecord()
     begin
-        FieldType := Format(FieldTypeGroup);
+        FieldType := Format(Rec.FieldTypeGroup);
     end;
 
     var

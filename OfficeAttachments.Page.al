@@ -7,8 +7,8 @@ page 2021 "Office Attachments"
     PageType = StandardDialog;
     SourceTable = "Exchange Object";
     SourceTableTemporary = true;
-    SourceTableView = SORTING(Name)
-                      ORDER(Ascending);
+    SourceTableView = sorting(Name)
+                      order(Ascending);
 
     layout
     {
@@ -16,13 +16,13 @@ page 2021 "Office Attachments"
         {
             repeater(Group)
             {
-                field(Selected; Selected)
+                field(Selected; Rec.Selected)
                 {
                     ApplicationArea = Basic, Suite;
                     Caption = 'Attach';
                     ToolTip = 'Select';
                 }
-                field(Name; Name)
+                field(Name; Rec.Name)
                 {
                     ApplicationArea = Basic, Suite;
                     Editable = false;
@@ -38,22 +38,26 @@ page 2021 "Office Attachments"
 
     trigger OnOpenPage()
     begin
-        if Count = 1 then begin
-            Selected := true;
-            Modify();
+        if Rec.Count = 1 then begin
+            Rec.Selected := true;
+            Rec.Modify();
         end
     end;
 
     trigger OnQueryClosePage(CloseAction: Action): Boolean
     begin
-        if CloseAction in [Action::OK, Action::LookupOK] then begin
-            SetRange(Selected, true);
-            if FindSet() then begin
-                repeat
-                    OfficeMgt.SendToAttachments(Rec);
-                until Next() = 0;
-                OfficeMgt.DisplaySuccessMessage(Rec);
-            end;
+        if CloseAction in [Action::OK, Action::LookupOK] then
+            onSave();
+    end;
+
+    local procedure onSave(): Boolean
+    begin
+        Rec.SetRange(Selected, true);
+        if Rec.FindSet() then begin
+            repeat
+                OfficeMgt.SendToAttachments(Rec);
+            until Rec.Next() = 0;
+            OfficeMgt.DisplaySuccessMessage(Rec);
         end;
     end;
 

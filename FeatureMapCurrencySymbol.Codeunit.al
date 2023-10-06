@@ -1,5 +1,18 @@
+#if not CLEAN22
+namespace System.Environment.Configuration;
+
+using Microsoft.Finance.Currency;
+using Microsoft.Foundation.Navigate;
+using Microsoft.Integration.Dataverse;
+using Microsoft.Integration.D365Sales;
+using Microsoft.Integration.SyncEngine;
+
 codeunit 5405 "Feature Map Currency Symbol" implements "Feature Data Update"
 {
+    ObsoleteReason = 'Feature CurrencySymbolMapping will be enabled by default in version 22.0.';
+    ObsoleteState = Pending;
+    ObsoleteTag = '22.0';
+
     procedure IsDataUpdateRequired(): Boolean;
     begin
         CountRecords();
@@ -48,7 +61,7 @@ codeunit 5405 "Feature Map Currency Symbol" implements "Feature Data Update"
         TempDocumentEntry.Reset();
         TempDocumentEntry.DeleteAll();
         if FindCurrencySymbolFieldMapping(IntegrationFieldMapping) then
-            InsertDocumentEntry(Database::"Integration Field Mapping", IntegrationFieldMapping.TableCaption, 1);
+            InsertDocumentEntry(Database::"Integration Field Mapping", IntegrationFieldMapping.TableCaption(), 1);
     end;
 
     local procedure UpdateCurrencySymbolFieldMapping()
@@ -98,3 +111,4 @@ codeunit 5405 "Feature Map Currency Symbol" implements "Feature Data Update"
         TempDocumentEntry.Insert();
     end;
 }
+#endif

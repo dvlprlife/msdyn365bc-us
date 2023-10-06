@@ -1,3 +1,9 @@
+namespace Microsoft.Foundation.Reporting;
+
+using System.Environment;
+using System.Environment.Configuration;
+using System.Reflection;
+
 page 1561 "Pick Report"
 {
     Caption = 'Pick Report';

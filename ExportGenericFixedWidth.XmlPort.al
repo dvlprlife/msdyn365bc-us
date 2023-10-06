@@ -1,3 +1,5 @@
+namespace System.IO;
+
 xmlport 1231 "Export Generic Fixed Width"
 {
     Caption = 'Export Generic Fixed Width';
@@ -36,7 +38,7 @@ xmlport 1231 "Export Generic Fixed Width"
                             currXMLport.BreakUnbound();
                         end;
 
-                        CheckColumnSequence;
+                        CheckColumnSequence();
                         ColumnX := "Data Exch. Field".Value;
 
                         if "Data Exch. Field".Next() = 0 then
@@ -71,12 +73,12 @@ xmlport 1231 "Export Generic Fixed Width"
         if ErrorText <> '' then
             Error(ErrorText);
 
-        Window.Close;
+        Window.Close();
     end;
 
     trigger OnPreXmlPort()
     begin
-        InitializeGlobals;
+        InitializeGlobals();
     end;
 
     var
@@ -102,7 +104,7 @@ xmlport 1231 "Export Generic Fixed Width"
         if DataExch.Get(DataExchEntryNo) and DataExchDef.Get(DataExch."Data Exch. Def Code") then begin
             currXMLport.Filename := DataExchDef.Name + '.txt';
             if DataExchDef."File Type" = DataExchDef."File Type"::"Variable Text" then
-                currXMLport.FieldSeparator(DataExchDef.ColumnSeparatorChar)
+                currXMLport.FieldSeparator(DataExchDef.ColumnSeparatorChar())
         end;
     end;
 

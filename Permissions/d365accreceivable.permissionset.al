@@ -1,3 +1,38 @@
+namespace System.Security.AccessControl;
+
+using Microsoft.Bank.Reconciliation;
+using Microsoft.Bank.Statement;
+using Microsoft.Finance.Currency;
+using Microsoft.Sales.FinanceCharge;
+using Microsoft.Sales.Reminder;
+using Microsoft.Sales.Customer;
+using Microsoft.Inventory.Item;
+using Microsoft.Purchases.Document;
+using Microsoft.Inventory.Journal;
+using Microsoft.Inventory.Ledger;
+using Microsoft.Inventory.Item.Catalog;
+using Microsoft.Inventory.Tracking;
+using Microsoft.Finance.VAT.Registration;
+using Microsoft.Projects.Project.Ledger;
+using Microsoft.Sales.Document;
+using Microsoft.EServices.EDocument;
+using Microsoft.Foundation.Period;
+using Microsoft.Bank.Payment;
+using System.Threading;
+using System.Environment.Configuration;
+using Microsoft.CRM.Opportunity;
+using Microsoft.Purchases.Vendor;
+using Microsoft.Inventory.Availability;
+using Microsoft.Bank.BankAccount;
+using Microsoft.Warehouse.History;
+using Microsoft.Pricing.Asset;
+using Microsoft.Pricing.Calculation;
+using Microsoft.Pricing.PriceList;
+using Microsoft.Pricing.Source;
+using Microsoft.Pricing.Worksheet;
+using Microsoft.Purchases.History;
+using Microsoft.Purchases.Remittance;
+
 permissionset 7862 "D365 ACC. RECEIVABLE"
 {
     Access = Public;
@@ -36,9 +71,6 @@ permissionset 7862 "D365 ACC. RECEIVABLE"
                   tabledata "Item Charge" = R,
                   tabledata "Item Charge Assignment (Purch)" = RIMD,
                   tabledata "Item Charge Assignment (Sales)" = RIMD,
-#if not CLEAN19
-                  tabledata "Item Cross Reference" = RIMD,
-#endif
                   tabledata "Item Entry Relation" = R,
                   tabledata "Item Journal Line" = RIMD,
                   tabledata "Item Ledger Entry" = Rimd,
@@ -52,7 +84,9 @@ permissionset 7862 "D365 ACC. RECEIVABLE"
                   tabledata "Line Fee Note on Report Hist." = Rim,
                   tabledata "Lot No. Information" = RIMD,
                   tabledata "Notification Entry" = RIMD,
+#if not CLEAN21
                   tabledata "O365 Document Sent History" = RimD,
+#endif
                   tabledata Opportunity = R,
                   tabledata "Opportunity Entry" = RIM,
                   tabledata "Order Address" = RIMD,
@@ -60,6 +94,8 @@ permissionset 7862 "D365 ACC. RECEIVABLE"
                   tabledata "Package No. Information" = RIMD,
                   tabledata "Payment Matching Details" = RIMD,
                   tabledata "Payment Method" = RIMD,
+                  tabledata "Payment Rec. Related Entry" = RIMD,
+                  tabledata "Pmt. Rec. Applied-to Entry" = RIMD,
                   tabledata "Posted Payment Recon. Hdr" = RIMD,
                   tabledata "Posted Payment Recon. Line" = RIMD,
                   tabledata "Posted Whse. Shipment Header" = R,
@@ -82,5 +118,6 @@ permissionset 7862 "D365 ACC. RECEIVABLE"
                   tabledata "Reminder Line" = RIMD,
                   tabledata "Reminder Text" = R,
                   tabledata "Reminder/Fin. Charge Entry" = Rimd,
+                  tabledata "Remit Address" = RIMD,
                   tabledata "VAT Registration No. Format" = IMD;
 }

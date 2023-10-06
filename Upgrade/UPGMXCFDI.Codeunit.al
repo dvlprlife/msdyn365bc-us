@@ -1,4 +1,4 @@
-codeunit 104151 "UPG. MX CFDI"
+﻿codeunit 104151 "UPG. MX CFDI"
 {
     Subtype = Upgrade;
 
@@ -12,11 +12,12 @@ codeunit 104151 "UPG. MX CFDI"
     begin
         if not HybridDeployment.VerifyCanStartUpgrade(CompanyName()) then
             exit;
-         
-        UpdateSATCatalogs;
-        UpdateCFDIFields;
+
+        UpdateSATCatalogs();
+        UpdateCFDIFields();
         UpdateCFDIEnabled();
         UpgradePACWebServiceDetails();
+        UpgradePermissionNumberSCT();
         UpgradeSATAddress();
     end;
 
@@ -73,9 +74,27 @@ codeunit 104151 "UPG. MX CFDI"
         if UpgradeTag.HasUpgradeTag(UpgradeTagDefCountry.GetPACWebServiceDetailsUpgradeTag()) then
             exit;
 
-        SATUtilities.PopulatePACWebServiceData();
+        SATUtilities.PopulatePACWebServiceData;
 
         UpgradeTag.SetUpgradeTag(UpgradeTagDefCountry.GetPACWebServiceDetailsUpgradeTag());
+    end;
+
+    local procedure UpgradePermissionNumberSCT(): Text[30]
+    var
+        FixedAsset: Record "Fixed Asset";
+        UpgradeTag: Codeunit "Upgrade Tag";
+        UpgradeTagDefCountry: Codeunit "Upgrade Tag Def - Country";
+        PermissionNumberDataTransfer: DataTransfer;
+    begin
+        if UpgradeTag.HasUpgradeTag(UpgradeTagDefCountry.GetSCTPermissionNoUpgradeTag()) then
+            exit;
+
+        PermissionNumberDataTransfer.SetTables(Database::"Fixed Asset", Database::"Fixed Asset");
+        PermissionNumberDataTransfer.AddFieldValue(FixedAsset.FieldNo("SCT Permission Number"), FixedAsset.FieldNo("SCT Permission No."));
+        PermissionNumberDataTransfer.UpdateAuditFields := false;
+        PermissionNumberDataTransfer.CopyFields();
+
+        UpgradeTag.SetUpgradeTag(UpgradeTagDefCountry.GetSCTPermissionNoUpgradeTag());
     end;
 
     local procedure UpgradeSATAddress()
@@ -126,24 +145,37 @@ codeunit 104151 "UPG. MX CFDI"
         SalesHeader: Record "Sales Header";
         SalesInvoiceHeader: Record "Sales Invoice Header";
         SalesShipmentHeader: Record "Sales Shipment Header";
+        SalesHeaderDataTransfer: DataTransfer;
+        SalesInvoiceHeaderDataTransfer: DataTransfer;
+        SalesShipmentHeaderDataTransfer: DataTransfer;
     begin
         Location.SetFilter("SAT Address ID", '<>0');
         if Location.FindSet() then
             repeat
-                SalesHeader.SetRange("Transit-to Location",Location.Code);
-                SalesHeader.ModifyAll("SAT Address ID",Location."SAT Address ID");
+                Clear(SalesHeaderDataTransfer);
+                SalesHeaderDataTransfer.SetTables(Database::"Sales Header", Database::"Sales Header");
+                SalesHeaderDataTransfer.AddSourceFilter(SalesHeader.FieldNo("Transit-to Location"), '=%1', Location.Code);
+                SalesHeaderDataTransfer.AddConstantValue(Location."SAT Address ID", SalesHeader.FieldNo("SAT Address ID"));
+                SalesHeaderDataTransfer.UpdateAuditFields := false;
+                SalesHeaderDataTransfer.CopyFields();
 
-                SalesInvoiceHeader.SetRange("Transit-to Location",Location.Code);
-                SalesInvoiceHeader.SetFilter(
-                    "Electronic Document Status",'%1|%2',
-                    SalesInvoiceHeader."Electronic Document Status"::" ",SalesInvoiceHeader."Electronic Document Status"::"Stamp Request Error");
-                SalesInvoiceHeader.ModifyAll("SAT Address ID",Location."SAT Address ID");
+                Clear(SalesInvoiceHeaderDataTransfer);
+                SalesInvoiceHeaderDataTransfer.SetTables(Database::"Sales Invoice Header", Database::"Sales Invoice Header");
+                SalesInvoiceHeaderDataTransfer.AddSourceFilter(SalesInvoiceHeader.FieldNo("Transit-to Location"), '=%1', Location.Code);
+                SalesInvoiceHeaderDataTransfer.AddSourceFilter(
+                    SalesInvoiceHeader.FieldNo("Electronic Document Status"), '%1|%2', SalesInvoiceHeader."Electronic Document Status"::" ", SalesInvoiceHeader."Electronic Document Status"::"Stamp Request Error");
+                SalesInvoiceHeaderDataTransfer.AddConstantValue(Location."SAT Address ID", SalesInvoiceHeader.FieldNo("SAT Address ID"));
+                SalesInvoiceHeaderDataTransfer.UpdateAuditFields := false;
+                SalesInvoiceHeaderDataTransfer.CopyFields();
 
-                SalesShipmentHeader.SetRange("Transit-to Location",Location.Code);
-                SalesShipmentHeader.SetFilter(
-                    "Electronic Document Status",'%1|%2',
-                    SalesShipmentHeader."Electronic Document Status"::" ",SalesShipmentHeader."Electronic Document Status"::"Stamp Request Error");
-                SalesShipmentHeader.ModifyAll("SAT Address ID",Location."SAT Address ID");
+                Clear(SalesShipmentHeaderDataTransfer);
+                SalesShipmentHeaderDataTransfer.SetTables(Database::"Sales Shipment Header", Database::"Sales Shipment Header");
+                SalesShipmentHeaderDataTransfer.AddSourceFilter(SalesShipmentHeader.FieldNo("Transit-to Location"), '=%1', Location.Code);
+                SalesShipmentHeaderDataTransfer.AddSourceFilter(
+                    SalesShipmentHeader.FieldNo("Electronic Document Status"), '%1|%2', SalesShipmentHeader."Electronic Document Status"::" ", SalesShipmentHeader."Electronic Document Status"::"Stamp Request Error");
+                SalesShipmentHeaderDataTransfer.AddConstantValue(Location."SAT Address ID", SalesShipmentHeader.FieldNo("SAT Address ID"));
+                SalesShipmentHeaderDataTransfer.UpdateAuditFields := false;
+                SalesShipmentHeaderDataTransfer.CopyFields();
             until Location.Next() = 0;
     end;
 }

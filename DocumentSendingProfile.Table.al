@@ -1,3 +1,15 @@
+﻿namespace Microsoft.Foundation.Reporting;
+
+using Microsoft.CRM.Outlook;
+using Microsoft.EServices.EDocument;
+using Microsoft.Purchases.Vendor;
+using Microsoft.Sales.Customer;
+using System.Email;
+using System.IO;
+using System.Reflection;
+using System.Telemetry;
+using System.Utilities;
+
 table 60 "Document Sending Profile"
 {
     Caption = 'Document Sending Profile';
@@ -122,12 +134,11 @@ table 60 "Document Sending Profile"
             Error(CannotDeleteDefaultRuleErr);
 
         Customer.SetRange("Document Sending Profile", Code);
-        if Customer.FindFirst() then begin
+        if Customer.FindFirst() then
             if Confirm(UpdateAssCustomerQst, false, Code) then
                 Customer.ModifyAll("Document Sending Profile", '')
             else
                 Error(CannotDeleteErr);
-        end;
     end;
 
     trigger OnInsert()
@@ -252,6 +263,8 @@ table 60 "Document Sending Profile"
             RecordAsText := StrSubstNo(
                 RecordAsTextFormatterTxt, StrSubstNo(FieldCaptionContentFormatterTxt, FieldCaption(Disk), Disk), RecordAsText);
 
+        OnAfterGetRecordAsText(Rec, RecordAsText, RecordAsTextFormatterTxt, FieldCaptionContentFormatterTxt);
+
         exit(RecordAsText);
     end;
 
@@ -295,8 +308,8 @@ table 60 "Document Sending Profile"
         DocumentSendingProfile: Record "Document Sending Profile";
         OfficeMgt: Codeunit "Office Management";
     begin
-        if OfficeMgt.IsAvailable then begin
-            GetOfficeAddinDefault(Rec, OfficeMgt.AttachAvailable);
+        if OfficeMgt.IsAvailable() then begin
+            GetOfficeAddinDefault(Rec, OfficeMgt.AttachAvailable());
             exit(true);
         end;
 
@@ -313,8 +326,8 @@ table 60 "Document Sending Profile"
         DocumentSendingProfile: Record "Document Sending Profile";
         OfficeMgt: Codeunit "Office Management";
     begin
-        if OfficeMgt.IsAvailable then begin
-            GetOfficeAddinDefault(Rec, OfficeMgt.AttachAvailable);
+        if OfficeMgt.IsAvailable() then begin
+            GetOfficeAddinDefault(Rec, OfficeMgt.AttachAvailable());
             exit(true);
         end;
 
@@ -461,7 +474,8 @@ table 60 "Document Sending Profile"
             "Report Selection Usage".FromInteger(ReportUsage), RecordVariant, DocumentNoFieldNo, DocName, CustomerFieldNo, true);
         SendToDisk("Report Selection Usage".FromInteger(ReportUsage), RecordVariant, DocNo, DocName, ToCust);
 
-        OnAfterSend(ReportUsage, RecordVariant, DocNo, ToCust, DocName, CustomerFieldNo, DocumentNoFieldNo);
+        OnAfterSend(ReportUsage, RecordVariant, DocNo, ToCust, DocName, CustomerFieldNo, DocumentNoFieldNo, Rec);
+        Commit();
     end;
 
     procedure SendVendor(ReportUsage: Integer; RecordVariant: Variant; DocNo: Code[20]; ToVendor: Code[20]; DocName: Text[150]; VendorNoFieldNo: Integer; DocumentNoFieldNo: Integer)
@@ -482,7 +496,9 @@ table 60 "Document Sending Profile"
         TrySendToEMailGroupedMultipleSelection("Report Selection Usage".FromInteger(ReportUsage), RecordVariant, DocumentNoFieldNo, DocName, VendorNoFieldNo, false);
         SendToDiskVendor("Report Selection Usage".FromInteger(ReportUsage), RecordVariant, DocNo, DocName, ToVendor);
 
-        OnAfterSendVendor(ReportUsage, RecordVariant, DocNo, ToVendor, DocName, VendorNoFieldNo, DocumentNoFieldNo);
+        OnAfterSendVendor(
+            ReportUsage, RecordVariant, DocNo, ToVendor, DocName, VendorNoFieldNo, DocumentNoFieldNo, Rec);
+        Commit();
     end;
 
     [Scope('OnPrem')]
@@ -539,7 +555,7 @@ table 60 "Document Sending Profile"
             "Report Selection Usage".FromInteger(ReportUsage), RecordVariant, DocumentNoFieldNo, DocName, CustomerFieldNo, IsCustomer);
     end;
 
-    local procedure TrySendToEMailGroupedMultipleSelection(ReportUsage: Enum "Report Selection Usage"; RecordVariant: Variant; DocumentNoFieldNo: Integer; DocName: Text[150]; CustomerVendorFieldNo: Integer; IsCustomer: Boolean)
+    procedure TrySendToEMailGroupedMultipleSelection(ReportUsage: Enum "Report Selection Usage"; RecordVariant: Variant; DocumentNoFieldNo: Integer; DocName: Text[150]; CustomerVendorFieldNo: Integer; IsCustomer: Boolean)
     var
         ReportDistributionMgt: Codeunit "Report Distribution Management";
         RecRef: RecordRef;
@@ -565,9 +581,9 @@ table 60 "Document Sending Profile"
                 DocumentNo := GetMultipleDocumentsNo(RecRef, DocumentNoFieldNo);
                 DocName := GetMultipleDocumentsName(DocName, ReportUsage, RecRef);
                 if IsCustomer then
-                    SendToEMail(ReportUsage, RecToSendCombine, DocumentNo, DocName, CustomerVendorNo)
+                    SendToEMail(ReportUsage, RecToSendCombine, DocumentNo, DocName, CustomerVendorNo, CustomerVendorFieldNo)
                 else
-                    SendToEMailVendor(ReportUsage, RecToSendCombine, DocumentNo, DocName, CustomerVendorNo);
+                    SendToEMailVendor(ReportUsage, RecToSendCombine, DocumentNo, DocName, CustomerVendorNo, CustomerVendorFieldNo);
             end;
         end
         else
@@ -579,9 +595,9 @@ table 60 "Document Sending Profile"
                     DocumentNo := RecToSend.Field(DocumentNoFieldNo).Value;
                     DocName := ReportDistributionMgt.GetFullDocumentTypeText(RecToSend);
                     if IsCustomer then
-                        SendToEMail(ReportUsage, RecToSend, DocumentNo, DocName, CustomerVendorNo)
+                        SendToEMail(ReportUsage, RecToSend, DocumentNo, DocName, CustomerVendorNo, CustomerVendorFieldNo)
                     else
-                        SendToEMailVendor(ReportUsage, RecToSend, DocumentNo, DocName, CustomerVendorNo);
+                        SendToEMailVendor(ReportUsage, RecToSend, DocumentNo, DocName, CustomerVendorNo, CustomerVendorFieldNo);
                 until RecRef.Next() = 0;
     end;
 
@@ -643,7 +659,7 @@ table 60 "Document Sending Profile"
         SendToDisk("Report Selection Usage".FromInteger(ReportUsage), RecordVariant, DocNo, DocName, ToCust);
     end;
 
-    local procedure SendToVAN(RecordVariant: Variant)
+    procedure SendToVAN(RecordVariant: Variant)
     var
         ReportDistributionManagement: Codeunit "Report Distribution Management";
     begin
@@ -653,7 +669,7 @@ table 60 "Document Sending Profile"
         ReportDistributionManagement.VANDocumentReport(RecordVariant, Rec);
     end;
 
-    local procedure SendToPrinter(ReportUsage: Enum "Report Selection Usage"; RecordVariant: Variant; CustomerNoFieldNo: Integer)
+    procedure SendToPrinter(ReportUsage: Enum "Report Selection Usage"; RecordVariant: Variant; CustomerNoFieldNo: Integer)
     var
         ReportSelections: Record "Report Selections";
         ShowRequestForm: Boolean;
@@ -677,7 +693,7 @@ table 60 "Document Sending Profile"
         ReportSelections.PrintWithDialogForVend(ReportUsage, RecordVariant, ShowRequestForm, VendorNoFieldNo);
     end;
 
-    local procedure SendToEMail(ReportUsage: Enum "Report Selection Usage"; RecordVariant: Variant; DocNo: Code[20]; DocName: Text[150]; ToCust: Code[20])
+    local procedure SendToEMail(ReportUsage: Enum "Report Selection Usage"; RecordVariant: Variant; DocNo: Code[20]; DocName: Text[150]; ToCust: Code[20]; DocNoFieldNo: Integer)
     var
         ReportSelections: Record "Report Selections";
         ElectronicDocumentFormat: Record "Electronic Document Format";
@@ -738,10 +754,10 @@ table 60 "Document Sending Profile"
                 end;
         end;
 
-        OnAfterSendToEMail(Rec, ReportUsage, RecordVariant, DocNo, DocName, ToCust);
+        OnAfterSendToEMail(Rec, ReportUsage, RecordVariant, DocNo, DocName, ToCust, DocNoFieldNo, ShowDialog);
     end;
 
-    local procedure SendToEmailVendor(ReportUsage: Enum "Report Selection Usage"; RecordVariant: Variant; DocNo: Code[20]; DocName: Text[150]; ToVendor: Code[20])
+    local procedure SendToEmailVendor(ReportUsage: Enum "Report Selection Usage"; RecordVariant: Variant; DocNo: Code[20]; DocName: Text[150]; ToVendor: Code[20]; VendorNoFieldNo: Integer)
     var
         ReportSelections: Record "Report Selections";
         ElectronicDocumentFormat: Record "Electronic Document Format";
@@ -801,10 +817,10 @@ table 60 "Document Sending Profile"
                 end;
         end;
 
-        OnAfterSendToEmailVendor(Rec, ReportUsage, RecordVariant, DocNo, DocName, ToVendor);
+        OnAfterSendToEmailVendor(Rec, ReportUsage, RecordVariant, DocNo, DocName, ToVendor, VendorNoFieldNo, ShowDialog);
     end;
 
-    local procedure SendToDisk(ReportUsage: Enum "Report Selection Usage"; RecordVariant: Variant; DocNo: Code[20]; DocName: Text; ToCust: Code[20])
+    procedure SendToDisk(ReportUsage: Enum "Report Selection Usage"; RecordVariant: Variant; DocNo: Code[20]; DocName: Text; ToCust: Code[20])
     var
         ReportSelections: Record "Report Selections";
         ElectronicDocumentFormat: Record "Electronic Document Format";
@@ -878,7 +894,7 @@ table 60 "Document Sending Profile"
     procedure GetOfficeAddinDefault(var TempDocumentSendingProfile: Record "Document Sending Profile" temporary; CanAttach: Boolean)
     begin
         with TempDocumentSendingProfile do begin
-            Init;
+            Init();
             Code := DefaultCodeTxt;
             Description := DefaultDescriptionTxt;
             if CanAttach then
@@ -934,8 +950,8 @@ table 60 "Document Sending Profile"
         DocExchServiceMgt: Codeunit "Doc. Exch. Service Mgt.";
     begin
         if "Electronic Document" <> "Electronic Document"::No then
-            if not HasThirdPartyDocExchService then
-                DocExchServiceMgt.CheckServiceEnabled;
+            if not HasThirdPartyDocExchService() then
+                DocExchServiceMgt.CheckServiceEnabled();
     end;
 
     local procedure HasThirdPartyDocExchService() ExchServiceEnabled: Boolean
@@ -949,11 +965,11 @@ table 60 "Document Sending Profile"
     begin
         TempBlob.CreateOutStream(ZipFileOutStream);
         DataCompression.SaveZipArchive(ZipFileOutStream);
-        DataCompression.CloseZipArchive;
+        DataCompression.CloseZipArchive();
     end;
 
     [IntegrationEvent(TRUE, false)]
-    local procedure OnAfterSend(ReportUsage: Integer; RecordVariant: Variant; DocNo: Code[20]; ToCust: Code[20]; DocName: Text[150]; CustomerFieldNo: Integer; DocumentNoFieldNo: Integer)
+    local procedure OnAfterSend(ReportUsage: Integer; RecordVariant: Variant; DocNo: Code[20]; ToCust: Code[20]; DocName: Text[150]; CustomerFieldNo: Integer; DocumentNoFieldNo: Integer; DocumentSendingProfile: Record "Document Sending Profile")
     begin
     end;
 
@@ -963,17 +979,17 @@ table 60 "Document Sending Profile"
     end;
 
     [IntegrationEvent(TRUE, false)]
-    local procedure OnAfterSendVendor(ReportUsage: Integer; RecordVariant: Variant; DocNo: Code[20]; ToVendor: Code[20]; DocName: Text[150]; VendorNoFieldNo: Integer; DocumentNoFieldNo: Integer)
+    local procedure OnAfterSendVendor(ReportUsage: Integer; RecordVariant: Variant; DocNo: Code[20]; ToVendor: Code[20]; DocName: Text[150]; VendorNoFieldNo: Integer; DocumentNoFieldNo: Integer; DocumentSendingProfile: Record "Document Sending Profile")
     begin
     end;
 
     [IntegrationEvent(false, false)]
-    local procedure OnAfterSendToEMail(var DocumentSendingProfile: Record "Document Sending Profile"; ReportUsage: Enum "Report Selection Usage"; RecordVariant: Variant; DocNo: Code[20]; DocName: Text[150]; ToCust: Code[20])
+    local procedure OnAfterSendToEMail(var DocumentSendingProfile: Record "Document Sending Profile"; ReportUsage: Enum "Report Selection Usage"; RecordVariant: Variant; DocNo: Code[20]; DocName: Text[150]; ToCust: Code[20]; DocNoFieldNo: Integer; ShowDialog: Boolean)
     begin
     end;
 
     [IntegrationEvent(false, false)]
-    local procedure OnAfterSendToEmailVendor(var DocumentSendingProfile: Record "Document Sending Profile"; ReportUsage: Enum "Report Selection Usage"; RecordVariant: Variant; DocNo: Code[20]; DocName: Text[150]; ToVendor: Code[20])
+    local procedure OnAfterSendToEmailVendor(var DocumentSendingProfile: Record "Document Sending Profile"; ReportUsage: Enum "Report Selection Usage"; RecordVariant: Variant; DocNo: Code[20]; DocName: Text[150]; ToVendor: Code[20]; VendorNoFieldNo: Integer; ShowDialog: Boolean)
     begin
     end;
 
@@ -1033,7 +1049,7 @@ table 60 "Document Sending Profile"
     end;
 
     [IntegrationEvent(false, false)]
-    local procedure OnBeforeTrySendToEMail(ReportUsage: Integer; RecordVariant: Variant; DocumentNoFieldNo: Integer; DocName: Text[150]; CustomerFieldNo: Integer; ShowDialog: Boolean; var Handled: Boolean; var IsCustomer: Boolean)
+    local procedure OnBeforeTrySendToEMail(ReportUsage: Integer; RecordVariant: Variant; DocumentNoFieldNo: Integer; DocName: Text[150]; CustomerFieldNo: Integer; var ShowDialog: Boolean; var Handled: Boolean; var IsCustomer: Boolean)
     begin
     end;
 
@@ -1064,6 +1080,11 @@ table 60 "Document Sending Profile"
 
     [IntegrationEvent(false, false)]
     local procedure OnBeforeVerifySelectedOptionsValid(var DocumentSendingProfile: Record "Document Sending Profile"; var IsHandled: Boolean)
+    begin
+    end;
+
+    [IntegrationEvent(false, false)]
+    local procedure OnAfterGetRecordAsText(DocumentSendingProfile: Record "Document Sending Profile"; var RecordAsText: Text; RecordAsTextFormatterTxt: Text; FieldCaptionContentFormatterTxt: Text)
     begin
     end;
 }

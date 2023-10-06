@@ -1,3 +1,22 @@
+// ------------------------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+// ------------------------------------------------------------------------------------------------
+namespace Microsoft.Utilities;
+
+using Microsoft.Bank.BankAccount;
+using Microsoft.Finance.SalesTax;
+using Microsoft.Foundation.Address;
+using Microsoft.Foundation.Company;
+using System.Email;
+using System.IO;
+using System.Reflection;
+using System.Utilities;
+using System.Integration;
+using System.Environment;
+using System.Environment.Configuration;
+using System.Azure.Identity;
+
 page 1803 "Assisted Company Setup Wizard"
 {
     Caption = 'Company Setup';
@@ -5,7 +24,6 @@ page 1803 "Assisted Company Setup Wizard"
     InsertAllowed = false;
     LinksAllowed = false;
     PageType = NavigatePage;
-    PromotedActionCategories = 'New,Process,Report,Step 4,Step 5';
     ShowFilter = false;
     SourceTable = "Config. Setup";
     SourceTableTemporary = true;
@@ -53,53 +71,58 @@ page 1803 "Assisted Company Setup Wizard"
                     InstructionalText = 'Choose Next so you can specify basic company information.';
                 }
             }
+#if not CLEAN21
+#pragma warning disable AL0432
             group(Control18)
             {
                 ShowCaption = false;
-                Visible = SelectTypeVisible AND TypeSelectionEnabled;
+                Visible = false;
+                ObsoleteState = Pending;
+                ObsoleteReason = 'Configuration package importing logic is seperated from this wizard, after introducting checklist.';
+                ObsoleteTag = '21.0';
                 group("Standard Setup")
                 {
                     Caption = 'Standard Setup';
                     InstructionalText = 'The company will be ready to use when Setup has completed.';
-                    Visible = StandardVisible;
+                    ObsoleteState = Pending;
+                    ObsoleteReason = 'Configuration package importing logic is seperated from this wizard, after introducting checklist.';
+                    ObsoleteTag = '21.0';
                     field(Standard; TypeStandard)
                     {
                         ApplicationArea = Basic, Suite;
                         Caption = 'Set up as Standard';
-
-                        trigger OnValidate()
-                        begin
-                            if TypeStandard then
-                                TypeEvaluation := false;
-                            CalcCompanyData;
-                        end;
+                        ObsoleteState = Pending;
+                        ObsoleteReason = 'Configuration package importing logic is seperated from this wizard, after introducting checklist.';
+                        ObsoleteTag = '21.0';
                     }
                 }
                 group("Evaluation Setup")
                 {
                     Caption = 'Evaluation Setup';
                     InstructionalText = 'The company will be set up in demonstration mode for exploring and testing.';
-                    Visible = EvaluationVisible;
+                    ObsoleteState = Pending;
+                    ObsoleteReason = 'Configuration package importing logic is seperated from this wizard, after introducting checklist.';
+                    ObsoleteTag = '21.0';
                     field(Evaluation; TypeEvaluation)
                     {
                         ApplicationArea = Basic, Suite;
                         Caption = 'Set up as Evaluation';
-
-                        trigger OnValidate()
-                        begin
-                            if TypeEvaluation then
-                                TypeStandard := false;
-                            CalcCompanyData;
-                        end;
+                        ObsoleteState = Pending;
+                        ObsoleteReason = 'Configuration package importing logic is seperated from this wizard, after introducting checklist.';
+                        ObsoleteTag = '21.0';
                     }
                 }
                 group(Important)
                 {
                     Caption = 'Important';
                     InstructionalText = 'You cannot change your choice of setup after you choose Next.';
-                    Visible = TypeStandard OR TypeEvaluation;
+                    ObsoleteState = Pending;
+                    ObsoleteReason = 'Configuration package importing logic is seperated from this wizard, after introducting checklist.';
+                    ObsoleteTag = '21.0';
                 }
             }
+#pragma warning restore
+#endif
             group(Control56)
             {
                 ShowCaption = false;
@@ -108,37 +131,37 @@ page 1803 "Assisted Company Setup Wizard"
                 {
                     Caption = 'Specify your company''s address information and logo.';
                     InstructionalText = 'This is used in invoices and other documents where general information about your company is printed.';
-                    field(Name; Name)
+                    field(Name; Rec.Name)
                     {
                         ApplicationArea = Basic, Suite;
                         Caption = 'Company Name';
                         NotBlank = true;
                         ShowMandatory = true;
                     }
-                    field(Address; Address)
+                    field(Address; Rec.Address)
                     {
                         ApplicationArea = Basic, Suite;
                     }
-                    field("Address 2"; "Address 2")
+                    field("Address 2"; Rec."Address 2")
                     {
                         ApplicationArea = Basic, Suite;
                         Visible = false;
                     }
-                    field(City; City)
+                    field(City; Rec.City)
                     {
                         ApplicationArea = Basic, Suite;
                     }
-                    field(County; County)
+                    field(County; Rec.County)
                     {
                         ApplicationArea = Basic, Suite;
                         Caption = 'State';
                         ToolTip = 'Specifies the state as a part of the address.';
                     }
-                    field("Post Code"; "Post Code")
+                    field("Post Code"; Rec."Post Code")
                     {
                         ApplicationArea = Basic, Suite;
                     }
-                    field("Country/Region Code"; "Country/Region Code")
+                    field("Country/Region Code"; Rec."Country/Region Code")
                     {
                         ApplicationArea = Basic, Suite;
                         TableRelation = "Country/Region".Code;
@@ -148,31 +171,31 @@ page 1803 "Assisted Company Setup Wizard"
                             SetTaxAreaCodeVisible();
                         end;
                     }
-                    field("VAT Registration No."; "VAT Registration No.")
+                    field("VAT Registration No."; Rec."VAT Registration No.")
                     {
                         ApplicationArea = Basic, Suite;
                         Visible = false;
                     }
-                    field("Industrial Classification"; "Industrial Classification")
+                    field("Industrial Classification"; Rec."Industrial Classification")
                     {
                         ApplicationArea = Basic, Suite;
                         NotBlank = true;
                         ShowMandatory = true;
                         Visible = false;
                     }
-                    field(Picture; Picture)
+                    field(Picture; Rec.Picture)
                     {
                         ApplicationArea = Basic, Suite;
                         Caption = 'Company Logo';
 
                         trigger OnValidate()
                         begin
-                            LogoPositionOnDocumentsShown := Picture.HasValue;
+                            LogoPositionOnDocumentsShown := Rec.Picture.HasValue;
                             if LogoPositionOnDocumentsShown then begin
-                                if "Logo Position on Documents" = "Logo Position on Documents"::"No Logo" then
-                                    "Logo Position on Documents" := "Logo Position on Documents"::Right;
+                                if Rec."Logo Position on Documents" = Rec."Logo Position on Documents"::"No Logo" then
+                                    Rec."Logo Position on Documents" := Rec."Logo Position on Documents"::Right;
                             end else
-                                "Logo Position on Documents" := "Logo Position on Documents"::"No Logo";
+                                Rec."Logo Position on Documents" := Rec."Logo Position on Documents"::"No Logo";
                             CurrPage.Update(true);
                         end;
                     }
@@ -181,7 +204,7 @@ page 1803 "Assisted Company Setup Wizard"
                 {
                     ShowCaption = false;
                     Visible = TaxAreaCodeVisible;
-                    field("Tax Area Code"; "Tax Area Code")
+                    field("Tax Area Code"; Rec."Tax Area Code")
                     {
                         ApplicationArea = Basic, Suite;
                         ToolTip = 'Specifies a tax area code for the company.';
@@ -196,7 +219,7 @@ page 1803 "Assisted Company Setup Wizard"
                 {
                     Caption = 'Specify the contact details for your company.';
                     InstructionalText = 'This is used in invoices and other documents where general information about your company is printed.';
-                    field("Phone No."; "Phone No.")
+                    field("Phone No."; Rec."Phone No.")
                     {
                         ApplicationArea = Basic, Suite;
 
@@ -204,14 +227,14 @@ page 1803 "Assisted Company Setup Wizard"
                         var
                             TypeHelper: Codeunit "Type Helper";
                         begin
-                            if "Phone No." = '' then
+                            if Rec."Phone No." = '' then
                                 exit;
 
-                            if not TypeHelper.IsPhoneNumber("Phone No.") then
+                            if not TypeHelper.IsPhoneNumber(Rec."Phone No.") then
                                 Error(InvalidPhoneNumberErr)
                         end;
                     }
-                    field("E-Mail"; "E-Mail")
+                    field("E-Mail"; Rec."E-Mail")
                     {
                         ApplicationArea = Basic, Suite;
                         ExtendedDatatype = EMail;
@@ -220,13 +243,13 @@ page 1803 "Assisted Company Setup Wizard"
                         var
                             MailManagement: Codeunit "Mail Management";
                         begin
-                            if "E-Mail" = '' then
+                            if Rec."E-Mail" = '' then
                                 exit;
 
-                            MailManagement.CheckValidEmailAddress("E-Mail");
+                            MailManagement.CheckValidEmailAddress(Rec."E-Mail");
                         end;
                     }
-                    field("Home Page"; "Home Page")
+                    field("Home Page"; Rec."Home Page")
                     {
                         ApplicationArea = Basic, Suite;
 
@@ -234,82 +257,14 @@ page 1803 "Assisted Company Setup Wizard"
                         var
                             WebRequestHelper: Codeunit "Web Request Helper";
                         begin
-                            if "Home Page" = '' then
+                            if Rec."Home Page" = '' then
                                 exit;
 
-                            WebRequestHelper.IsValidUriWithoutProtocol("Home Page");
+                            WebRequestHelper.IsValidUriWithoutProtocol(Rec."Home Page");
                         end;
                     }
                 }
             }
-#if not CLEAN19
-            group(Control29)
-            {
-                ShowCaption = false;
-                Visible = false;
-                ObsoleteState = Pending;
-                ObsoleteReason = 'The Bank Feed setup is no longer configured in this wizard.';
-                ObsoleteTag = '18.0';
-
-                group("Bank Feed Service")
-                {
-                    Caption = 'Bank Feed Service';
-                    InstructionalText = 'You can use a bank feeds service to import electronic bank statements from your bank to quickly process payments.';
-                    ObsoleteState = Pending;
-                    ObsoleteReason = 'The Bank Feed setup is no longer configured in this wizard.';
-                    ObsoleteTag = '18.0';
-
-                    field(UseBankStatementFeed; false)
-                    {
-                        ApplicationArea = Basic, Suite;
-                        Caption = 'Use a bank feed service';
-                        ObsoleteState = Pending;
-                        ObsoleteReason = 'The Bank Feed setup is no longer configured in this wizard.';
-                        ObsoleteTag = '18.0';
-                    }
-                }
-                group("NOTE:")
-                {
-                    Caption = 'NOTE:';
-                    InstructionalText = 'When you choose Next, you accept the terms of use for the bank feed service.';
-                    Visible = false;
-                    ObsoleteState = Pending;
-                    ObsoleteReason = 'The Bank Feed setup is no longer configured in this wizard.';
-                    ObsoleteTag = '18.0';
-
-                    field(TermsOfUseLbl; TermsOfUseLbl)
-                    {
-                        ApplicationArea = Basic, Suite;
-                        Editable = false;
-                        ShowCaption = false;
-                        ObsoleteState = Pending;
-                        ObsoleteReason = 'The Bank Feed setup is no longer configured in this wizard.';
-                        ObsoleteTag = '18.0';
-
-                        trigger OnDrillDown()
-                        begin
-                            HyperLink(TermsOfUseUrlTxt);
-                        end;
-                    }
-                }
-            }
-            group("Select bank account.")
-            {
-                Caption = 'Select bank account.';
-                Visible = false;
-                ObsoleteState = Pending;
-                ObsoleteReason = 'The Bank Feed setup is no longer configured in this wizard.';
-                ObsoleteTag = '18.0';
-
-                part(OnlineBanckAccountLinkPagePart; "Online Bank Accounts")
-                {
-                    ApplicationArea = Basic, Suite;
-                    ObsoleteState = Pending;
-                    ObsoleteReason = 'The Bank Feed setup is no longer configured in this wizard.';
-                    ObsoleteTag = '19.0';
-                }
-            }
-#endif
             group(Control37)
             {
                 ShowCaption = false;
@@ -318,21 +273,21 @@ page 1803 "Assisted Company Setup Wizard"
                 {
                     Caption = 'Specify your company''s bank information.';
                     InstructionalText = 'This information is included on documents that you send to customer and vendors to inform about payments to your bank account.';
-                    field("Bank Name"; "Bank Name")
+                    field("Bank Name"; Rec."Bank Name")
                     {
                         ApplicationArea = Basic, Suite;
                     }
-                    field("Bank Branch No."; "Bank Branch No.")
+                    field("Bank Branch No."; Rec."Bank Branch No.")
                     {
                         ApplicationArea = Basic, Suite;
                     }
-                    field("Bank Account No."; "Bank Account No.")
+                    field("Bank Account No."; Rec."Bank Account No.")
                     {
                         ApplicationArea = Basic, Suite;
 
                         trigger OnValidate()
                         begin
-                            ShowBankAccountCreationWarning := not ValidateBankAccountNotEmpty;
+                            ShowBankAccountCreationWarning := not ValidateBankAccountNotEmpty();
                         end;
                     }
                 }
@@ -343,126 +298,6 @@ page 1803 "Assisted Company Setup Wizard"
                     Visible = ShowBankAccountCreationWarning;
                 }
             }
-#if not CLEAN19
-            group(Control6)
-            {
-                ShowCaption = false;
-                Visible = false;
-                ObsoleteState = Pending;
-                ObsoleteReason = 'The accounting period setup is no longer configured in this wizard.';
-                ObsoleteTag = '18.0';
-
-                group("Specify the start date of the company's fiscal year.")
-                {
-                    Caption = 'Specify the start date of the company''s fiscal year.';
-                    InstructionalText = 'Specify the start of the company''s fiscal year, or select the Skip for Now field if you want to define accounting periods later.';
-                    ObsoleteState = Pending;
-                    ObsoleteReason = 'The accounting period setup is no longer configured in this wizard.';
-                    ObsoleteTag = '18.0';
-
-                    field(AccountingPeriodStartDate; AccountingPeriodStartDate)
-                    {
-                        ApplicationArea = Basic, Suite;
-                        Caption = 'Fiscal Year Start Date';
-                        Editable = NOT SkipAccountingPeriod;
-                        ShowMandatory = true;
-                        ObsoleteState = Pending;
-                        ObsoleteReason = 'The accounting period setup is no longer configured in this wizard.';
-                        ObsoleteTag = '18.0';
-
-                        trigger OnValidate()
-                        begin
-                            if (not SkipAccountingPeriod) and (AccountingPeriodStartDate = 0D) then
-                                Error(AccountingPeriodStartDateBlankErr);
-                            UserAccountingPeriodStartDate := AccountingPeriodStartDate;
-                        end;
-                    }
-                    field(SkipAccountingPeriod; SkipAccountingPeriod)
-                    {
-                        ApplicationArea = Basic, Suite;
-                        Caption = 'Skip for Now';
-                        ObsoleteState = Pending;
-                        ObsoleteReason = 'The accounting period setup is no longer configured in this wizard.';
-                        ObsoleteTag = '18.0';
-
-                        trigger OnValidate()
-                        begin
-                            if SkipAccountingPeriod then
-                                Clear(AccountingPeriodStartDate)
-                            else
-                                AccountingPeriodStartDate := UserAccountingPeriodStartDate;
-                        end;
-                    }
-                }
-            }
-            group(Control57)
-            {
-                ShowCaption = false;
-                Visible = false;
-                ObsoleteState = Pending;
-                ObsoleteReason = 'The costing method setup is no longer configured in this wizard. A notification will be shown in the Data Migration Wizard Page';
-                ObsoleteTag = '18.0';
-
-                group("Specify the costing method for your inventory valuation.")
-                {
-                    Caption = 'Specify the costing method for your inventory valuation.';
-                    ObsoleteState = Pending;
-                    ObsoleteReason = 'The costing method setup is no longer configured in this wizard. A notification will be shown in the Data Migration Wizard Page';
-                    ObsoleteTag = '18.0';
-
-                    group(Control122)
-                    {
-                        InstructionalText = 'The costing method works together with the posting date and sequence to determine how to record the cost flow.';
-                        ShowCaption = false;
-                        ObsoleteState = Pending;
-                        ObsoleteReason = 'The costing method setup is no longer configured in this wizard. A notification will be shown in the Data Migration Wizard Page';
-                        ObsoleteTag = '18.0';
-
-                        field("Cost Method"; CostMethodeLbl)
-                        {
-                            ApplicationArea = Basic, Suite;
-                            Editable = false;
-                            ShowCaption = false;
-                            ObsoleteState = Pending;
-                            ObsoleteReason = 'The costing method setup is no longer configured in this wizard. A notification will be shown in the Data Migration Wizard Page';
-                            ObsoleteTag = '18.0';
-
-                            trigger OnDrillDown()
-                            begin
-                                HyperLink(CostMethodUrlTxt);
-                            end;
-                        }
-                        field("Costing Method"; InventorySetup."Default Costing Method")
-                        {
-                            ApplicationArea = Basic, Suite;
-                            Caption = 'Costing Method';
-                            ShowMandatory = true;
-                            ObsoleteState = Pending;
-                            ObsoleteReason = 'The costing method setup is no longer configured in this wizard. A notification will be shown in the Data Migration Wizard Page';
-                            ObsoleteTag = '18.0';
-
-                            trigger OnValidate()
-                            var
-                                ExistingInventorySetup: Record "Inventory Setup";
-                            begin
-                                if not ExistingInventorySetup.Get then begin
-                                    InventorySetup."Automatic Cost Adjustment" := InventorySetup."Automatic Cost Adjustment"::Always;
-                                    InventorySetup."Automatic Cost Posting" := true;
-                                end;
-
-                                if InventorySetup."Default Costing Method" = InventorySetup."Default Costing Method"::Average then begin
-                                    InventorySetup."Average Cost Period" := InventorySetup."Average Cost Period"::Day;
-                                    InventorySetup."Average Cost Calc. Type" := InventorySetup."Average Cost Calc. Type"::Item;
-                                end;
-
-                                if not InventorySetup.Modify() then
-                                    InventorySetup.Insert();
-                            end;
-                        }
-                    }
-                }
-            }
-#endif
             group(Control9)
             {
                 ShowCaption = false;
@@ -514,9 +349,6 @@ page 1803 "Assisted Company Setup Wizard"
 
                 trigger OnAction()
                 begin
-                    if (Step = Step::"Select Type") and not (TypeStandard or TypeEvaluation) then
-                        if not Confirm(NoSetupTypeSelectedQst, false) then
-                            Error('');
                     NextStep(false);
                 end;
             }
@@ -534,18 +366,16 @@ page 1803 "Assisted Company Setup Wizard"
                     AssistedCompanySetup: Codeunit "Assisted Company Setup";
                     ErrorText: Text;
                 begin
-                    StartConfigPackageImport();
-                    AssistedCompanySetup.WaitForPackageImportToComplete;
                     BankAccount.TransferFields(TempBankAccount, true);
-                    AssistedCompanySetup.ApplyUserInput(Rec, BankAccount, AccountingPeriodStartDate, TypeEvaluation);
+                    AssistedCompanySetup.ApplyUserInput(Rec, BankAccount, AccountingPeriodStartDate, false);
 
-                    UpdateCompanyDisplayNameIfNameChanged;
+                    UpdateCompanyDisplayNameIfNameChanged();
 
                     GuidedExperience.CompleteAssistedSetup(ObjectType::Page, Page::"Assisted Company Setup Wizard");
                     if (BankAccount."No." <> '') and (not TempOnlineBankAccLink.IsEmpty) then
-                        if not TryLinkBankAccount then
+                        if not TryLinkBankAccount() then
                             ErrorText := GetLastErrorText;
-                    CurrPage.Close;
+                    CurrPage.Close();
 
                     if ErrorText <> '' then begin
                         Message(StrSubstNo(BankAccountLinkingFailedMsg, ErrorText));
@@ -563,25 +393,23 @@ page 1803 "Assisted Company Setup Wizard"
 
     trigger OnAfterGetRecord()
     begin
-        LogoPositionOnDocumentsShown := Picture.HasValue;
+        LogoPositionOnDocumentsShown := Rec.Picture.HasValue;
     end;
 
     trigger OnInit()
     begin
-        InitializeRecord;
-        LoadTopBanners;
+        InitializeRecord();
+        LoadTopBanners();
     end;
 
     trigger OnOpenPage()
     var
         EnvironmentInfo: Codeunit "Environment Information";
     begin
-        CompanyData := CompanyData::None;
         Clear(AccountingPeriodStartDate);
 
-        ResetWizardControls;
-        ShowIntroStep;
-        TypeSelectionEnabled := LoadConfigTypes and not PackageImported();
+        ResetWizardControls();
+        ShowIntroStep();
 
         if EnvironmentInfo.IsSaaS() then
             GetCompanyDetailsFromMicrosoft365();
@@ -599,79 +427,48 @@ page 1803 "Assisted Company Setup Wizard"
 
     var
         MediaRepositoryStandard: Record "Media Repository";
-#if not CLEAN19
-        TempSavedBankAccount: Record "Bank Account" temporary;
-#endif
         TempBankAccount: Record "Bank Account" temporary;
         BankAccount: Record "Bank Account";
         TempOnlineBankAccLink: Record "Online Bank Acc. Link" temporary;
         MediaRepositoryDone: Record "Media Repository";
         MediaResourcesStandard: Record "Media Resources";
         MediaResourcesDone: Record "Media Resources";
-#if not CLEAN19
-        InventorySetup: Record "Inventory Setup";
-#endif
-        AssistedCompanySetup: Codeunit "Assisted Company Setup";
         ClientTypeManagement: Codeunit "Client Type Management";
         CompanyInfoNotification: Notification;
         AccountingPeriodStartDate: Date;
-#if not CLEAN19
-        UserAccountingPeriodStartDate: Date;
-#endif
-        CompanyData: Option "Evaluation Data","Standard Data","None","Extended Data","Full No Data";
+#if not CLEAN21
         TypeStandard: Boolean;
         TypeEvaluation: Boolean;
-        Step: Option Intro,Sync,"Select Type","Company Details","Communication Details","Payment Details",Done;
+#endif
+        Step: Option Intro,"Company Details","Communication Details","Payment Details",Done;
         BackEnabled: Boolean;
         NextEnabled: Boolean;
         FinishEnabled: Boolean;
         TopBannerVisible: Boolean;
         IntroVisible: Boolean;
-        SelectTypeVisible: Boolean;
         CompanyDetailsVisible: Boolean;
         CommunicationDetailsVisible: Boolean;
         PaymentDetailsVisible: Boolean;
         DoneVisible: Boolean;
-        TypeSelectionEnabled: Boolean;
-        StandardVisible: Boolean;
-        EvaluationVisible: Boolean;
-#if not CLEAN19
-        SkipAccountingPeriod: Boolean;
-#endif
         ShowCompanyInfoDownloadedNotification: Boolean;
         IsCompanyInfoDownloadedNotificationEnabled: Boolean;
         NotificationSent: Boolean;
         CompanyInfoDownloadedMsg: Label 'The information on this page was downloaded from Microsoft 365. Before you proceed, verify that it''s correct.';
         NotSetUpQst: Label 'The application is not set up. This guide will display the next time you sign in. If you do not want the guide to start, go to the Companies page and turn off the guide.\\Are you sure that you want to close this guide?';
-        NoSetupTypeSelectedQst: Label 'You have not selected a type of setup. If you proceed, Business Central will not be fully functional until you manually complete the required setups, or run this assisted setup guide again.\\Do you want to continue?';
         HelpLbl: Label 'Learn more about setting up your company';
         HelpLinkTxt: Label 'http://go.microsoft.com/fwlink/?LinkId=746160', Locked = true;
-#if not CLEAN19
-        BankAccountInformationUpdated: Boolean;
-#endif
         TaxAreaCodeVisible: Boolean;
-#if not CLEAN19
-        TermsOfUseLbl: Label 'Envestnet Yodlee Terms of Use';
-        TermsOfUseUrlTxt: Label 'https://go.microsoft.com/fwlink/?LinkId=746179', Locked = true;
-#endif
         LogoPositionOnDocumentsShown: Boolean;
         ShowBankAccountCreationWarning: Boolean;
         InvalidPhoneNumberErr: Label 'The phone number is invalid.';
-#if not CLEAN19
-        CostMethodeLbl: Label 'Learn more';
-        CostMethodUrlTxt: Label 'https://go.microsoft.com/fwlink/?linkid=858295', Locked = true;
-#endif
         BankAccountLinkingFailedMsg: Label 'Linking the company bank account failed with the following message:\''%1''\Link the company bank account from the Bank Accounts page.', Comment = '%1 - an error message';
-#if not CLEAN19       
-        AccountingPeriodStartDateBlankErr: Label 'You have not specified a start date for the fiscal year. You must either specify a date in the Fiscal Year Start Date field or select the Skip for Now field.';
-#endif
         GraphURLEndpointLbl: Label '%1v1.0/organization', Locked = true;
         ResourceNameTxt: Label 'Azure Service', Locked = true;
         BearerLbl: Label 'Bearer %1', Comment = '%1 = Access Token', Locked = true;
 
     local procedure NextStep(Backwards: Boolean)
     begin
-        ResetWizardControls;
+        ResetWizardControls();
 
         if Backwards then
             Step := Step - 1
@@ -680,35 +477,18 @@ page 1803 "Assisted Company Setup Wizard"
 
         case Step of
             Step::Intro:
-                ShowIntroStep;
-            Step::Sync:
-                ShowSyncStep(Backwards);
-            Step::"Select Type":
-                begin
-                    HideCompanyInfoDownloadedFromOfficeNotification();
-                    if not TypeSelectionEnabled then
-                        NextStep(Backwards)
-                    else
-                        ShowSelectTypeStep;
-                end;
+                ShowIntroStep();
             Step::"Company Details":
-                if TypeEvaluation then begin
-                    Step := Step::Done;
-                    ShowDoneStep;
-                end else begin
+                begin
                     SendCompanyInfoDownloadedFromOfficeNotification();
-                    ShowCompanyDetailsStep;
+                    ShowCompanyDetailsStep();
                 end;
             Step::"Communication Details":
-                ShowCommunicationDetailsStep;
+                ShowCommunicationDetailsStep();
             Step::"Payment Details":
                 begin
-#if not CLEAN19
-                    if not Backwards then
-                        PopulateBankAccountInformation;
-#endif
-                    ShowPaymentDetailsStep;
-                    ShowBankAccountCreationWarning := not ValidateBankAccountNotEmpty;
+                    ShowPaymentDetailsStep();
+                    ShowBankAccountCreationWarning := not ValidateBankAccountNotEmpty();
                 end;
             Step::Done:
                 begin
@@ -723,16 +503,6 @@ page 1803 "Assisted Company Setup Wizard"
     begin
         IntroVisible := true;
         BackEnabled := false;
-    end;
-
-    local procedure ShowSyncStep(Backwards: Boolean)
-    begin
-        NextStep(Backwards);
-    end;
-
-    local procedure ShowSelectTypeStep()
-    begin
-        SelectTypeVisible := true;
     end;
 
     local procedure ShowCompanyDetailsStep()
@@ -766,7 +536,6 @@ page 1803 "Assisted Company Setup Wizard"
 
         // Tabs
         IntroVisible := false;
-        SelectTypeVisible := false;
         CompanyDetailsVisible := false;
         CommunicationDetailsVisible := false;
         PaymentDetailsVisible := false;
@@ -776,148 +545,29 @@ page 1803 "Assisted Company Setup Wizard"
     local procedure InitializeRecord()
     var
         CompanyInformation: Record "Company Information";
-#if not CLEAN19
-        AccountingPeriod: Record "Accounting Period";
-#endif
     begin
-        Init;
+        Rec.Init();
 
-        if CompanyInformation.Get then begin
-            TransferFields(CompanyInformation);
-            if Name = '' then
-                Name := CompanyName;
+        if CompanyInformation.Get() then begin
+            Rec.TransferFields(CompanyInformation);
+            if Rec.Name = '' then
+                Rec.Name := CompanyName;
         end else
-            Name := CompanyName;
+            Rec.Name := CompanyName;
 
-#if not CLEAN19
-        SkipAccountingPeriod := not AccountingPeriod.IsEmpty;
-        if not SkipAccountingPeriod then begin
-            AccountingPeriodStartDate := CalcDate('<-CY>', Today);
-            UserAccountingPeriodStartDate := AccountingPeriodStartDate;
-        end;
-#endif
-
-        Insert;
-    end;
-
-    local procedure CalcCompanyData()
-    begin
-        CompanyData := CompanyData::None;
-        if TypeStandard then
-            CompanyData := CompanyData::"Standard Data";
-        if TypeEvaluation then
-            CompanyData := CompanyData::"Evaluation Data";
-    end;
-
-    local procedure StartConfigPackageImport()
-    begin
-        if not TypeSelectionEnabled then
-            exit;
-        if CompanyData in [CompanyData::None, CompanyData::"Full No Data"] then
-            exit;
-        if AssistedCompanySetup.IsCompanySetupInProgress(CompanyName) then
-            exit;
-        AssistedCompanySetup.FillCompanyData(CompanyName, CompanyData);
-    end;
-
-    local procedure LoadConfigTypes(): Boolean
-    begin
-        StandardVisible :=
-          AssistedCompanySetup.ExistsConfigurationPackageFile(CompanyData::"Standard Data");
-        EvaluationVisible :=
-          AssistedCompanySetup.ExistsConfigurationPackageFile(CompanyData::"Evaluation Data");
-        exit(StandardVisible or EvaluationVisible);
-    end;
-
-    local procedure PackageImported(): Boolean
-    var
-        AssistedCompanySetupStatus: Record "Assisted Company Setup Status";
-    begin
-        if not AssistedCompanySetupStatus.Get(CompanyName) then begin
-            AssistedCompanySetupStatus.Validate("Company Name", CompanyName);
-            AssistedCompanySetupStatus.Validate(Enabled, true);
-            AssistedCompanySetupStatus.Validate("Package Imported", false);
-            AssistedCompanySetupStatus.Validate("Import Failed", false);
-            AssistedCompanySetupStatus.Insert();
-        end;
-        exit(AssistedCompanySetupStatus."Package Imported" or AssistedCompanySetupStatus."Import Failed");
+        Rec.Insert();
     end;
 
     local procedure LoadTopBanners()
     begin
-        if MediaRepositoryStandard.Get('AssistedSetup-NoText-400px.png', Format(ClientTypeManagement.GetCurrentClientType)) and
-           MediaRepositoryDone.Get('AssistedSetupDone-NoText-400px.png', Format(ClientTypeManagement.GetCurrentClientType))
+        if MediaRepositoryStandard.Get('AssistedSetup-NoText-400px.png', Format(ClientTypeManagement.GetCurrentClientType())) and
+           MediaRepositoryDone.Get('AssistedSetupDone-NoText-400px.png', Format(ClientTypeManagement.GetCurrentClientType()))
         then
             if MediaResourcesStandard.Get(MediaRepositoryStandard."Media Resources Ref") and
                MediaResourcesDone.Get(MediaRepositoryDone."Media Resources Ref")
             then
                 TopBannerVisible := MediaResourcesDone."Media Reference".HasValue;
     end;
-
-#if not CLEAN19
-    local procedure PopulateBankAccountInformation()
-    begin
-        if BankAccountInformationUpdated then
-            if TempOnlineBankAccLink.Count = 0 then begin
-                RestoreBankAccountInformation(TempSavedBankAccount);
-                exit;
-            end;
-
-        if TempOnlineBankAccLink.Count = 1 then
-            TempOnlineBankAccLink.FindFirst
-        else
-            CurrPage.OnlineBanckAccountLinkPagePart.PAGE.GetRecord(TempOnlineBankAccLink);
-
-        if (TempBankAccount."Bank Account No." = TempOnlineBankAccLink."Bank Account No.") and
-           (TempBankAccount.Name = TempOnlineBankAccLink.Name)
-        then
-            exit;
-
-        if not IsBankAccountFormatValid(TempOnlineBankAccLink."Bank Account No.") then
-            Clear(TempOnlineBankAccLink."Bank Account No.");
-
-        if not BankAccountInformationUpdated then
-            StoreBankAccountInformation(TempSavedBankAccount);
-
-        TempBankAccount.Init();
-        TempBankAccount.CreateNewAccount(TempOnlineBankAccLink);
-        RestoreBankAccountInformation(TempBankAccount);
-        BankAccountInformationUpdated := true;
-    end;
-
-    local procedure StoreBankAccountInformation(var BufferBankAccount: Record "Bank Account")
-    begin
-        if not BufferBankAccount.IsEmpty() then
-            exit;
-        BufferBankAccount.Init();
-        BufferBankAccount."Bank Account No." := "Bank Account No.";
-        BufferBankAccount.Name := "Bank Name";
-        BufferBankAccount."Bank Branch No." := "Bank Branch No.";
-        BufferBankAccount."SWIFT Code" := "SWIFT Code";
-        BufferBankAccount.IBAN := IBAN;
-        BufferBankAccount.Insert();
-    end;
-
-    local procedure RestoreBankAccountInformation(var BufferBankAccount: Record "Bank Account")
-    begin
-        if BufferBankAccount.IsEmpty() then
-            exit;
-        "Bank Account No." := BufferBankAccount."Bank Account No.";
-        "Bank Name" := BufferBankAccount.Name;
-        "Bank Branch No." := BufferBankAccount."Bank Branch No.";
-        "SWIFT Code" := BufferBankAccount."SWIFT Code";
-        IBAN := BufferBankAccount.IBAN;
-    end;
-
-    local procedure IsBankAccountFormatValid(BankAccount: Text): Boolean
-    var
-        VarInt: Integer;
-        Which: Text;
-    begin
-        Which := ' -';
-        exit(Evaluate(VarInt, DelChr(BankAccount, '=', Which)));
-    end;
-#endif
 
     local procedure SetTaxAreaCodeVisible()
     var
@@ -928,7 +578,7 @@ page 1803 "Assisted Company Setup Wizard"
         if TaxArea.IsEmpty() then
             exit;
 
-        if "Country/Region Code" <> 'CA' then
+        if Rec."Country/Region Code" <> 'CA' then
             exit;
 
         TaxAreaCodeVisible := true;
@@ -936,7 +586,7 @@ page 1803 "Assisted Company Setup Wizard"
 
     local procedure ValidateBankAccountNotEmpty(): Boolean
     begin
-        exit(("Bank Account No." <> '') or TempOnlineBankAccLink.IsEmpty);
+        exit((Rec."Bank Account No." <> '') or TempOnlineBankAccLink.IsEmpty);
     end;
 
     [TryFunction]
@@ -949,11 +599,11 @@ page 1803 "Assisted Company Setup Wizard"
     var
         Company: Record Company;
     begin
-        if COMPANYPROPERTY.DisplayName = Name then
+        if COMPANYPROPERTY.DisplayName() = Rec.Name then
             exit;
 
         Company.Get(CompanyName);
-        Company."Display Name" := Name;
+        Company."Display Name" := Rec.Name;
         Company.Modify();
     end;
 

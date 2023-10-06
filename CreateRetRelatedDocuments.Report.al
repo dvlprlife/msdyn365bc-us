@@ -1,3 +1,13 @@
+// ------------------------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+// ------------------------------------------------------------------------------------------------
+namespace Microsoft.Utilities;
+
+using Microsoft.Purchases.Document;
+using Microsoft.Purchases.Vendor;
+using Microsoft.Sales.Document;
+
 report 6697 "Create Ret.-Related Documents"
 {
     Caption = 'Create Ret.-Related Documents';
@@ -129,18 +139,18 @@ report 6697 "Create Ret.-Related Documents"
 
     var
         Vend: Record Vendor;
-        PROPurchHeader: Record "Purchase Header";
-        POPurchHeader: Record "Purchase Header";
-        SROSalesHeader: Record "Sales Header";
-        SOSalesHeader: Record "Sales Header";
         TempRetRelDoc: Record "Returns-Related Document" temporary;
         CopyDocMgt: Codeunit "Copy Document Mgt.";
-        VendorNo: Code[20];
 
     protected var
+        POPurchHeader: Record "Purchase Header";
+        PROPurchHeader: Record "Purchase Header";
+        SOSalesHeader: Record "Sales Header";
+        SROSalesHeader: Record "Sales Header";
         CreatePRO: Boolean;
         CreatePO: Boolean;
         CreateSO: Boolean;
+        VendorNo: Code[20];
 
     procedure SetSalesHeader(NewSROSalesHeader: Record "Sales Header")
     begin

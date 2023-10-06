@@ -1,4 +1,4 @@
-#if not CLEAN20
+#if not CLEAN21
 report 10408 "Bank Reconciliation"
 {
     DefaultLayout = RDLC;
@@ -6,13 +6,13 @@ report 10408 "Bank Reconciliation"
     Caption = 'Bank Reconciliation';
     ObsoleteReason = 'Deprecated in favor of W1 Bank Reconciliation';
     ObsoleteState = Pending;
-    ObsoleteTag = '20.0';
+    ObsoleteTag = '21.0';
 
     dataset
     {
         dataitem("Posted Bank Rec. Header"; "Posted Bank Rec. Header")
         {
-            DataItemTableView = SORTING("Bank Account No.", "Statement No.");
+            DataItemTableView = sorting("Bank Account No.", "Statement No.");
             RequestFilterFields = "Bank Account No.", "Statement No.";
             column(USERID; UserId)
             {
@@ -181,8 +181,8 @@ report 10408 "Bank Reconciliation"
             }
             dataitem(Checks; "Posted Bank Rec. Line")
             {
-                DataItemLink = "Bank Account No." = FIELD("Bank Account No."), "Statement No." = FIELD("Statement No.");
-                DataItemTableView = SORTING("Bank Account No.", "Statement No.", "Record Type", "Line No.") WHERE("Record Type" = CONST(Check), Cleared = CONST(true));
+                DataItemLink = "Bank Account No." = field("Bank Account No."), "Statement No." = field("Statement No.");
+                DataItemTableView = sorting("Bank Account No.", "Statement No.", "Record Type", "Line No.") where("Record Type" = const(Check), Cleared = const(true));
                 column(Checks__Posting_Date_; "Posting Date")
                 {
                 }
@@ -249,8 +249,8 @@ report 10408 "Bank Reconciliation"
             }
             dataitem(Deposits; "Posted Bank Rec. Line")
             {
-                DataItemLink = "Bank Account No." = FIELD("Bank Account No."), "Statement No." = FIELD("Statement No.");
-                DataItemTableView = SORTING("Bank Account No.", "Statement No.", "Record Type", "Line No.") WHERE("Record Type" = CONST(Deposit), Cleared = CONST(true));
+                DataItemLink = "Bank Account No." = field("Bank Account No."), "Statement No." = field("Statement No.");
+                DataItemTableView = sorting("Bank Account No.", "Statement No.", "Record Type", "Line No.") where("Record Type" = const(Deposit), Cleared = const(true));
                 column(Deposits_Amount; Amount)
                 {
                 }
@@ -317,8 +317,8 @@ report 10408 "Bank Reconciliation"
             }
             dataitem(Adjustments; "Posted Bank Rec. Line")
             {
-                DataItemLink = "Bank Account No." = FIELD("Bank Account No."), "Statement No." = FIELD("Statement No.");
-                DataItemTableView = SORTING("Bank Account No.", "Statement No.", "Record Type", "Line No.") WHERE("Record Type" = CONST(Adjustment), Cleared = CONST(true));
+                DataItemLink = "Bank Account No." = field("Bank Account No."), "Statement No." = field("Statement No.");
+                DataItemTableView = sorting("Bank Account No.", "Statement No.", "Record Type", "Line No.") where("Record Type" = const(Adjustment), Cleared = const(true));
                 column(Adjustments_Amount; Amount)
                 {
                 }
@@ -379,8 +379,8 @@ report 10408 "Bank Reconciliation"
             }
             dataitem(OutstandingChecks; "Posted Bank Rec. Line")
             {
-                DataItemLink = "Bank Account No." = FIELD("Bank Account No."), "Statement No." = FIELD("Statement No.");
-                DataItemTableView = SORTING("Bank Account No.", "Statement No.", "Record Type", "Line No.") WHERE("Record Type" = CONST(Check), Cleared = CONST(false));
+                DataItemLink = "Bank Account No." = field("Bank Account No."), "Statement No." = field("Statement No.");
+                DataItemTableView = sorting("Bank Account No.", "Statement No.", "Record Type", "Line No.") where("Record Type" = const(Check), Cleared = const(false));
                 column(OutstandingChecks_Amount; Amount)
                 {
                 }
@@ -441,8 +441,8 @@ report 10408 "Bank Reconciliation"
             }
             dataitem(OutstandingDeposits; "Posted Bank Rec. Line")
             {
-                DataItemLink = "Bank Account No." = FIELD("Bank Account No."), "Statement No." = FIELD("Statement No.");
-                DataItemTableView = SORTING("Bank Account No.", "Statement No.", "Record Type", "Line No.") WHERE("Record Type" = CONST(Deposit), Cleared = CONST(false));
+                DataItemLink = "Bank Account No." = field("Bank Account No."), "Statement No." = field("Statement No.");
+                DataItemTableView = sorting("Bank Account No.", "Statement No.", "Record Type", "Line No.") where("Record Type" = const(Deposit), Cleared = const(false));
                 column(OutstandingDeposits_Amount; Amount)
                 {
                 }
@@ -504,7 +504,7 @@ report 10408 "Bank Reconciliation"
 
             trigger OnAfterGetRecord()
             begin
-                SetupRecord;
+                SetupRecord();
 
                 Difference :=
                   ("G/L Balance" +
@@ -547,7 +547,7 @@ report 10408 "Bank Reconciliation"
                                 PrintOutstandingChecks := true;
                                 PrintOutstandingDeposits := true;
                             end;
-                            PrintDetailsOnAfterValidate;
+                            PrintDetailsOnAfterValidate();
                         end;
                     }
                     field(PrintChecks; PrintChecks)
@@ -604,7 +604,7 @@ report 10408 "Bank Reconciliation"
 
         trigger OnOpenPage()
         begin
-            SetupRequestForm;
+            SetupRequestForm();
         end;
     }
 
@@ -627,15 +627,10 @@ report 10408 "Bank Reconciliation"
         Difference: Decimal;
         CompanyInformation: Record "Company Information";
         UpdateBankRecPrinted: Codeunit "BankRec-Printed";
-        [InDataSet]
         PrintOutChecksEditable: Boolean;
-        [InDataSet]
         PrintOutDepositsEditable: Boolean;
-        [InDataSet]
         PrintAdjEditable: Boolean;
-        [InDataSet]
         PrintDepositsEditable: Boolean;
-        [InDataSet]
         PrintChecksEditable: Boolean;
         CurrReport_PAGENOCaptionLbl: Label 'Page';
         Bank_ReconciliationCaptionLbl: Label 'Bank Reconciliation';
@@ -688,12 +683,12 @@ report 10408 "Bank Reconciliation"
 
     procedure SetupRequestForm()
     begin
-        PageSetupRequestForm;
+        PageSetupRequestForm();
     end;
 
     local procedure PrintDetailsOnAfterValidate()
     begin
-        SetupRequestForm;
+        SetupRequestForm();
     end;
 
     local procedure PageSetupRequestForm()

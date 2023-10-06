@@ -1,3 +1,17 @@
+namespace Microsoft.Finance.ReceivablesPayables;
+
+using Microsoft.Finance.Currency;
+using Microsoft.Purchases.Document;
+using Microsoft.Purchases.History;
+using Microsoft.Purchases.Payables;
+using Microsoft.Purchases.Setup;
+using Microsoft.Sales.Customer;
+using Microsoft.Sales.Document;
+using Microsoft.Sales.History;
+using Microsoft.Sales.Receivables;
+using Microsoft.Sales.Setup;
+using System.Threading;
+
 codeunit 441 "Prepayment Mgt."
 {
 
@@ -126,6 +140,9 @@ codeunit 441 "Prepayment Mgt."
         if IsHandled then
             exit(TestResult);
 
+        if SalesHeader."Document Type" = SalesHeader."Document Type"::Quote then
+            exit(false);
+
         SalesLine.SetLoadFields("Prepmt. Line Amount", "Prepmt. Amt. Inv.");
         SalesLine.SetRange("Document Type", SalesHeader."Document Type");
         SalesLine.SetRange("Document No.", SalesHeader."No.");
@@ -147,6 +164,9 @@ codeunit 441 "Prepayment Mgt."
         OnBeforeTestPurchPrepayment(PurchaseHeader, TestResult, IsHandled);
         if IsHandled then
             exit(TestResult);
+
+        if PurchaseHeader."Document Type" = PurchaseHeader."Document Type"::Quote then
+            exit(false);
 
         PurchaseLine.SetLoadFields("Prepmt. Amt. Inv.", "Prepmt. Line Amount");
         PurchaseLine.SetRange("Document Type", PurchaseHeader."Document Type");
@@ -338,7 +358,7 @@ codeunit 441 "Prepayment Mgt."
     end;
 
     [IntegrationEvent(false, false)]
-    local procedure OnBeforeTestSalesPayment(SalesHeader: Record "Sales Header"; var Result: Boolean; var IsHandled: Boolean)
+    local procedure OnBeforeTestSalesPayment(var SalesHeader: Record "Sales Header"; var Result: Boolean; var IsHandled: Boolean)
     begin
     end;
 

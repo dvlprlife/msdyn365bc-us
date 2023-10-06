@@ -1,3 +1,19 @@
+// ------------------------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+// ------------------------------------------------------------------------------------------------
+namespace Microsoft.Utilities;
+
+using System.Environment.Configuration;
+using System.Privacy;
+using Microsoft.Foundation.Address;
+using Microsoft.Foundation.Company;
+using Microsoft.Purchases.Vendor;
+using Microsoft.Sales.Customer;
+using Microsoft.CRM.Contact;
+using Microsoft.Projects.Resources.Resource;
+using Microsoft.HumanResources.Employee;
+
 codeunit 1756 "Data Class. Notification Mgt."
 {
 
@@ -35,7 +51,7 @@ codeunit 1756 "Data Class. Notification Mgt."
         CreateNotification(Notification, DataClassificationNotificationIdTxt, DataClassificationNotificationMsg);
         Notification.AddAction(DataClassificationNotificationActionTxt,
           CODEUNIT::"Data Class. Notification Mgt.", 'OpenDataClassificationWizard');
-        Notification.Send;
+        Notification.Send();
     end;
 
     [Scope('OnPrem')]
@@ -52,7 +68,7 @@ codeunit 1756 "Data Class. Notification Mgt."
 
         CreateNotification(Notification, SyncFieldsNotificationIdTxt, NotificationMessage);
         Notification.AddAction(SyncAllFieldsTxt, CODEUNIT::"Data Class. Notification Mgt.", 'SyncAllFieldsFromNotification');
-        Notification.Send;
+        Notification.Send();
     end;
 
     [Scope('OnPrem')]
@@ -66,7 +82,7 @@ codeunit 1756 "Data Class. Notification Mgt."
 
         CreateNotification(Notification, UnclassifiedFieldsNotificationIdTxt, UnclassifiedFieldsExistMsg);
         Notification.AddAction(OpenWorksheetActionLbl, CODEUNIT::"Data Class. Notification Mgt.", 'OpenClassificationWorksheetPage');
-        Notification.Send;
+        Notification.Send();
     end;
 
     local procedure CreateNotification(var Notification: Notification; Id: Text; Message: Text)
@@ -89,7 +105,7 @@ codeunit 1756 "Data Class. Notification Mgt."
         if not DataSensitivity.WritePermission then
             exit;
 
-        if CompanyInformation.Get then;
+        if CompanyInformation.Get() then;
         if CompanyInformation."Demo Company" then
             exit;
 
@@ -98,8 +114,8 @@ codeunit 1756 "Data Class. Notification Mgt."
         if not DataSensitivity.IsEmpty() then
             FireNotificationForNonEmptyDataSensitivityTable(DataSensitivity)
         else
-            if CompanyInformationMgt.IsEUCompany(CompanyInformation) and DataClassificationMgt.DataPrivacyEntitiesExist then
-                FireDataClassificationNotification
+            if CompanyInformationMgt.IsEUCompany(CompanyInformation) and DataClassificationMgt.DataPrivacyEntitiesExist() then
+                FireDataClassificationNotification()
             else begin
                 CountryRegion.SetFilter("EU Country/Region Code", '<>%1', '');
                 RecRef.GetTable(CountryRegion);
@@ -112,7 +128,7 @@ codeunit 1756 "Data Class. Notification Mgt."
                    CompanyHasContactsInRegion(EURegionFilter) or CompanyHasResourcesInRegion(EURegionFilter) or
                    CompanyHasEmployeesInRegion(EURegionFilter)
                 then
-                    FireDataClassificationNotification;
+                    FireDataClassificationNotification();
             end;
     end;
 
@@ -120,9 +136,9 @@ codeunit 1756 "Data Class. Notification Mgt."
     begin
         DataSensitivity.SetRange("Data Sensitivity", DataSensitivity."Data Sensitivity"::Unclassified);
         if DataSensitivity.FindFirst() then
-            FireUnclassifiedFieldsNotification
+            FireUnclassifiedFieldsNotification()
         else
-            ShowSyncFieldsNotificationIfThereAreUnsynchedFields;
+            ShowSyncFieldsNotificationIfThereAreUnsynchedFields();
     end;
 
     local procedure CompanyHasVendorsInRegion(RegionFilter: Text): Boolean
@@ -183,13 +199,13 @@ codeunit 1756 "Data Class. Notification Mgt."
         MyNotifications: Record "My Notifications";
     begin
         case Notification.Id of
-            GetDataClassificationNotificationId:
+            GetDataClassificationNotificationId():
                 MyNotifications.InsertDefault(Notification.Id, ReviewPrivacySettingsNotificationTxt,
                   ReviewPrivacySettingsNotificationDescriptionTxt, false);
-            GetSyncFieldsNotificationId:
+            GetSyncFieldsNotificationId():
                 MyNotifications.InsertDefault(Notification.Id, SyncFieldsReminderNotificationTxt,
                   SyncFieldsReminderNotificationDescriptionTxt, false);
-            GetUnclassifiedFieldsNotificationId:
+            GetUnclassifiedFieldsNotificationId():
                 MyNotifications.InsertDefault(Notification.Id, UnclassifiedFieldsNotificationTxt,
                   UnclassifiedFieldsNotificationDescriptionTxt, false);
         end;
@@ -204,7 +220,7 @@ codeunit 1756 "Data Class. Notification Mgt."
         DaysSinceLastSync: Integer;
         LastStatusSyncDateTime: DateTime;
     begin
-        if CompanyInformation.Get then;
+        if CompanyInformation.Get() then;
         if CompanyInformation."Demo Company" then
             exit;
 
@@ -274,8 +290,8 @@ codeunit 1756 "Data Class. Notification Mgt."
     var
         DataClassificationMgt: Codeunit "Data Classification Mgt.";
     begin
-        DataClassificationMgt.SyncAllFields;
-        ShowNotificationIfThereAreUnclassifiedFields;
+        DataClassificationMgt.SyncAllFields();
+        ShowNotificationIfThereAreUnclassifiedFields();
     end;
 
     [Scope('OnPrem')]
@@ -284,20 +300,20 @@ codeunit 1756 "Data Class. Notification Mgt."
         CompanyInformation: Record "Company Information";
         DataClassificationMgt: Codeunit "Data Classification Mgt.";
     begin
-        if DataClassificationMgt.AreAllFieldsClassified then
+        if DataClassificationMgt.AreAllFieldsClassified() then
             exit;
 
-        if CompanyInformation.Get then;
+        if CompanyInformation.Get() then;
         if CompanyInformation."Demo Company" then
             exit;
 
-        FireUnclassifiedFieldsNotification;
+        FireUnclassifiedFieldsNotification();
     end;
 
     [EventSubscriber(ObjectType::Codeunit, Codeunit::"Data Classification Mgt.", 'OnShowSyncFieldsNotification', '', false, false)]
     local procedure OnShowSyncFieldsNotificationSubscriber()
     begin
-        ShowSyncFieldsNotificationIfThereAreUnsynchedFields;
+        ShowSyncFieldsNotificationIfThereAreUnsynchedFields();
     end;
 }
 

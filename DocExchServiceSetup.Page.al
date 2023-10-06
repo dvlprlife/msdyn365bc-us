@@ -1,3 +1,10 @@
+namespace Microsoft.EServices.EDocument;
+
+using Microsoft.Utilities;
+using System.Environment;
+using System.Security.Encryption;
+using System.Telemetry;
+
 page 1275 "Doc. Exch. Service Setup"
 {
     AdditionalSearchTerms = 'electronic document,e-invoice,incoming document,ocr,ecommerce';
@@ -7,7 +14,6 @@ page 1275 "Doc. Exch. Service Setup"
     InsertAllowed = false;
     LinksAllowed = false;
     PageType = Card;
-    PromotedActionCategories = 'New,Process,Page,Encryption';
     ShowFilter = false;
     SourceTable = "Doc. Exch. Service Setup";
     UsageCategory = Administration;
@@ -19,34 +25,13 @@ page 1275 "Doc. Exch. Service Setup"
             group(General)
             {
                 Caption = 'General';
-                field("User Agent"; "User Agent")
+                field("User Agent"; Rec."User Agent")
                 {
                     ApplicationArea = Basic, Suite;
                     Editable = EditableByNotEnabled;
                     ShowMandatory = true;
                     ToolTip = 'Specifies any text that you have entered to identify your company in document exchange processes.';
                 }
-#if not CLEAN19
-                field(DocExchTenantID; DocExchTenantID)
-                {
-                    ApplicationArea = Basic, Suite;
-                    Caption = 'Doc. Exch. Tenant ID';
-                    Visible = false;
-                    Editable = EditableByNotEnabled;
-                    ExtendedDatatype = Masked;
-                    ShowMandatory = true;
-                    StyleExpr = TRUE;
-                    ToolTip = 'Specifies the tenant in the document exchange service that represents your company.';
-                    ObsoleteState = Pending;
-                    ObsoleteReason = 'Authentication with OAuth 1.0 is deprecated.';
-                    ObsoleteTag = '19.0';
-
-                    trigger OnValidate()
-                    begin
-                        SavePassword("Doc. Exch. Tenant ID", DocExchTenantID);
-                    end;
-                }
-#endif
                 field(Sandbox; Sandbox)
                 {
                     Caption = 'Sandbox';
@@ -57,51 +42,38 @@ page 1275 "Doc. Exch. Service Setup"
 
                     trigger OnValidate()
                     begin
-                        SetURLsToDefault(Sandbox);
+                        Rec.SetURLsToDefault(Sandbox);
                         AppUrl := DocExchServiceMgt.GetAppUrl(Rec);
                         CurrPage.SaveRecord();
                         DocExchServiceMgt.SendActivateAppNotification();
                     end;
                 }
-                field(Enabled; Enabled)
+                field(Enabled; Rec.Enabled)
                 {
                     ApplicationArea = Basic, Suite;
                     ToolTip = 'Specifies if the service is enabled. When you enable the service, at least two job queue entries are created to process the traffic of electronic documents in and out of Microsoft Dynamics 365.';
 
                     trigger OnValidate()
                     begin
-                        if IsEnabledChanged() then begin
+                        if Rec.IsEnabledChanged() then begin
                             CurrPage.Update(true);
                             UpdateBasedOnEnable();
                         end;
                     end;
                 }
-#if not CLEAN19
-                field(ShowEnableWarning; ShowEnableWarning)
-                {
-                    ShowCaption = false;
-                    ApplicationArea = Basic, Suite;
-                    Editable = false;
-                    Visible = false;
-                    Enabled = false;
-                    ObsoleteState = Pending;
-                    ObsoleteReason = 'Authentication with OAuth 1.0 is deprecated.';
-                    ObsoleteTag = '19.0';
-                }
-#endif
             }
             group(Token)
             {
                 Caption = 'Token';
                 Visible = StatusVisible;
-                field("Token Issued At"; "Token Issued At")
+                field("Token Issued At"; Rec."Token Issued At")
                 {
                     Caption = 'Issued At';
                     ApplicationArea = Basic, Suite;
                     Editable = false;
                     ToolTip = 'Specifies the time at which the token was issued.';
                 }
-                field("Token Expired"; "Token Expired")
+                field("Token Expired"; Rec."Token Expired")
                 {
                     Caption = 'Expired';
                     ApplicationArea = Basic, Suite;
@@ -118,7 +90,7 @@ page 1275 "Doc. Exch. Service Setup"
                         if not Confirm(RenewExpiredTokenQst) then
                             exit;
                         DocExchServiceMgt.RenewToken(false);
-                        Get();
+                        Rec.Get();
                         CurrPage.Update(false);
                     end;
                 }
@@ -126,14 +98,14 @@ page 1275 "Doc. Exch. Service Setup"
             group(Service)
             {
                 Caption = 'Service';
-                field("Sign-up URL"; "Sign-up URL")
+                field("Sign-up URL"; Rec."Sign-up URL")
                 {
                     ApplicationArea = Basic, Suite;
                     Editable = EditableByNotEnabled;
                     ToolTip = 'Specifies the web page where you sign up for the document exchange service.';
 
                 }
-                field("Sign-in URL"; "Sign-in URL")
+                field("Sign-in URL"; Rec."Sign-in URL")
                 {
                     ApplicationArea = Basic, Suite;
                     Editable = EditableByNotEnabled;
@@ -152,7 +124,7 @@ page 1275 "Doc. Exch. Service Setup"
                     ExtendedDatatype = URL;
                     ToolTip = 'Specifies the app URL in the document exchange service app store.';
                 }
-                field("Service URL"; "Service URL")
+                field("Service URL"; Rec."Service URL")
                 {
                     ApplicationArea = Basic, Suite;
                     Editable = EditableByNotEnabled;
@@ -164,7 +136,7 @@ page 1275 "Doc. Exch. Service Setup"
                         Sandbox := DocExchServiceMgt.IsSandbox(Rec);
                     end;
                 }
-                field("Auth URL"; "Auth URL")
+                field("Auth URL"; Rec."Auth URL")
                 {
                     ApplicationArea = Basic, Suite;
                     Visible = OAuth2Visible;
@@ -172,7 +144,7 @@ page 1275 "Doc. Exch. Service Setup"
                     ShowMandatory = true;
                     ToolTip = 'Specifies the authentication URL address of the document exchange service.';
                 }
-                field("Token URL"; "Token URL")
+                field("Token URL"; Rec."Token URL")
                 {
                     ApplicationArea = Basic, Suite;
                     Visible = OAuth2Visible;
@@ -180,7 +152,7 @@ page 1275 "Doc. Exch. Service Setup"
                     ShowMandatory = true;
                     ToolTip = 'Specifies the token URL address of the document exchange service.';
                 }
-                field("Log Web Requests"; "Log Web Requests")
+                field("Log Web Requests"; Rec."Log Web Requests")
                 {
                     ApplicationArea = Basic, Suite;
                     Editable = EditableByNotEnabled;
@@ -191,101 +163,7 @@ page 1275 "Doc. Exch. Service Setup"
             {
                 Caption = 'Authorization';
                 Visible = OAuth2Visible;
-#if not CLEAN19
-                group(Consumer)
-                {
-                    Caption = 'Consumer';
-                    Visible = false;
-                    ObsoleteState = Pending;
-                    ObsoleteReason = 'Authentication with OAuth 1.0 is deprecated.';
-                    ObsoleteTag = '19.0';
-                    field(ConsumerKey; ConsumerKey)
-                    {
-                        ApplicationArea = Basic, Suite;
-                        Caption = 'Consumer Key';
-                        Editable = EditableByNotEnabled;
-                        ExtendedDatatype = Masked;
-                        ShowMandatory = true;
-                        ToolTip = 'Specifies the 3-legged OAuth key for the consumer key. This is provided by the document exchange service provider.';
-                        ObsoleteState = Pending;
-                        ObsoleteReason = 'Authentication with OAuth 1.0 is deprecated.';
-                        ObsoleteTag = '19.0';
-
-                        trigger OnValidate()
-                        begin
-                            SavePassword("Consumer Key", ConsumerKey);
-                            if ConsumerKey <> '' then
-                                CheckEncryption();
-                        end;
-                    }
-                    field(ConsumerSecret; ConsumerSecret)
-                    {
-                        ApplicationArea = Basic, Suite;
-                        Caption = 'Consumer Secret';
-                        Editable = EditableByNotEnabled;
-                        ExtendedDatatype = Masked;
-                        ShowMandatory = true;
-                        ToolTip = 'Specifies the secret that protects the consumer key that you enter in the Consumer Key field.';
-                        ObsoleteState = Pending;
-                        ObsoleteReason = 'Authentication with OAuth 1.0 is deprecated.';
-                        ObsoleteTag = '19.0';
-
-                        trigger OnValidate()
-                        begin
-                            SavePassword("Consumer Secret", ConsumerSecret);
-                            if ConsumerSecret <> '' then
-                                CheckEncryption();
-                        end;
-                    }
-                }
-                group(Tokens)
-                {
-                    Caption = 'Tokens';
-                    Visible = false;
-                    ObsoleteState = Pending;
-                    ObsoleteReason = 'Authentication with OAuth 1.0 is deprecated.';
-                    ObsoleteTag = '19.0';
-                    field(TokenValue; TokenValue)
-                    {
-                        ApplicationArea = Basic, Suite;
-                        Caption = 'Token';
-                        Editable = EditableByNotEnabled;
-                        ExtendedDatatype = Masked;
-                        ShowMandatory = true;
-                        ToolTip = 'Specifies a 3-legged OAuth key for Token. This is provided by the document exchange service provider.';
-                        ObsoleteState = Pending;
-                        ObsoleteReason = 'Authentication with OAuth 1.0 is deprecated.';
-                        ObsoleteTag = '19.0';
-
-                        trigger OnValidate()
-                        begin
-                            SavePassword(Token, TokenValue);
-                            if TokenValue <> '' then
-                                CheckEncryption();
-                        end;
-                    }
-                    field(TokenSecret; TokenSecret)
-                    {
-                        ApplicationArea = Basic, Suite;
-                        Caption = 'Token Secret';
-                        Editable = EditableByNotEnabled;
-                        ExtendedDatatype = Masked;
-                        ShowMandatory = true;
-                        ToolTip = 'Specifies the 3-legged OAuth key for the token that you enter in the Token field.';
-                        ObsoleteState = Pending;
-                        ObsoleteReason = 'Authentication with OAuth 1.0 is deprecated.';
-                        ObsoleteTag = '19.0';
-
-                        trigger OnValidate()
-                        begin
-                            SavePassword("Token Secret", TokenSecret);
-                            if TokenSecret <> '' then
-                                CheckEncryption();
-                        end;
-                    }
-                }
-#endif
-                field("Client Id"; "Client Id")
+                field("Client Id"; Rec."Client Id")
                 {
                     Caption = 'Client ID';
                     ApplicationArea = Basic, Suite;
@@ -328,14 +206,14 @@ page 1275 "Doc. Exch. Service Setup"
                             ClientSecret := SavedClientSecret;
                             exit;
                         end;
-                        if not IsTemporary() then
+                        if not Rec.IsTemporary() then
                             if ClientSecret <> '' then
                                 CheckEncryption();
-                        SetClientSecret(ClientSecret);
+                        Rec.SetClientSecret(ClientSecret);
                         SavedClientSecret := ClientSecret;
                     end;
                 }
-                field("Redirect URL"; "Redirect URL")
+                field("Redirect URL"; Rec."Redirect URL")
                 {
                     ApplicationArea = Basic, Suite;
                     Editable = EditableByNotEnabled and not SoftwareAsAService;
@@ -355,13 +233,11 @@ page 1275 "Doc. Exch. Service Setup"
                 Caption = 'Set URLs to Default';
                 Enabled = EditableByNotEnabled;
                 Image = Restore;
-                Promoted = true;
-                PromotedCategory = Process;
                 ToolTip = 'Change the service, sign-up, and sign-in URLs back to their default values. The changes occur immediately when you choose this action.';
 
                 trigger OnAction()
                 begin
-                    SetURLsToDefault(Sandbox);
+                    Rec.SetURLsToDefault(Sandbox);
                     AppUrl := DocExchServiceMgt.GetAppUrl(Rec);
                 end;
             }
@@ -370,8 +246,6 @@ page 1275 "Doc. Exch. Service Setup"
                 ApplicationArea = Basic, Suite;
                 Caption = 'Renew Token';
                 Image = Restore;
-                Promoted = true;
-                PromotedCategory = Process;
                 ToolTip = 'Renew the token for connecting to the document exchange service. This might require administrator account credentials for the document exchange service.';
 
                 trigger OnAction()
@@ -379,7 +253,7 @@ page 1275 "Doc. Exch. Service Setup"
                     if not Confirm(RenewTokenQst) then
                         exit;
                     DocExchServiceMgt.RenewToken(true);
-                    Get();
+                    Rec.Get();
                     CurrPage.Update(false);
                 end;
             }
@@ -388,15 +262,12 @@ page 1275 "Doc. Exch. Service Setup"
                 ApplicationArea = Basic, Suite;
                 Caption = 'Test Connection';
                 Image = Link;
-                Promoted = true;
-                PromotedCategory = Process;
-                PromotedIsBig = true;
                 ToolTip = 'Check that the settings that you added are correct and the connection to the document exchange service is working.';
 
                 trigger OnAction()
                 begin
-                    CheckConnection();
-                    Get();
+                    Rec.CheckConnection();
+                    Rec.Get();
                     CurrPage.Update(false);
                 end;
             }
@@ -404,15 +275,13 @@ page 1275 "Doc. Exch. Service Setup"
             {
                 ApplicationArea = Basic, Suite;
                 Caption = 'Job Queue Entry';
-                Enabled = Enabled;
+                Enabled = Rec.Enabled;
                 Image = JobListSetup;
-                Promoted = true;
-                PromotedCategory = Process;
                 ToolTip = 'View or edit the jobs that automatically process the incoming and outgoing electronic documents.';
 
                 trigger OnAction()
                 begin
-                    ShowJobQueueEntry();
+                    Rec.ShowJobQueueEntry();
                 end;
             }
         }
@@ -423,9 +292,6 @@ page 1275 "Doc. Exch. Service Setup"
                 ApplicationArea = Basic, Suite;
                 Caption = 'Encryption Management';
                 Image = EncryptionKeys;
-                Promoted = true;
-                PromotedCategory = Category4;
-                PromotedIsBig = true;
                 RunObject = Page "Data Encryption Management";
                 RunPageMode = View;
                 ToolTip = 'Enable or disable data encryption. Data encryption helps make sure that unauthorized users cannot read business data.';
@@ -445,6 +311,38 @@ page 1275 "Doc. Exch. Service Setup"
                 end;
             }
         }
+        area(Promoted)
+        {
+            group(Category_Process)
+            {
+                Caption = 'Process', Comment = 'Generated from the PromotedActionCategories property index 1.';
+
+                actionref(TestConnection_Promoted; TestConnection)
+                {
+                }
+                actionref(SetURLsToDefault_Promoted; SetURLsToDefault)
+                {
+                }
+                actionref(RenewToken_Promoted; RenewToken)
+                {
+                }
+                actionref(JobQueueEntry_Promoted; JobQueueEntry)
+                {
+                }
+            }
+            group(Category_Report)
+            {
+                Caption = 'Page', Comment = 'Generated from the PromotedActionCategories property index 2.';
+            }
+            group(Category_Category4)
+            {
+                Caption = 'Encryption', Comment = 'Generated from the PromotedActionCategories property index 3.';
+
+                actionref(EncryptionManagement_Promoted; EncryptionManagement)
+                {
+                }
+            }
+        }
     }
 
     trigger OnAfterGetCurrRecord()
@@ -455,36 +353,38 @@ page 1275 "Doc. Exch. Service Setup"
 
     trigger OnAfterGetRecord()
     begin
-        EditableByNotEnabled := not Enabled;
+        EditableByNotEnabled := not Rec.Enabled;
     end;
 
     trigger OnOpenPage()
     var
+        FeatureTelemetry: Codeunit "Feature Telemetry";
         ClientId: Text;
     begin
-        Reset();
-        if not Get() then begin
-            Init();
-            SetURLsToDefault(false);
-            Insert(true);
+        Rec.Reset();
+        FeatureTelemetry.LogUptake('0000IM8', DocExchServiceMgt.GetFeatureTelemetryName(), Enum::"Feature Uptake Status"::Discovered);
+        if not Rec.Get() then begin
+            Rec.Init();
+            Rec.SetURLsToDefault(false);
+            Rec.Insert(true);
         end;
         Sandbox := DocExchServiceMgt.IsSandbox(Rec);
         AppUrl := DocExchServiceMgt.GetAppUrl(Rec);
-        ClientSecret := GetClientSecret();
+        ClientSecret := Rec.GetClientSecret();
         SavedClientSecret := ClientSecret;
-        if ("Redirect URL" = '') or (SoftwareAsAservice and ("Redirect URL" <> DocExchServiceMgt.GetDefaultRedirectUrl())) then begin
-            SetDefaultRedirectUrl();
-            Modify();
+        if (Rec."Redirect URL" = '') or (SoftwareAsAservice and (Rec."Redirect URL" <> DocExchServiceMgt.GetDefaultRedirectUrl())) then begin
+            Rec.SetDefaultRedirectUrl();
+            Rec.Modify();
         end;
         UpdateBasedOnEnable();
 
-        if Enabled and "Token Expired" then begin
+        if Rec.Enabled and Rec."Token Expired" then begin
             DocExchServiceMgt.SendRenewTokenNotification();
             exit;
         end;
 
         ClientId := DocExchServiceMgt.GetClientId(Sandbox);
-        if (ClientId <> '') and ("Token Issued At" = 0DT) then
+        if (ClientId <> '') and (Rec."Token Issued At" = 0DT) then
             DocExchServiceMgt.SendActivateAppNotification();
     end;
 
@@ -501,21 +401,13 @@ page 1275 "Doc. Exch. Service Setup"
 
     trigger OnQueryClosePage(CloseAction: Action): Boolean
     begin
-        if not Enabled then
+        if not Rec.Enabled then
             if not Confirm(StrSubstNo(EnableServiceQst, CurrPage.Caption), true) then
                 exit(false);
     end;
 
     var
         DocExchServiceMgt: Codeunit "Doc. Exch. Service Mgt.";
-#if not CLEAN19
-        ConsumerKey: Text[50];
-        ConsumerSecret: Text[50];
-        TokenValue: Text[50];
-        TokenSecret: Text[50];
-        DocExchTenantID: Text[50];
-        ShowEnableWarning: Text;
-#endif
         Sandbox: Boolean;
         OAuth2Visible: Boolean;
         StatusVisible: Boolean;
@@ -537,13 +429,13 @@ page 1275 "Doc. Exch. Service Setup"
 
     local procedure UpdateBasedOnEnable()
     begin
-        StatusVisible := Enabled;
-        EditableByNotEnabled := not Enabled;
+        StatusVisible := Rec.Enabled;
+        EditableByNotEnabled := not Rec.Enabled;
     end;
 
     local procedure SetStyleExpr()
     begin
-        TokenStatus := not "Token Expired";
+        TokenStatus := not Rec."Token Expired";
         TokenStyleExpr := GetStyleExpr(TokenStatus);
     end;
 

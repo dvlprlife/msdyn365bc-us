@@ -1,3 +1,19 @@
+﻿namespace Microsoft.Inventory.Planning;
+
+using Microsoft.Finance.Currency;
+using Microsoft.Foundation.NoSeries;
+using Microsoft.Inventory.Item;
+using Microsoft.Inventory.Location;
+using Microsoft.Inventory.Requisition;
+using Microsoft.Inventory.Transfer;
+using Microsoft.Manufacturing.MachineCenter;
+using Microsoft.Manufacturing.ProductionBOM;
+using Microsoft.Manufacturing.Routing;
+using Microsoft.Manufacturing.Setup;
+using Microsoft.Manufacturing.WorkCenter;
+using Microsoft.Purchases.Vendor;
+using System.Reflection;
+
 table 5430 "Planning Error Log"
 {
     Caption = 'Planning Error Log';
@@ -15,7 +31,7 @@ table 5430 "Planning Error Log"
         field(2; "Journal Batch Name"; Code[10])
         {
             Caption = 'Journal Batch Name';
-            TableRelation = "Requisition Wksh. Name".Name WHERE("Worksheet Template Name" = FIELD("Worksheet Template Name"));
+            TableRelation = "Requisition Wksh. Name".Name where("Worksheet Template Name" = field("Worksheet Template Name"));
         }
         field(3; "Entry No."; Integer)
         {
@@ -33,7 +49,7 @@ table 5430 "Planning Error Log"
         field(6; "Table ID"; Integer)
         {
             Caption = 'Table ID';
-            TableRelation = AllObjWithCaption."Object ID" WHERE("Object Type" = CONST(Table));
+            TableRelation = AllObjWithCaption."Object ID" where("Object Type" = const(Table));
         }
         field(7; "Table Position"; Text[250])
         {
@@ -83,14 +99,14 @@ table 5430 "Planning Error Log"
         "Error Description" := TheError;
         "Table ID" := TheTableID;
         "Table Position" := TheTablePosition;
-        Insert;
+        Insert();
     end;
 
     procedure GetError(var PlanningErrorLog: Record "Planning Error Log"): Boolean
     begin
         if not Find('-') then
             exit(false);
-        Delete;
+        Delete();
         PlanningErrorLog.SetRange("Worksheet Template Name", "Worksheet Template Name");
         PlanningErrorLog.SetRange("Journal Batch Name", "Journal Batch Name");
         if PlanningErrorLog.Find('+') then
@@ -127,67 +143,67 @@ table 5430 "Planning Error Log"
             DATABASE::Item:
                 begin
                     RecRef.SetTable(Item);
-                    Item.SetRecFilter;
+                    Item.SetRecFilter();
                     PAGE.RunModal(PAGE::"Item Card", Item);
                 end;
             DATABASE::"Stockkeeping Unit":
                 begin
                     RecRef.SetTable(SKU);
-                    SKU.SetRecFilter;
+                    SKU.SetRecFilter();
                     PAGE.RunModal(PAGE::"Stockkeeping Unit Card", SKU);
                 end;
             DATABASE::Currency:
                 begin
                     RecRef.SetTable(Currency);
-                    Currency.SetRecFilter;
+                    Currency.SetRecFilter();
                     PAGE.RunModal(PAGE::Currencies, Currency);
                 end;
             DATABASE::Vendor:
                 begin
                     RecRef.SetTable(Vendor);
-                    Vendor.SetRecFilter;
+                    Vendor.SetRecFilter();
                     PAGE.RunModal(PAGE::"Vendor Card", Vendor);
                 end;
             DATABASE::"No. Series":
                 begin
                     RecRef.SetTable(NoSeries);
-                    NoSeries.SetRecFilter;
+                    NoSeries.SetRecFilter();
                     PAGE.RunModal(PAGE::"No. Series", NoSeries);
                 end;
             DATABASE::"Production BOM Header":
                 begin
                     RecRef.SetTable(ProdBOMHeader);
-                    ProdBOMHeader.SetRecFilter;
+                    ProdBOMHeader.SetRecFilter();
                     PAGE.RunModal(PAGE::"Production BOM", ProdBOMHeader);
                 end;
             DATABASE::"Routing Header":
                 begin
                     RecRef.SetTable(RtngHeader);
-                    RtngHeader.SetRecFilter;
+                    RtngHeader.SetRecFilter();
                     PAGE.RunModal(PAGE::Routing, RtngHeader);
                 end;
             DATABASE::"Production BOM Version":
                 begin
                     RecRef.SetTable(ProdBOMVersion);
-                    ProdBOMVersion.SetRecFilter;
+                    ProdBOMVersion.SetRecFilter();
                     PAGE.RunModal(PAGE::"Production BOM Version", ProdBOMVersion);
                 end;
             DATABASE::"Routing Version":
                 begin
                     RecRef.SetTable(RtngVersion);
-                    RtngVersion.SetRecFilter;
+                    RtngVersion.SetRecFilter();
                     PAGE.RunModal(PAGE::"Routing Version", RtngVersion);
                 end;
             DATABASE::"Machine Center":
                 begin
                     RecRef.SetTable(MachCenter);
-                    MachCenter.SetRecFilter;
+                    MachCenter.SetRecFilter();
                     PAGE.RunModal(PAGE::"Machine Center Card", MachCenter);
                 end;
             DATABASE::"Work Center":
                 begin
                     RecRef.SetTable(WorkCenter);
-                    WorkCenter.SetRecFilter;
+                    WorkCenter.SetRecFilter();
                     PAGE.RunModal(PAGE::"Work Center Card", WorkCenter);
                 end;
             DATABASE::"Manufacturing Setup":

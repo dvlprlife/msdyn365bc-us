@@ -1,3 +1,7 @@
+namespace Microsoft.CRM.Outlook;
+
+using System.Reflection;
+
 codeunit 5302 "Outlook Synch. Type Conv"
 {
 
@@ -195,26 +199,23 @@ codeunit 5302 "Outlook Synch. Type Conv"
                             FieldRef.Validate(TextVar1);
                     end else
                         FieldRef.Value := PadStr(InputText, FieldRef.Length);
-                end else begin
+                end else
                     if ToValidate then begin
                         TextVar := FieldRef.Value;
                         if TextVar <> InputText then
                             FieldRef.Validate(InputText);
                     end else
                         FieldRef.Value := InputText;
-                end;
             FieldType::DateFormula:
-                begin
-                    if TextToDateFormula(InputText, DateFormulaVar) then begin
-                        if ToValidate then begin
-                            DateFormulaVar1 := FieldRef.Value;
-                            if DateFormulaVar1 <> DateFormulaVar then
-                                FieldRef.Validate(DateFormulaVar);
-                        end else
-                            FieldRef.Value := DateFormulaVar;
+                if TextToDateFormula(InputText, DateFormulaVar) then begin
+                    if ToValidate then begin
+                        DateFormulaVar1 := FieldRef.Value;
+                        if DateFormulaVar1 <> DateFormulaVar then
+                            FieldRef.Validate(DateFormulaVar);
                     end else
-                        exit(false);
-                end;
+                        FieldRef.Value := DateFormulaVar;
+                end else
+                    exit(false);
             else
                 exit(false);
         end;
@@ -237,10 +238,9 @@ codeunit 5302 "Outlook Synch. Type Conv"
                 IntVar := -1;
         end else begin
             IntVar := -1;
-            for Counter := 1 to GetOptionsQuantity(OptionString) + 1 do begin
+            for Counter := 1 to GetOptionsQuantity(OptionString) + 1 do
                 if UpperCase(GetSubStrByNo(Counter, OptionString)) = UpperCase(InputText) then
                     IntVar := Counter - 1;
-            end;
         end;
 
         exit(IntVar);
@@ -365,7 +365,13 @@ codeunit 5302 "Outlook Synch. Type Conv"
     local procedure TextToTime(InputText: Text; var TimeVar: Time; UseLocalTime: Boolean) IsConverted: Boolean
     var
         DateTimeVar: DateTime;
+        IsHandled: Boolean;
     begin
+        IsHandled := false;
+        OnBeforeTextToTime(InputText, TimeVar, UseLocalTime, IsConverted, IsHandled);
+        if IsHandled then
+            exit(IsConverted);
+
         InputText := ConvertStr(InputText, ' ', ',');
         if StrPos(InputText, ',') = 0 then
             exit;
@@ -397,10 +403,9 @@ codeunit 5302 "Outlook Synch. Type Conv"
 
         if DateVar <> 0D then
             DateTimeVar := UTC2LocalDT(CreateDateTime(DateVar, TimeVar))
-        else begin
+        else
             if TimeVar <> 0T then
                 DateTimeVar := CreateDateTime(Today, TimeVar);
-        end;
     end;
 
     procedure TextToDuration(InputText: Text; var DurationVar: Duration) IsConverted: Boolean
@@ -624,7 +629,7 @@ codeunit 5302 "Outlook Synch. Type Conv"
         Bool: Boolean;
     begin
         if FldRef.Class = FieldClass::FlowField then
-            FldRef.CalcField;
+            FldRef.CalcField();
 
         case FldRef.Type of
             FieldType::Option:
@@ -674,10 +679,10 @@ codeunit 5302 "Outlook Synch. Type Conv"
             FieldType::GUID:
                 OutText := Format(FldRef.Value);
             else begin
-                    RecID := FldRef.Record.RecordId;
-                    Field.Get(RecID.TableNo, FldRef.Number);
-                    Error(Text003, Field."Field Caption", FldRef.Record.Caption);
-                end;
+                RecID := FldRef.Record().RecordId;
+                Field.Get(RecID.TableNo, FldRef.Number);
+                Error(Text003, Field."Field Caption", FldRef.Record().Caption);
+            end;
         end;
     end;
 
@@ -731,10 +736,10 @@ codeunit 5302 "Outlook Synch. Type Conv"
                     OutText := Format(BigInt);
                 end;
             else begin
-                    RecID := FldRef.Record.RecordId;
-                    Field.Get(RecID.TableNo, FldRef.Number);
-                    Error(Text003, FldRef.Caption, FldRef.Record.Caption);
-                end;
+                RecID := FldRef.Record().RecordId;
+                Field.Get(RecID.TableNo, FldRef.Number);
+                Error(Text003, FldRef.Caption, FldRef.Record().Caption);
+            end;
         end;
     end;
 
@@ -832,7 +837,7 @@ codeunit 5302 "Outlook Synch. Type Conv"
         OptionRecordRef.Open(TableId);
         OptionFieldRef := OptionRecordRef.Field(FieldId);
         OptionCaption := OptionFieldRef.OptionCaption;
-        OptionRecordRef.Close;
+        OptionRecordRef.Close();
     end;
 
     procedure RunningUTC(): Boolean
@@ -879,6 +884,11 @@ codeunit 5302 "Outlook Synch. Type Conv"
 
     [IntegrationEvent(false, false)]
     local procedure OnBeforeTextToDecimal(InputText: Text; var DecVar: Decimal; var IsConverted: Boolean; var IsHandled: Boolean);
+    begin
+    end;
+
+    [IntegrationEvent(false, false)]
+    local procedure OnBeforeTextToTime(InputText: Text; var TimeVar: Time; var UseLocalTime: Boolean; var IsConverted: Boolean; var IsHandled: Boolean);
     begin
     end;
 }

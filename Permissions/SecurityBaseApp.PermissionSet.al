@@ -1,3 +1,16 @@
+namespace System.Security.AccessControl;
+
+using System.Environment.Configuration;
+using System.Diagnostics;
+using Microsoft.Foundation.Company;
+using System.Tooling;
+using Microsoft.Finance.GeneralLedger.Setup;
+using System.Privacy;
+using System.Security.User;
+using Microsoft.Utilities;
+using Microsoft.Finance.VAT.Setup;
+using Microsoft;
+
 permissionset 7372 "Security - Baseapp"
 {
     Access = Internal;
@@ -14,21 +27,21 @@ permissionset 7372 "Security - Baseapp"
                   tabledata "Designer Diagnostic" = RIMD,
                   tabledata "Experience Tier Setup" = R,
                   tabledata "General Ledger Setup" = R,
+                  tabledata "VAT Setup" = R,
                   tabledata "Permission Buffer" = RIMD,
                   tabledata "Permission Set Buffer" = RIMD,
                   tabledata "Permission Set Link" = rimd,
-#if not CLEAN20
-                  tabledata "Plan Permission Set" = Rimd,
-#endif
                   tabledata "Profile Designer Diagnostic" = RIMD,
                   tabledata "Profile Import" = RIMD,
                   tabledata "Support Contact Information" = Rimd,
                   tabledata "Terms And Conditions" = RIM,
                   tabledata "Terms And Conditions State" = RIM,
+#if not CLEAN22
                   tabledata "User Group" = RIMD,
                   tabledata "User Group Access Control" = RIMD,
                   tabledata "User Group Member" = RIMD,
                   tabledata "User Group Permission Set" = RIMD,
                   tabledata "User Group Plan" = RIMD,
+#endif
                   tabledata "User Security Status" = RIMD;
 }

@@ -1,3 +1,33 @@
+namespace System.Security.AccessControl;
+
+using Microsoft.Finance.Analysis;
+using Microsoft.Finance.Currency;
+using Microsoft.Sales.Customer;
+using Microsoft.Pricing.Calculation;
+using Microsoft.Pricing.PriceList;
+using Microsoft.HumanResources.Employee;
+using Microsoft.Finance.GeneralLedger.Account;
+using Microsoft.Finance.GeneralLedger.Ledger;
+using Microsoft.Finance.GeneralLedger.Setup;
+using Microsoft.Inventory.Item;
+using Microsoft.Inventory.Ledger;
+using Microsoft.Pricing.Asset;
+using Microsoft.Pricing.Source;
+using Microsoft.Pricing.Worksheet;
+using Microsoft.Inventory.Tracking;
+using Microsoft.Sales.Pricing;
+using Microsoft.Inventory.Location;
+using Microsoft.Purchases.Vendor;
+using Microsoft.Inventory.Costing;
+using Microsoft.Foundation.BatchProcessing;
+using Microsoft.Foundation.Period;
+using Microsoft.Utilities;
+using Microsoft.Foundation.AuditCodes;
+using Microsoft.Finance.VAT.Setup;
+using Microsoft.Finance.VAT.RateChange;
+using Microsoft.Finance.VAT.Reporting;
+using Microsoft.Finance.VAT.Calculation;
+
 permissionset 4936 "Inventory - Periodic"
 {
     Access = Public;
@@ -43,11 +73,11 @@ permissionset 4936 "Inventory - Periodic"
                   tabledata "Reservation Entry" = Rimd,
                   tabledata "Responsibility Center" = R,
                   tabledata "Rounding Method" = R,
-#if not CLEAN19
+#if not CLEAN21
                   tabledata "Sales Price" = RIMD,
 #endif
                   tabledata "Sales Price Access" = RIMD,
-#if not CLEAN19
+#if not CLEAN21
                   tabledata "Sales Price Worksheet" = RIMD,
 #endif
                   tabledata "Source Code Setup" = R,
@@ -64,6 +94,8 @@ permissionset 4936 "Inventory - Periodic"
                   tabledata "VAT Rate Change Setup" = R,
                   tabledata "VAT Reporting Code" = R,
                   tabledata "VAT Setup Posting Groups" = R,
+                  tabledata "VAT Setup" = R,
+                  tabledata "VAT Posting Parameters" = R,
                   tabledata Vendor = R,
                   tabledata "Vendor Bank Account" = R,
                   tabledata "Vendor Posting Group" = R;

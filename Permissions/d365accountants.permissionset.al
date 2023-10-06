@@ -1,3 +1,22 @@
+namespace System.Security.AccessControl;
+
+using System.Apps;
+using Microsoft.CRM.Campaign;
+using System.Environment;
+using Microsoft.Foundation.Company;
+using Microsoft.CRM.Contact;
+using Microsoft.CRM.BusinessRelation;
+using Microsoft.Integration.Dataverse;
+using Microsoft.Sales.Receivables;
+using Microsoft.Sales.Customer;
+using Microsoft.Inventory.Item.Catalog;
+using Microsoft.Sales.FinanceCharge;
+using Microsoft.Sales.History;
+using Microsoft.Sales.Pricing;
+using Microsoft.Sales.Document;
+using System.Security.User;
+using Microsoft.Service.Ledger;
+
 permissionset 2911 "D365 ACCOUNTANTS"
 {
     Access = Public;
@@ -6,7 +25,6 @@ permissionset 2911 "D365 ACCOUNTANTS"
 
     IncludedPermissionSets = "LOGIN",
                              "Metadata - Read",
-                             "User Login Times - View",
                              "User Personalization - Edit",
                              "Webhook - Edit";
 
@@ -21,16 +39,12 @@ permissionset 2911 "D365 ACCOUNTANTS"
                   tabledata Customer = RIMD,
                   tabledata "Customer Bank Account" = RD,
                   tabledata "Customer Templ." = RIMD,
-#if not CLEAN18
-                  tabledata "Customer Template" = RIMD,
-                  tabledata "Item Cross Reference" = RD,
-#endif
                   tabledata "Item Reference" = RD,
                   tabledata "Reminder/Fin. Charge Entry" = Rm,
                   tabledata "Sales Cr.Memo Header" = R,
                   tabledata "Sales Discount Access" = Rimd,
                   tabledata "Sales Invoice Header" = R,
-#if not CLEAN19
+#if not CLEAN21
                   tabledata "Sales Line Discount" = Rimd,
 #endif
                   tabledata "Sales Prepayment %" = D,

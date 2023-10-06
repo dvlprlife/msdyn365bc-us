@@ -1,3 +1,16 @@
+namespace Microsoft.Foundation.Reporting;
+
+using Microsoft.Projects.Project.Job;
+using Microsoft.Sales.Document;
+using Microsoft.Sales.History;
+using Microsoft.Sales.Peppol;
+using Microsoft.Service.Document;
+using Microsoft.Service.History;
+using System.IO;
+using System.Reflection;
+using System.Telemetry;
+using System.Utilities;
+
 table 61 "Electronic Document Format"
 {
     Caption = 'Electronic Document Format';
@@ -23,12 +36,26 @@ table 61 "Electronic Document Format"
             BlankZero = true;
             Caption = 'Codeunit ID';
             NotBlank = true;
-            TableRelation = AllObjWithCaption."Object ID" WHERE("Object Type" = CONST(Codeunit));
+            TableRelation = AllObjWithCaption."Object ID" where("Object Type" = const(Codeunit));
+
+            trigger OnValidate()
+            var
+                PEPPOLManagement: Codeunit "PEPPOL Management";
+                FeatureTelemetry: Codeunit "Feature Telemetry";
+            begin
+                if "Codeunit ID" in
+                    [Codeunit::"PEPPOL Validation", Codeunit::"PEPPOL Service Validation",
+                    Codeunit::"Exp. Sales Inv. PEPPOL BIS3.0", Codeunit::"Exp. Sales CrM. PEPPOL BIS3.0",
+                    Codeunit::"Exp. Serv.Inv. PEPPOL BIS3.0", Codeunit::"Exp. Serv.CrM. PEPPOL BIS3.0"] then begin
+                    FeatureTelemetry.LogUptake('0000KOQ', PEPPOLManagement.GetPeppolTelemetryTok(), Enum::"Feature Uptake Status"::Discovered);
+                    FeatureTelemetry.LogUptake('0000KOR', PEPPOLManagement.GetPeppolTelemetryTok(), Enum::"Feature Uptake Status"::"Set up");
+                end;
+            end;
         }
         field(6; "Codeunit Caption"; Text[250])
         {
-            CalcFormula = Lookup(AllObjWithCaption."Object Caption" WHERE("Object Type" = CONST(Codeunit),
-                                                                           "Object ID" = FIELD("Codeunit ID")));
+            CalcFormula = Lookup(AllObjWithCaption."Object Caption" where("Object Type" = const(Codeunit),
+                                                                           "Object ID" = field("Codeunit ID")));
             Caption = 'Codeunit Caption';
             Editable = false;
             FieldClass = FlowField;
@@ -37,12 +64,12 @@ table 61 "Electronic Document Format"
         {
             BlankZero = true;
             Caption = 'Delivery Codeunit ID';
-            TableRelation = AllObjWithCaption."Object ID" WHERE("Object Type" = CONST(Codeunit));
+            TableRelation = AllObjWithCaption."Object ID" where("Object Type" = const(Codeunit));
         }
         field(8; "Delivery Codeunit Caption"; Text[250])
         {
-            CalcFormula = Lookup(AllObjWithCaption."Object Caption" WHERE("Object Type" = CONST(Codeunit),
-                                                                           "Object ID" = FIELD("Delivery Codeunit ID")));
+            CalcFormula = Lookup(AllObjWithCaption."Object Caption" where("Object Type" = const(Codeunit),
+                                                                           "Object ID" = field("Delivery Codeunit ID")));
             Caption = 'Delivery Codeunit Caption';
             Editable = false;
             FieldClass = FlowField;
@@ -63,23 +90,23 @@ table 61 "Electronic Document Format"
 
     trigger OnInsert()
     begin
-        CheckCodeunitExist;
+        CheckCodeunitExist();
     end;
 
     trigger OnModify()
     begin
-        CheckCodeunitExist;
+        CheckCodeunitExist();
     end;
 
     var
+        DataCompression: Codeunit "Data Compression";
+
         UnSupportedTableTypeErr: Label 'The %1 table is not supported.', Comment = '%1 = Sales Document Type';
         NonExistingDocumentFormatErr: Label 'The electronic document format %1 does not exist for the document type %2.', Comment = '%1 : document format, %2 document use eq Invoice';
         UnSupportedDocumentTypeErr: Label 'The document type %1 is not supported.', Comment = '%1 : document ytp eq Invocie ';
         ElectronicDocumentNotCreatedErr: Label 'The electronic document has not been created.';
         ElectronicFormatErr: Label 'The electronic format %1 does not exist.', Comment = '%1=Specified Electronic Format';
-        DataCompression: Codeunit "Data Compression";
 
-    [Scope('OnPrem')]
     procedure SendElectronically(var TempBlob: Codeunit "Temp Blob"; var ClientFileName: Text[250]; DocumentVariant: Variant; ElectronicFormat: Code[20])
     var
         RecordExportBuffer: Record "Record Export Buffer";
@@ -104,6 +131,7 @@ table 61 "Electronic Document Format"
         RecRef.GetTable(DocumentVariant);
         OnSendElectronicallyOnAfterRecRefGetTable(RecRef);
 
+        StartID := 0;
         RecordExportBuffer.LockTable();
         if RecRef.FindSet() then
             repeat
@@ -158,98 +186,11 @@ table 61 "Electronic Document Format"
                 ClientFileName := RecordExportBuffer.ClientFileName;
             end;
 
-        RecordExportBuffer.DeleteAll();
-    end;
-
-#if not CLEAN20
-    [Scope('OnPrem')]
-    [Obsolete('Replaced by SendElectronically with TempBlob parameter.', '20.0')]
-    procedure SendElectronically(var ServerFilePath: Text[250]; var ClientFileName: Text[250]; DocumentVariant: Variant; ElectronicFormat: Code[20])
-    var
-        RecordExportBuffer: Record "Record Export Buffer";
-        TempErrorMessage: Record "Error Message" temporary;
-        ErrorMessage: Record "Error Message";
-        FileManagement: Codeunit "File Management";
-        EntryTempBlob: Codeunit "Temp Blob";
-        RecRef: RecordRef;
-        ZipFile: File;
-        EntryFileInStream: InStream;
-        ZipFileOutStream: OutStream;
-        DocumentUsage: Option "Sales Invoice","Sales Credit Memo";
-        StartID: Integer;
-        EndID: Integer;
-        IsMissingServerFile: Boolean;
-    begin
-        GetDocumentUsage(DocumentUsage, DocumentVariant);
-
-        if not Get(ElectronicFormat, DocumentUsage) then begin
-            Usage := "Electronic Document Format Usage".FromInteger(DocumentUsage);
-            Error(NonExistingDocumentFormatErr, ElectronicFormat, Format(Usage));
-        end;
-
-        RecRef.GetTable(DocumentVariant);
-        OnSendElectronicallyOnAfterRecRefGetTable(RecRef);
-
-        RecordExportBuffer.LockTable();
-        if RecRef.FindSet() then
-            repeat
-                Clear(RecordExportBuffer);
-                RecordExportBuffer.RecordID := RecRef.RecordId;
-                RecordExportBuffer.ClientFileName :=
-                  GetAttachmentFileName(RecRef, GetDocumentNo(RecRef), GetDocumentType(RecRef), 'xml');
-                RecordExportBuffer.ZipFileName :=
-                  GetAttachmentFileName(RecRef, GetDocumentNo(RecRef), GetDocumentType(RecRef), 'zip');
-                OnSendElectronicallyOnBeforeRecordExportBufferInsert(RecordExportBuffer, RecRef);
-                RecordExportBuffer.Insert(true);
-                if StartID = 0 then
-                    StartID := RecordExportBuffer.ID;
-                EndID := RecordExportBuffer.ID;
-            until RecRef.Next() = 0;
-
-        RecordExportBuffer.SetRange(ID, StartID, EndID);
-        if RecordExportBuffer.FindSet() then
-            repeat
-                ErrorMessage.SetContext(RecordExportBuffer);
-                ErrorMessage.ClearLog;
-
-                CODEUNIT.Run("Codeunit ID", RecordExportBuffer);
-
-                TempErrorMessage.CopyFromContext(RecordExportBuffer);
-                ErrorMessage.ClearLog; // Clean up
-
-                if RecordExportBuffer.ServerFilePath = '' then
-                    IsMissingServerFile := true;
-            until RecordExportBuffer.Next() = 0;
-
-        // Display errors in case anything went wrong.
-        TempErrorMessage.ShowErrorMessages(true);
-        if IsMissingServerFile then
-            Error(ElectronicDocumentNotCreatedErr);
-
-        if RecordExportBuffer.Count > 1 then begin
-            ServerFilePath := CopyStr(FileManagement.ServerTempFileName('zip'), 1, 250);
-            ZipFile.Create(ServerFilePath);
-            ZipFile.CreateOutStream(ZipFileOutStream);
-            DataCompression.CreateZipArchive;
-            ClientFileName := CopyStr(RecordExportBuffer.ZipFileName, 1, 250);
-            RecordExportBuffer.FindSet();
-            repeat
-                FileManagement.BLOBImportFromServerFile(EntryTempBlob, RecordExportBuffer.ServerFilePath);
-                EntryTempBlob.CreateInStream(EntryFileInStream);
-                DataCompression.AddEntry(EntryFileInStream, RecordExportBuffer.ClientFileName);
-            until RecordExportBuffer.Next() = 0;
-            DataCompression.SaveZipArchive(ZipFileOutStream);
-            DataCompression.CloseZipArchive;
-            ZipFile.Close;
-        end else
-            if RecordExportBuffer.FindFirst() then begin
-                ServerFilePath := RecordExportBuffer.ServerFilePath;
-                ClientFileName := RecordExportBuffer.ClientFileName;
-            end;
+        OnSendElectronicallyOnBeforeDeleteAll(RecordExportBuffer, ClientFileName, DocumentVariant);
 
         RecordExportBuffer.DeleteAll();
     end;
-#endif
+
     procedure ValidateElectronicServiceDocument(ServiceHeader: Record "Service Header"; ElectronicFormat: Code[20])
     var
         ElectronicDocumentFormat: Record "Electronic Document Format";
@@ -280,15 +221,6 @@ table 61 "Electronic Document Format"
         CODEUNIT.Run(ElectronicDocumentFormat."Codeunit ID", Job);
     end;
 
-#if not CLEAN20
-    [Obsolete('Replaced by GetAttachmentFileName with RecordVariant parameter', '20.0')]
-    procedure GetAttachmentFileName(DocumentNo: Code[20]; DocumentType: Text; Extension: Code[3]): Text[250]
-    var
-        RecordVariant: Variant;
-    begin
-        exit(GetAttachmentFileName(RecordVariant, DocumentNo, DocumentType, Extension));
-    end;
-#endif
     procedure GetAttachmentFileName(RecordVariant: Variant; DocumentNo: Code[20]; DocumentType: Text; Extension: Code[3]) FileName: Text[250]
     var
         FileMgt: Codeunit "File Management";
@@ -389,13 +321,13 @@ table 61 "Electronic Document Format"
                     exit(Job."No.");
                 end;
             else begin
-                    IsHandled := false;
-                    OnGetDocumentNoCaseElse(DocumentVariant, DocumentNo, IsHandled);
-                    if IsHandled then
-                        exit(DocumentNo);
+                IsHandled := false;
+                OnGetDocumentNoCaseElse(DocumentVariant, DocumentNo, IsHandled);
+                if IsHandled then
+                    exit(DocumentNo);
 
-                    Error(UnSupportedTableTypeErr, DocumentRecordRef.Caption);
-                end;
+                Error(UnSupportedTableTypeErr, DocumentRecordRef.Caption);
+            end;
         end;
     end;
 
@@ -455,7 +387,7 @@ table 61 "Electronic Document Format"
             Error(ElectronicFormatErr, ElectronicFormat);
     end;
 
-    local procedure GetDocumentType(DocumentVariant: Variant) DocumentTypeText: Text[50]
+    procedure GetDocumentType(DocumentVariant: Variant) DocumentTypeText: Text[50]
     var
         DummySalesHeader: Record "Sales Header";
         DummyServiceHeader: Record "Service Header";
@@ -544,6 +476,11 @@ table 61 "Electronic Document Format"
 
     [IntegrationEvent(false, false)]
     local procedure OnGetDocumentTypeCaseElse(DocumentVariant: Variant; var DocumentTypeText: Text[50])
+    begin
+    end;
+
+    [IntegrationEvent(false, false)]
+    local procedure OnSendElectronicallyOnBeforeDeleteAll(var RecordExportBuffer: Record "Record Export Buffer"; var ClientFileName: Text[250]; DocumentVariant: Variant)
     begin
     end;
 

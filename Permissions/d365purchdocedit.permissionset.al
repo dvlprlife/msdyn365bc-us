@@ -1,3 +1,50 @@
+namespace System.Security.AccessControl;
+
+using Microsoft.Assembly.Document;
+using Microsoft.Bank.BankAccount;
+using Microsoft.Foundation.Company;
+using Microsoft.CRM.Contact;
+using Microsoft.CRM.BusinessRelation;
+using Microsoft.CostAccounting.Account;
+using Microsoft.Finance.Currency;
+using Microsoft.Sales.Customer;
+using Microsoft.HumanResources.Payables;
+using Microsoft.Purchases.Payables;
+using Microsoft.HumanResources.Employee;
+using Microsoft.Finance.GeneralLedger.Account;
+using Microsoft.Finance.GeneralLedger.Setup;
+using Microsoft.Inventory.Item;
+using Microsoft.Inventory.Item.Catalog;
+using Microsoft.Inventory.Tracking;
+using Microsoft.Foundation.NoSeries;
+using Microsoft.Purchases.Vendor;
+using Microsoft.Foundation.PaymentTerms;
+using Microsoft.Inventory.Planning;
+using Microsoft.Purchases.History;
+using Microsoft.Purchases.Document;
+using Microsoft.Purchases.Archive;
+using Microsoft.Purchases.Setup;
+using Microsoft.Purchases.Remittance;
+using Microsoft.Inventory.Requisition;
+using Microsoft.Finance.GeneralLedger.Journal;
+using Microsoft.Inventory.Location;
+using Microsoft.Inventory.Ledger;
+using Microsoft.Warehouse.Ledger;
+using Microsoft.Utilities;
+using Microsoft.Foundation.AuditCodes;
+using Microsoft.Projects.TimeSheet;
+using Microsoft.Inventory.Intrastat;
+using Microsoft.Foundation.Task;
+using Microsoft.Finance.VAT.Calculation;
+using Microsoft.Finance.VAT.RateChange;
+using Microsoft.Finance.VAT.Setup;
+using Microsoft.Finance.VAT.Reporting;
+using System.Automation;
+using System.Environment.Configuration;
+using System.IO;
+using System.Security.User;
+using System.Threading;
+
 permissionset 5807 "D365 PURCH DOC, EDIT"
 {
     Assignable = true;
@@ -20,9 +67,6 @@ permissionset 5807 "D365 PURCH DOC, EDIT"
                   tabledata "G/L Account" = R,
                   tabledata "General Ledger Setup" = rm,
                   tabledata "Item Charge" = R,
-#if not CLEAN19
-                  tabledata "Item Cross Reference" = R,
-#endif
                   tabledata "Item Entry Relation" = R,
                   tabledata "Item Reference" = R,
                   tabledata "Item Tracing Buffer" = Rimd,
@@ -46,6 +90,7 @@ permissionset 5807 "D365 PURCH DOC, EDIT"
                   tabledata "Purchase Line Archive" = RIMD,
                   tabledata "Purchases & Payables Setup" = R,
                   tabledata "Record Buffer" = Rimd,
+                  tabledata "Remit Address" = RIMD,
                   tabledata "Requisition Line" = RIMD,
                   tabledata "Restricted Record" = RIMD,
                   tabledata "Return Reason" = R,
@@ -76,6 +121,8 @@ permissionset 5807 "D365 PURCH DOC, EDIT"
                   tabledata "VAT Rate Change Conversion" = R,
                   tabledata "VAT Rate Change Log Entry" = Ri,
                   tabledata "VAT Rate Change Setup" = R,
+                  tabledata "VAT Setup" = R,
+                  tabledata "VAT Posting Parameters" = R,
                   tabledata "VAT Reporting Code" = R,
                   tabledata Vendor = RM,
                   tabledata "Vendor Bank Account" = R,

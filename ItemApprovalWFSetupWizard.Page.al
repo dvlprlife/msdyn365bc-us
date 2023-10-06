@@ -1,3 +1,15 @@
+// ------------------------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+// ------------------------------------------------------------------------------------------------
+namespace System.Automation;
+
+using Microsoft.Inventory.Item;
+using System.Environment;
+using System.Environment.Configuration;
+using System.Reflection;
+using System.Utilities;
+
 page 1812 "Item Approval WF Setup Wizard"
 {
     Caption = 'Item Approval Workflow Setup';
@@ -67,7 +79,7 @@ page 1812 "Item Approval WF Setup Wizard"
                     {
                         Caption = '';
                         InstructionalText = 'Choose who is authorized to approve or reject new or changed item cards.';
-                        field("Approver ID"; "Approver ID")
+                        field("Approver ID"; Rec."Approver ID")
                         {
                             ApplicationArea = Suite;
                             Caption = 'Approver';
@@ -75,7 +87,7 @@ page 1812 "Item Approval WF Setup Wizard"
 
                             trigger OnValidate()
                             begin
-                                CanEnableNext;
+                                CanEnableNext();
                             end;
                         }
                     }
@@ -88,14 +100,14 @@ page 1812 "Item Approval WF Setup Wizard"
                         Caption = '';
                         InstructionalText = 'Choose if the approval process starts automatically or if the user must start the process.';
                     }
-                    field("App. Trigger"; "App. Trigger")
+                    field("App. Trigger"; Rec."App. Trigger")
                     {
                         ApplicationArea = Suite;
                         Caption = 'The workflow starts when';
 
                         trigger OnValidate()
                         begin
-                            CanEnableNext;
+                            CanEnableNext();
                         end;
                     }
                 }
@@ -163,7 +175,7 @@ page 1812 "Item Approval WF Setup Wizard"
                                 Caption = 'is';
                                 ShowCaption = false;
                             }
-                            field("Field Operator"; "Field Operator")
+                            field("Field Operator"; Rec."Field Operator")
                             {
                                 ApplicationArea = Suite;
                                 Caption = 'Operator';
@@ -174,7 +186,7 @@ page 1812 "Item Approval WF Setup Wizard"
                     group("Para3.1.2")
                     {
                         Caption = 'Specify the message to display when the workflow starts.';
-                        field("Custom Message"; "Custom Message")
+                        field("Custom Message"; Rec."Custom Message")
                         {
                             ApplicationArea = Suite;
                             Caption = 'Message';
@@ -256,7 +268,7 @@ page 1812 "Item Approval WF Setup Wizard"
                     ApprovalWorkflowSetupMgt.ApplyItemWizardUserInput(Rec);
                     GuidedExperience.CompleteAssistedSetup(ObjectType::Page, PAGE::"Item Approval WF Setup Wizard");
 
-                    CurrPage.Close;
+                    CurrPage.Close();
                 end;
             }
         }
@@ -264,17 +276,17 @@ page 1812 "Item Approval WF Setup Wizard"
 
     trigger OnInit()
     begin
-        if not Get then begin
-            Init;
-            SetDefaultValues;
-            Insert;
+        if not Rec.Get() then begin
+            Rec.Init();
+            SetDefaultValues();
+            Rec.Insert();
         end;
-        LoadTopBanners;
+        LoadTopBanners();
     end;
 
     trigger OnOpenPage()
     begin
-        ShowIntroStep;
+        ShowIntroStep();
     end;
 
     trigger OnQueryClosePage(CloseAction: Action): Boolean
@@ -316,62 +328,60 @@ page 1812 "Item Approval WF Setup Wizard"
             Step := Step - 1
         else begin
             if ItemApproverSetupVisible then
-                ValidateApprover;
+                ValidateApprover();
             if ItemAutoAppDetailsVisible then
-                ValidateFieldSelection;
+                ValidateFieldSelection();
             Step := Step + 1;
         end;
 
         case Step of
             Step::Intro:
-                ShowIntroStep;
+                ShowIntroStep();
             Step::"Item Approver Setup":
-                ShowApprovalUserSetupDetailsStep;
+                ShowApprovalUserSetupDetailsStep();
             Step::"Automatic Approval Setup":
-                if "App. Trigger" = "App. Trigger"::"The user changes a specific field"
-                then
-                    ShowItemApprovalDetailsStep
+                if Rec."App. Trigger" = Rec."App. Trigger"::"The user changes a specific field" then
+                    ShowItemApprovalDetailsStep()
                 else
                     NextStep(Backwards);
             Step::Done:
-                ShowDoneStep;
+                ShowDoneStep();
         end;
         CurrPage.Update(true);
     end;
 
     local procedure ShowIntroStep()
     begin
-        ResetWizardControls;
+        ResetWizardControls();
         IntroVisible := true;
         BackEnabled := false;
     end;
 
     local procedure ShowApprovalUserSetupDetailsStep()
     begin
-        ResetWizardControls;
+        ResetWizardControls();
         ItemApproverSetupVisible := true;
     end;
 
     local procedure ShowItemApprovalDetailsStep()
     begin
-        ResetWizardControls;
+        ResetWizardControls();
         ItemAutoAppDetailsVisible := true;
-        SetItemField(Field);
+        SetItemField(Rec.Field);
     end;
 
     local procedure ShowDoneStep()
     begin
-        ResetWizardControls;
+        ResetWizardControls();
         DoneVisible := true;
         NextEnabled := false;
         FinishEnabled := true;
 
-        if "App. Trigger" = "App. Trigger"::"The user sends an approval requests manually" then
-            SummaryText := StrSubstNo(ManualTriggerTxt, "Approver ID");
-        if "App. Trigger" = "App. Trigger"::"The user changes a specific field"
-        then begin
-            CalcFields("Field Caption");
-            SummaryText := StrSubstNo(AutoTriggerTxt, "Approver ID", "Field Caption", "Field Operator");
+        if Rec."App. Trigger" = Rec."App. Trigger"::"The user sends an approval requests manually" then
+            SummaryText := StrSubstNo(ManualTriggerTxt, Rec."Approver ID");
+        if Rec."App. Trigger" = Rec."App. Trigger"::"The user changes a specific field" then begin
+            Rec.CalcFields("Field Caption");
+            SummaryText := StrSubstNo(AutoTriggerTxt, Rec."Approver ID", Rec."Field Caption", Rec."Field Operator");
         end;
 
         SummaryText := ConvertStr(SummaryText, '\', '/');
@@ -401,26 +411,26 @@ page 1812 "Item Approval WF Setup Wizard"
         WorkflowResponseHandling: Codeunit "Workflow Response Handling";
         WorkflowCode: Code[20];
     begin
-        TableNo := DATABASE::Item;
-        WorkflowCode := WorkflowSetup.GetWorkflowTemplateCode(WorkflowSetup.ItemUnitPriceChangeApprovalWorkflowCode);
+        Rec.TableNo := DATABASE::Item;
+        WorkflowCode := WorkflowSetup.GetWorkflowTemplateCode(WorkflowSetup.ItemUnitPriceChangeApprovalWorkflowCode());
         if Workflow.Get(WorkflowCode) then begin
             WorkflowRule.SetRange("Workflow Code", WorkflowCode);
             if WorkflowRule.FindFirst() then begin
-                Field := WorkflowRule."Field No.";
-                "Field Operator" := WorkflowRule.Operator;
+                Rec.Field := WorkflowRule."Field No.";
+                Rec."Field Operator" := WorkflowRule.Operator;
             end;
             WorkflowStep.SetRange("Workflow Code", WorkflowCode);
-            WorkflowStep.SetRange("Function Name", WorkflowResponseHandling.ShowMessageCode);
+            WorkflowStep.SetRange("Function Name", WorkflowResponseHandling.ShowMessageCode());
             if WorkflowStep.FindFirst() then begin
                 WorkflowStepArgument.Get(WorkflowStep.Argument);
-                "Custom Message" := WorkflowStepArgument.Message;
+                Rec."Custom Message" := WorkflowStepArgument.Message;
             end;
         end;
     end;
 
     local procedure ValidateApprover()
     begin
-        if "Approver ID" = '' then
+        if Rec."Approver ID" = '' then
             Error(MandatoryApproverErr);
     end;
 
@@ -435,9 +445,9 @@ page 1812 "Item Approval WF Setup Wizard"
 
     local procedure SetItemField(FieldNo: Integer)
     begin
-        Field := FieldNo;
-        CalcFields("Field Caption");
-        ItemFieldCaption := "Field Caption";
+        Rec.Field := FieldNo;
+        Rec.CalcFields("Field Caption");
+        ItemFieldCaption := Rec."Field Caption";
     end;
 
     local procedure FindAndFilterToField(var FieldRec: Record "Field"; CaptionToFind: Text): Boolean
@@ -461,21 +471,21 @@ page 1812 "Item Approval WF Setup Wizard"
         FieldRec.SetRange(Class, FieldRec.Class::Normal);
         FieldRec.SetFilter(ObsoleteState, '<>%1', FieldRec.ObsoleteState::Removed);
 
-        if CaptionToFind = "Field Caption" then
-            FieldRec.SetRange("No.", Field)
+        if CaptionToFind = Rec."Field Caption" then
+            FieldRec.SetRange("No.", Rec.Field)
         else
             if CaptionToFind = 'Blocked' then
                 FieldRec.SetFilter("Field Caption", '%1', '@' + CaptionToFind)
             else
                 FieldRec.SetFilter("Field Caption", '%1', '@' + CaptionToFind + '*');
 
-        exit(FieldRec.FindFirst);
+        exit(FieldRec.FindFirst());
     end;
 
     local procedure LoadTopBanners()
     begin
-        if MediaRepositoryStandard.Get('AssistedSetup-NoText-400px.png', Format(ClientTypeManagement.GetCurrentClientType)) and
-           MediaRepositoryDone.Get('AssistedSetupDone-NoText-400px.png', Format(ClientTypeManagement.GetCurrentClientType))
+        if MediaRepositoryStandard.Get('AssistedSetup-NoText-400px.png', Format(ClientTypeManagement.GetCurrentClientType())) and
+           MediaRepositoryDone.Get('AssistedSetupDone-NoText-400px.png', Format(ClientTypeManagement.GetCurrentClientType()))
         then
             if MediaResourcesStandard.Get(MediaRepositoryStandard."Media Resources Ref") and
                MediaResourcesDone.Get(MediaRepositoryDone."Media Resources Ref")

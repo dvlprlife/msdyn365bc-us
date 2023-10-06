@@ -1,3 +1,146 @@
+namespace System.Security.AccessControl;
+
+using Microsoft.Inventory.Location;
+using Microsoft.Projects.TimeSheet;
+using Microsoft.Bank.Payment;
+using Microsoft.EServices.EDocument;
+using Microsoft.Foundation.Navigate;
+using Microsoft.Finance.VAT.Reporting;
+using Microsoft.Finance.VAT.Ledger;
+using Microsoft.eServices.OnlineMap;
+using Microsoft.Inventory.Reconciliation;
+using Microsoft.Projects.Project.WIP;
+using Microsoft.Projects.Project.Setup;
+using Microsoft.Foundation.AuditCodes;
+using Microsoft.Foundation.Shipping;
+using Microsoft.Foundation.Task;
+using Microsoft.Finance.VAT.Calculation;
+using Microsoft.Finance.VAT.Setup;
+using Microsoft.Finance.VAT.Clause;
+using Microsoft.Finance.VAT.RateChange;
+using System.Privacy;
+using System.Apps;
+using System.Environment.Configuration;
+using Microsoft.Finance.FinancialReports;
+using Microsoft.Integration.Entity;
+using Microsoft.Finance.AllocationAccount;
+using Microsoft.Finance.GeneralLedger.Setup;
+using Microsoft.Inventory.Tracking;
+using Microsoft.CRM.Task;
+using Microsoft.Sales.Customer;
+using Microsoft.Purchases.Vendor;
+using Microsoft.Inventory.Analysis;
+using Microsoft.Finance.Analysis;
+using Microsoft.Bank.Reconciliation;
+using System.Automation;
+using Microsoft.Assembly.Setup;
+using Microsoft.CRM.Interaction;
+using Microsoft.Inventory.Availability;
+using System.Azure.Identity;
+using Microsoft.Bank.BankAccount;
+using Microsoft.Bank.Ledger;
+using Microsoft.Bank.Statement;
+using Microsoft.Bank.Setup;
+using Microsoft.Warehouse.Structure;
+using Microsoft.Inventory.BOM;
+using Microsoft.Finance.Consolidation;
+using Microsoft.CRM.BusinessRelation;
+using Microsoft.CRM.Campaign;
+using Microsoft.CashFlow.Setup;
+using System.Diagnostics;
+using Microsoft.Bank.Check;
+using Microsoft.CRM.Opportunity;
+using Microsoft.CRM.Contact;
+using Microsoft.Foundation.Company;
+using System.IO;
+using Microsoft.CRM.Duplicates;
+using Microsoft.CRM.Profiling;
+using Microsoft.Service.Contract;
+using Microsoft.Integration.Dataverse;
+using Microsoft.Integration.D365Sales;
+using Microsoft.Finance.Currency;
+using Microsoft.Sales.FinanceCharge;
+using Microsoft.Sales.Reminder;
+using Microsoft.Sales.Receivables;
+using System.Integration;
+using Microsoft.Finance.Deferral;
+using Microsoft.Finance.Dimension;
+using Microsoft.Bank.DirectDebit;
+using Microsoft.HumanResources.Payables;
+using Microsoft.HumanResources.Employee;
+using Microsoft.CRM.Outlook;
+using Microsoft.Inventory.Counting.Tracking;
+using Microsoft.FixedAssets.Setup;
+using Microsoft.Inventory.Ledger;
+using Microsoft.Finance.GeneralLedger.Account;
+using Microsoft.Finance.GeneralLedger.Budget;
+using Microsoft.Finance.GeneralLedger.Ledger;
+using Microsoft.Finance.GeneralLedger.Journal;
+using Microsoft.HumanResources.Setup;
+using Microsoft.Intercompany.Setup;
+using Microsoft.Integration.SyncEngine;
+using Microsoft.Inventory.Costing;
+using Microsoft.Inventory.Comment;
+using Microsoft.Inventory.Setup;
+using Microsoft.Inventory.Item;
+using Microsoft.Purchases.Document;
+using System.Threading;
+using Microsoft.CRM.Segment;
+using Microsoft.Inventory.Item.Catalog;
+using Microsoft.CRM.Setup;
+using Microsoft.Inventory.BOM.Tree;
+using Microsoft.Foundation.NoSeries;
+using Microsoft.Purchases.Payables;
+using Microsoft.Foundation.PaymentTerms;
+using Microsoft.Inventory.Counting.Journal;
+using Microsoft.Inventory.Counting.Comment;
+using Microsoft.Inventory.Counting.Document;
+using Microsoft.Inventory.Counting.Recording;
+using Microsoft.Inventory.Planning;
+using Microsoft.Bank.PositivePay;
+using Microsoft.Foundation.Address;
+using Microsoft.Warehouse.History;
+using Microsoft.Pricing.Asset;
+using Microsoft.Pricing.Calculation;
+using Microsoft.Pricing.PriceList;
+using Microsoft.Pricing.Source;
+using Microsoft.Pricing.Worksheet;
+using Microsoft.Inventory.Counting.History;
+using Microsoft.Purchases.History;
+using Microsoft.Purchases.Archive;
+using Microsoft.Purchases.Setup;
+using Microsoft.Warehouse.Activity.History;
+using Microsoft.Inventory.Requisition;
+using Microsoft.Projects.Resources.Journal;
+#if not CLEAN21
+using Microsoft.Projects.Resources.Pricing;
+#endif
+using Microsoft.Projects.Resources.Resource;
+using Microsoft.Projects.Resources.Setup;
+using Microsoft.Sales.History;
+using Microsoft.Sales.Setup;
+using Microsoft.Sales.Document;
+using Microsoft.Sales.Archive;
+using Microsoft.Sales.Pricing;
+using Microsoft.Service.Document;
+using Microsoft.Warehouse.Setup;
+using Microsoft.Finance.SalesTax;
+using Microsoft.CRM.Team;
+using System.Security.User;
+using Microsoft.Warehouse.Activity;
+using Microsoft.Warehouse.Comment;
+using Microsoft.Warehouse.Ledger;
+using Microsoft.Warehouse.Request;
+using Microsoft.Warehouse.Document;
+using Microsoft.Service.Ledger;
+using Microsoft.Warehouse.Worksheet;
+using Microsoft.Manufacturing.WorkCenter;
+using Microsoft.Foundation.Period;
+using Microsoft.Inventory.Intrastat;
+using Microsoft.Foundation.Calendar;
+using Microsoft.Utilities;
+using Microsoft;
+
 permissionset 191 "D365 SETUP"
 {
     Access = Public;
@@ -22,9 +165,17 @@ permissionset 191 "D365 SETUP"
                   tabledata "Acc. Schedule Line" = RIMD,
                   tabledata "Acc. Schedule Line Entity" = RIMD,
                   tabledata "Acc. Schedule Name" = RIMD,
+                  tabledata "Alloc. Acc. Manual Override" = RIMD,
+                  tabledata "Alloc. Account Distribution" = RIMD,
+                  tabledata "Allocation Account" = RIMD,
+                  tabledata "Allocation Line" = RIMD,
+                  tabledata "Financial Report" = RIMD,
+                  tabledata "Financial Report User Filters" = RIMD,
                   tabledata "Accounting Period" = IMD,
                   tabledata "Action Message Entry" = D,
                   tabledata Activity = D,
+                  tabledata "Alt. Customer Posting Group" = RIMD,
+                  tabledata "Alt. Vendor Posting Group" = RIMD,
                   tabledata "Analysis Column" = D,
                   tabledata "Analysis Column Template" = D,
                   tabledata "Analysis Field Value" = D,
@@ -66,6 +217,7 @@ permissionset 191 "D365 SETUP"
                   tabledata Bin = IMD,
                   tabledata "Bin Content" = IMD,
                   tabledata "BOM Component" = RIMD,
+                  tabledata "Bus. Unit In Cons. Process" = D,
                   tabledata "Business Relation" = D,
                   tabledata "Business Unit" = D,
                   tabledata "Business Unit Information" = D,
@@ -105,6 +257,8 @@ permissionset 191 "D365 SETUP"
                   tabledata "Config. Template Line" = RIMD,
                   tabledata "Config. Tmpl. Selection Rules" = RIMD,
                   tabledata "Consolidation Account" = D,
+                  tabledata "Consolidation Process" = D,
+                  tabledata "Consolidation Setup" = D,
                   tabledata "Contact Duplicate" = D,
                   tabledata "Contact Industry Group" = D,
                   tabledata "Contact Job Responsibility" = D,
@@ -113,7 +267,9 @@ permissionset 191 "D365 SETUP"
                   tabledata "Contact Value" = D,
                   tabledata "Contact Web Source" = D,
                   tabledata "Contract Gain/Loss Entry" = D,
+#if not CLEAN22
                   tabledata "Coupling Field Buffer" = RIMD,
+#endif
                   tabledata "Coupling Record Buffer" = RIMD,
                   tabledata "Credit Trans Re-export History" = D,
                   tabledata "Credit Transfer Entry" = D,
@@ -135,13 +291,11 @@ permissionset 191 "D365 SETUP"
                   tabledata "Customer Posting Group" = RIMD,
                   tabledata "Customer Price Group" = RIMD,
                   tabledata "Customer Templ." = RIMD,
-#if not CLEAN18
-                  tabledata "Customer Template" = RIMD,
-#endif
                   tabledata "Customized Calendar Change" = RIMD,
                   tabledata "Customized Calendar Entry" = RIMD,
                   tabledata "Data Exch." = RIMD,
                   tabledata "Data Exchange Type" = RimD,
+                  tabledata "Data Exch. Table Filter" = RIMD,
                   tabledata "Data Migration Entity" = RIMD,
                   tabledata "Data Migration Error" = RIMD,
                   tabledata "Data Migration Parameters" = RIMD,
@@ -202,7 +356,9 @@ permissionset 191 "D365 SETUP"
                   tabledata "Inter. Log Entry Comment Line" = D,
                   tabledata "Interaction Log Entry" = D,
                   tabledata "Intermediate Data Import" = RimD,
+#if not CLEAN22
                   tabledata "Intrastat Setup" = RIMD,
+#endif
                   tabledata "Inventory Adjmt. Entry (Order)" = d,
                   tabledata "Inventory Comment Line" = D,
                   tabledata "Inventory Page Data" = D,
@@ -223,9 +379,6 @@ permissionset 191 "D365 SETUP"
                   tabledata "Item Charge" = RIMD,
                   tabledata "Item Charge Assignment (Purch)" = rD,
                   tabledata "Item Charge Assignment (Sales)" = rD,
-#if not CLEAN19
-                  tabledata "Item Cross Reference" = RIMD,
-#endif
                   tabledata "Item Discount Group" = RIMD,
                   tabledata "Item Entry Relation" = RIMD,
                   tabledata "Item Ledger Entry" = Rmd,
@@ -250,7 +403,9 @@ permissionset 191 "D365 SETUP"
                   tabledata "No. Series Relationship" = RIMD,
                   tabledata "Nonstock Item Setup" = RIMD,
                   tabledata "Notification Entry" = RimD,
+#if not CLEAN21
                   tabledata "O365 Document Sent History" = RmD,
+#endif
                   tabledata "OCR Service Setup" = RIMD,
                   tabledata "Office Add-in Setup" = RIMD,
                   tabledata "Online Map Parameter Setup" = RIMD,
@@ -266,6 +421,8 @@ permissionset 191 "D365 SETUP"
                   tabledata "Payment Application Proposal" = D,
                   tabledata "Payment Matching Details" = D,
                   tabledata "Payment Method" = IMD,
+                  tabledata "Payment Rec. Related Entry" = RIMD,
+                  tabledata "Pmt. Rec. Applied-to Entry" = RIMD,
                   tabledata "Payment Service Setup" = RIMD,
                   tabledata "Payment Terms" = RIMD,
                   tabledata "Phys. Inventory Ledger Entry" = Rmd,
@@ -278,9 +435,6 @@ permissionset 191 "D365 SETUP"
                   tabledata "Phys. Invt. Record Header" = RIMD,
                   tabledata "Phys. Invt. Record Line" = RIMD,
                   tabledata "Phys. Invt. Tracking" = RIMD,
-#if not CLEAN20
-                  tabledata "Plan Permission Set" = d,
-#endif
                   tabledata "Planning Assignment" = D,
                   tabledata "Planning Component" = D,
                   tabledata "Positive Pay Entry" = D,
@@ -338,7 +492,7 @@ permissionset 191 "D365 SETUP"
                   tabledata "Requisition Wksh. Name" = RIMD,
                   tabledata "Res. Journal Line" = D,
                   tabledata "Reservation Entry" = RimD,
-#if not CLEAN19
+#if not CLEAN21
                   tabledata "Resource Cost" = D,
                   tabledata "Resource Price" = D,
 #endif
@@ -362,12 +516,12 @@ permissionset 191 "D365 SETUP"
                   tabledata "Sales Invoice Line" = Rd,
                   tabledata "Sales Line" = RmD,
                   tabledata "Sales Line Archive" = RmD,
-#if not CLEAN19
+#if not CLEAN21
                   tabledata "Sales Line Discount" = IM,
 #endif
                   tabledata "Sales Planning Line" = d,
                   tabledata "Sales Prepayment %" = RIMD,
-#if not CLEAN19
+#if not CLEAN21
                   tabledata "Sales Price Worksheet" = RIMD,
 #endif
                   tabledata "Sales Shipment Header" = RD,
@@ -414,8 +568,10 @@ permissionset 191 "D365 SETUP"
                   tabledata "Transaction Type" = RIMD,
                   tabledata "Transport Method" = RIMD,
                   tabledata "Untracked Planning Element" = D,
+#if not CLEAN22
                   tabledata "User Group Member" = Rimd,
                   tabledata "User Group Plan" = d,
+#endif
                   tabledata "User Security Status" = D,
                   tabledata "User Setup" = RIMD,
                   tabledata "User Task Group" = RIMD,
@@ -448,6 +604,8 @@ permissionset 191 "D365 SETUP"
                   tabledata "VAT Statement Line" = RIMD,
                   tabledata "VAT Statement Name" = RIMD,
                   tabledata "VAT Statement Template" = RIMD,
+                  tabledata "VAT Setup" = RIMD,
+                  tabledata "VAT Posting Parameters" = RIMD,
                   tabledata "Vendor Invoice Disc." = R,
                   tabledata "Vendor Ledger Entry" = RMd,
                   tabledata "Vendor Posting Group" = RIMD,

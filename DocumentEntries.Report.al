@@ -1,3 +1,33 @@
+﻿namespace Microsoft.Foundation.Navigate;
+
+using Microsoft.Bank.Check;
+using Microsoft.Bank.Ledger;
+using Microsoft.Finance.Currency;
+using Microsoft.Finance.GeneralLedger.Ledger;
+using Microsoft.Finance.VAT.Ledger;
+using Microsoft.FixedAssets.Insurance;
+using Microsoft.FixedAssets.Ledger;
+using Microsoft.FixedAssets.Maintenance;
+using Microsoft.Inventory.Counting.Journal;
+using Microsoft.Inventory.Ledger;
+using Microsoft.Inventory.Transfer;
+using Microsoft.Manufacturing.Capacity;
+using Microsoft.Manufacturing.Document;
+using Microsoft.Projects.Project.Ledger;
+using Microsoft.Projects.Resources.Ledger;
+using Microsoft.Purchases.History;
+using Microsoft.Purchases.Payables;
+using Microsoft.Sales.FinanceCharge;
+using Microsoft.Sales.History;
+using Microsoft.Sales.Receivables;
+using Microsoft.Sales.Reminder;
+using Microsoft.Service.History;
+using Microsoft.Service.Ledger;
+using Microsoft.Warehouse.History;
+using Microsoft.Warehouse.Ledger;
+using System.Utilities;
+using Microsoft.Bank.Deposit;
+
 report 35 "Document Entries"
 {
     DefaultLayout = RDLC;
@@ -9,11 +39,11 @@ report 35 "Document Entries"
     {
         dataitem("Integer"; "Integer")
         {
-            DataItemTableView = SORTING(Number) WHERE(Number = FILTER(1 ..));
+            DataItemTableView = sorting(Number) where(Number = filter(1 ..));
             column(TodayFormatted; Format(Today, 0, 4))
             {
             }
-            column(CompanyName; COMPANYPROPERTY.DisplayName)
+            column(CompanyName; COMPANYPROPERTY.DisplayName())
             {
             }
             column(DocNoFilter; Text001 + Format(DocNoFilter))
@@ -22,10 +52,10 @@ report 35 "Document Entries"
             column(PostingDateFilter; Text002 + PostingDateFilter)
             {
             }
-            column(DocEntryNoofRecords; DocEntry."No. of Records")
+            column(DocEntryNoofRecords; TempDocumentEntry."No. of Records")
             {
             }
-            column(DocEntryTableName; DocEntry."Table Name")
+            column(DocEntryTableName; TempDocumentEntry."Table Name")
             {
             }
             column(PrintAmtsInLCY; PrintAmountsInLCY)
@@ -51,7 +81,7 @@ report 35 "Document Entries"
             }
             dataitem("Service Ledger Entry"; "Service Ledger Entry")
             {
-                DataItemTableView = SORTING("Document No.", "Posting Date");
+                DataItemTableView = sorting("Document No.", "Posting Date");
                 column(PostDate_ServiceLedgEntry; Format("Posting Date"))
                 {
                 }
@@ -94,7 +124,7 @@ report 35 "Document Entries"
 
                 trigger OnPreDataItem()
                 begin
-                    if DocEntry."Table ID" <> DATABASE::"Service Ledger Entry" then
+                    if TempDocumentEntry."Table ID" <> DATABASE::"Service Ledger Entry" then
                         CurrReport.Break();
 
                     SetCurrentKey("Document No.", "Posting Date");
@@ -104,7 +134,7 @@ report 35 "Document Entries"
             }
             dataitem("Warranty Ledger Entry"; "Warranty Ledger Entry")
             {
-                DataItemTableView = SORTING("Document No.", "Posting Date");
+                DataItemTableView = sorting("Document No.", "Posting Date");
                 column(EntryNo_WarrantyLedgEntry; "Entry No.")
                 {
                     IncludeCaption = false;
@@ -142,7 +172,7 @@ report 35 "Document Entries"
 
                 trigger OnPreDataItem()
                 begin
-                    if DocEntry."Table ID" <> DATABASE::"Warranty Ledger Entry" then
+                    if TempDocumentEntry."Table ID" <> DATABASE::"Warranty Ledger Entry" then
                         CurrReport.Break();
 
                     SetCurrentKey("Document No.", "Posting Date");
@@ -152,7 +182,7 @@ report 35 "Document Entries"
             }
             dataitem("Service Shipment Header"; "Service Shipment Header")
             {
-                DataItemTableView = SORTING("No.");
+                DataItemTableView = sorting("No.");
                 column(CurrencyCaption; CurrencyCaption)
                 {
                 }
@@ -177,7 +207,7 @@ report 35 "Document Entries"
 
                 trigger OnPreDataItem()
                 begin
-                    if DocEntry."Table ID" <> DATABASE::"Service Shipment Header" then
+                    if TempDocumentEntry."Table ID" <> DATABASE::"Service Shipment Header" then
                         CurrReport.Break();
 
                     SetCurrentKey("No.");
@@ -187,7 +217,7 @@ report 35 "Document Entries"
             }
             dataitem("Sales Shipment Header"; "Sales Shipment Header")
             {
-                DataItemTableView = SORTING("No.");
+                DataItemTableView = sorting("No.");
                 column(PostingDate_SalesShipmentHdr; Format("Posting Date"))
                 {
                 }
@@ -228,7 +258,7 @@ report 35 "Document Entries"
 
                 trigger OnPreDataItem()
                 begin
-                    if DocEntry."Table ID" <> DATABASE::"Sales Shipment Header" then
+                    if TempDocumentEntry."Table ID" <> DATABASE::"Sales Shipment Header" then
                         CurrReport.Break();
 
                     SetCurrentKey("No.");
@@ -238,7 +268,7 @@ report 35 "Document Entries"
             }
             dataitem("Sales Invoice Header"; "Sales Invoice Header")
             {
-                DataItemTableView = SORTING("No.");
+                DataItemTableView = sorting("No.");
                 column(PostingDate_SalesInvHdr; Format("Posting Date"))
                 {
                 }
@@ -304,7 +334,7 @@ report 35 "Document Entries"
 
                 trigger OnPreDataItem()
                 begin
-                    if DocEntry."Table ID" <> DATABASE::"Sales Invoice Header" then
+                    if TempDocumentEntry."Table ID" <> DATABASE::"Sales Invoice Header" then
                         CurrReport.Break();
 
                     SetCurrentKey("No.");
@@ -314,7 +344,7 @@ report 35 "Document Entries"
             }
             dataitem("Return Receipt Header"; "Return Receipt Header")
             {
-                DataItemTableView = SORTING("No.");
+                DataItemTableView = sorting("No.");
                 column(PostingDate_ReturnRcptHdr; Format("Posting Date"))
                 {
                 }
@@ -355,7 +385,7 @@ report 35 "Document Entries"
 
                 trigger OnPreDataItem()
                 begin
-                    if DocEntry."Table ID" <> DATABASE::"Return Receipt Header" then
+                    if TempDocumentEntry."Table ID" <> DATABASE::"Return Receipt Header" then
                         CurrReport.Break();
 
                     SetCurrentKey("No.");
@@ -365,7 +395,7 @@ report 35 "Document Entries"
             }
             dataitem("Sales Cr.Memo Header"; "Sales Cr.Memo Header")
             {
-                DataItemTableView = SORTING("No.");
+                DataItemTableView = sorting("No.");
                 column(PostingDate_SalesCrMemoHdr; Format("Posting Date"))
                 {
                 }
@@ -431,7 +461,7 @@ report 35 "Document Entries"
 
                 trigger OnPreDataItem()
                 begin
-                    if DocEntry."Table ID" <> DATABASE::"Sales Cr.Memo Header" then
+                    if TempDocumentEntry."Table ID" <> DATABASE::"Sales Cr.Memo Header" then
                         CurrReport.Break();
 
                     SetCurrentKey("No.");
@@ -441,7 +471,7 @@ report 35 "Document Entries"
             }
             dataitem("Issued Reminder Header"; "Issued Reminder Header")
             {
-                DataItemTableView = SORTING("No.");
+                DataItemTableView = sorting("No.");
                 column(PostingDate_IssuedReminderHdr; Format("Posting Date"))
                 {
                 }
@@ -513,7 +543,7 @@ report 35 "Document Entries"
 
                 trigger OnPreDataItem()
                 begin
-                    if DocEntry."Table ID" <> DATABASE::"Issued Reminder Header" then
+                    if TempDocumentEntry."Table ID" <> DATABASE::"Issued Reminder Header" then
                         CurrReport.Break();
 
                     SetCurrentKey("No.");
@@ -523,7 +553,7 @@ report 35 "Document Entries"
             }
             dataitem("Issued Fin. Charge Memo Header"; "Issued Fin. Charge Memo Header")
             {
-                DataItemTableView = SORTING("No.");
+                DataItemTableView = sorting("No.");
                 column(PostingDate_IssuedFinChargeMemoHdr; Format("Posting Date"))
                 {
                 }
@@ -578,7 +608,7 @@ report 35 "Document Entries"
 
                 trigger OnAfterGetRecord()
                 begin
-                    if PrintAmountsInLCY then begin
+                    if PrintAmountsInLCY then
                         if "Currency Code" <> '' then begin
                             "Remaining Amount" := CurrExchRate.ExchangeAmtFCYToLCY("Posting Date", "Currency Code",
                                 "Remaining Amount", CurrExchRate.ExchangeRate("Posting Date", "Currency Code"));
@@ -589,12 +619,11 @@ report 35 "Document Entries"
                             "VAT Amount" := CurrExchRate.ExchangeAmtFCYToLCY("Posting Date", "Currency Code",
                                 "VAT Amount", CurrExchRate.ExchangeRate("Posting Date", "Currency Code"));
                         end;
-                    end;
                 end;
 
                 trigger OnPreDataItem()
                 begin
-                    if DocEntry."Table ID" <> DATABASE::"Issued Fin. Charge Memo Header" then
+                    if TempDocumentEntry."Table ID" <> DATABASE::"Issued Fin. Charge Memo Header" then
                         CurrReport.Break();
 
                     SetCurrentKey("No.");
@@ -604,7 +633,7 @@ report 35 "Document Entries"
             }
             dataitem("Posted Deposit Header"; "Posted Deposit Header")
             {
-                DataItemTableView = SORTING("No.");
+                DataItemTableView = sorting("No.");
                 column(CurrencyCaption_PostedDepositHdr; CurrencyCaption)
                 {
                 }
@@ -658,7 +687,7 @@ report 35 "Document Entries"
 
                 trigger OnPreDataItem()
                 begin
-                    if DocEntry."Table ID" <> DATABASE::"Posted Deposit Header" then
+                    if TempDocumentEntry."Table ID" <> DATABASE::"Posted Deposit Header" then
                         CurrReport.Break();
 
                     SetCurrentKey("No.");
@@ -668,7 +697,7 @@ report 35 "Document Entries"
             }
             dataitem("Purch. Rcpt. Header"; "Purch. Rcpt. Header")
             {
-                DataItemTableView = SORTING("No.");
+                DataItemTableView = sorting("No.");
                 column(PostingDate_PurchRcptHdr; Format("Posting Date"))
                 {
                 }
@@ -709,7 +738,7 @@ report 35 "Document Entries"
 
                 trigger OnPreDataItem()
                 begin
-                    if DocEntry."Table ID" <> DATABASE::"Purch. Rcpt. Header" then
+                    if TempDocumentEntry."Table ID" <> DATABASE::"Purch. Rcpt. Header" then
                         CurrReport.Break();
 
                     SetCurrentKey("No.");
@@ -719,7 +748,7 @@ report 35 "Document Entries"
             }
             dataitem("Purch. Inv. Header"; "Purch. Inv. Header")
             {
-                DataItemTableView = SORTING("No.");
+                DataItemTableView = sorting("No.");
                 column(PostingDate_PurchInvHdr; Format("Posting Date"))
                 {
                 }
@@ -785,7 +814,7 @@ report 35 "Document Entries"
 
                 trigger OnPreDataItem()
                 begin
-                    if DocEntry."Table ID" <> DATABASE::"Purch. Inv. Header" then
+                    if TempDocumentEntry."Table ID" <> DATABASE::"Purch. Inv. Header" then
                         CurrReport.Break();
 
                     SetCurrentKey("No.");
@@ -795,7 +824,7 @@ report 35 "Document Entries"
             }
             dataitem("Return Shipment Header"; "Return Shipment Header")
             {
-                DataItemTableView = SORTING("No.");
+                DataItemTableView = sorting("No.");
                 column(PostingDate_ReturnShipmentHdr; Format("Posting Date"))
                 {
                 }
@@ -836,7 +865,7 @@ report 35 "Document Entries"
 
                 trigger OnPreDataItem()
                 begin
-                    if DocEntry."Table ID" <> DATABASE::"Return Shipment Header" then
+                    if TempDocumentEntry."Table ID" <> DATABASE::"Return Shipment Header" then
                         CurrReport.Break();
 
                     SetCurrentKey("No.");
@@ -846,7 +875,7 @@ report 35 "Document Entries"
             }
             dataitem("Purch. Cr. Memo Hdr."; "Purch. Cr. Memo Hdr.")
             {
-                DataItemTableView = SORTING("No.");
+                DataItemTableView = sorting("No.");
                 column(PostingDate_PurchCrMemoHdr; Format("Posting Date"))
                 {
                 }
@@ -912,7 +941,7 @@ report 35 "Document Entries"
 
                 trigger OnPreDataItem()
                 begin
-                    if DocEntry."Table ID" <> DATABASE::"Purch. Cr. Memo Hdr." then
+                    if TempDocumentEntry."Table ID" <> DATABASE::"Purch. Cr. Memo Hdr." then
                         CurrReport.Break();
 
                     SetCurrentKey("No.");
@@ -922,7 +951,7 @@ report 35 "Document Entries"
             }
             dataitem("Production Order"; "Production Order")
             {
-                DataItemTableView = SORTING(Status, "No.");
+                DataItemTableView = sorting(Status, "No.");
                 column(No_ProductionOrder; "No.")
                 {
                     IncludeCaption = false;
@@ -974,7 +1003,7 @@ report 35 "Document Entries"
 
                 trigger OnPreDataItem()
                 begin
-                    if DocEntry."Table ID" <> DATABASE::"Production Order" then
+                    if TempDocumentEntry."Table ID" <> DATABASE::"Production Order" then
                         CurrReport.Break();
 
                     SetCurrentKey(Status, "No.");
@@ -984,7 +1013,7 @@ report 35 "Document Entries"
             }
             dataitem("Transfer Shipment Header"; "Transfer Shipment Header")
             {
-                DataItemTableView = SORTING("No.");
+                DataItemTableView = sorting("No.");
                 column(PostingDate_TransferShipmentHdr; Format("Posting Date"))
                 {
                 }
@@ -1029,7 +1058,7 @@ report 35 "Document Entries"
 
                 trigger OnPreDataItem()
                 begin
-                    if DocEntry."Table ID" <> DATABASE::"Transfer Shipment Header" then
+                    if TempDocumentEntry."Table ID" <> DATABASE::"Transfer Shipment Header" then
                         CurrReport.Break();
 
                     SetCurrentKey("No.");
@@ -1039,7 +1068,7 @@ report 35 "Document Entries"
             }
             dataitem("Transfer Receipt Header"; "Transfer Receipt Header")
             {
-                DataItemTableView = SORTING("No.");
+                DataItemTableView = sorting("No.");
                 column(PostingDate_TransferRcptHdr; Format("Posting Date"))
                 {
                 }
@@ -1084,7 +1113,7 @@ report 35 "Document Entries"
 
                 trigger OnPreDataItem()
                 begin
-                    if DocEntry."Table ID" <> DATABASE::"Transfer Receipt Header" then
+                    if TempDocumentEntry."Table ID" <> DATABASE::"Transfer Receipt Header" then
                         CurrReport.Break();
 
                     SetCurrentKey("No.");
@@ -1094,7 +1123,7 @@ report 35 "Document Entries"
             }
             dataitem("Posted Whse. Shipment Line"; "Posted Whse. Shipment Line")
             {
-                DataItemTableView = SORTING("Posted Source No.", "Posting Date");
+                DataItemTableView = sorting("Posted Source No.", "Posting Date");
                 column(PostingDate_PostedWhseShipmentLine; Format("Posting Date"))
                 {
                 }
@@ -1152,7 +1181,7 @@ report 35 "Document Entries"
 
                 trigger OnPreDataItem()
                 begin
-                    if DocEntry."Table ID" <> DATABASE::"Posted Whse. Shipment Line" then
+                    if TempDocumentEntry."Table ID" <> DATABASE::"Posted Whse. Shipment Line" then
                         CurrReport.Break();
 
                     SetCurrentKey("Posted Source No.", "Posting Date");
@@ -1162,7 +1191,7 @@ report 35 "Document Entries"
             }
             dataitem("Posted Whse. Receipt Line"; "Posted Whse. Receipt Line")
             {
-                DataItemTableView = SORTING("Posted Source No.", "Posting Date");
+                DataItemTableView = sorting("Posted Source No.", "Posting Date");
                 column(PostingDate_PostedWhseRcptLine; Format("Posting Date"))
                 {
                 }
@@ -1214,7 +1243,7 @@ report 35 "Document Entries"
 
                 trigger OnPreDataItem()
                 begin
-                    if DocEntry."Table ID" <> DATABASE::"Posted Whse. Receipt Line" then
+                    if TempDocumentEntry."Table ID" <> DATABASE::"Posted Whse. Receipt Line" then
                         CurrReport.Break();
 
                     SetCurrentKey("Posted Source No.", "Posting Date");
@@ -1224,7 +1253,7 @@ report 35 "Document Entries"
             }
             dataitem("Posted Deposit Line"; "Posted Deposit Line")
             {
-                DataItemTableView = SORTING("Document No.", "Posting Date");
+                DataItemTableView = sorting("Document No.", "Posting Date");
                 column(CurrencyCaption_PostedDepositLine; CurrencyCaption)
                 {
                 }
@@ -1301,7 +1330,7 @@ report 35 "Document Entries"
 
                 trigger OnPreDataItem()
                 begin
-                    if DocEntry."Table ID" <> DATABASE::"Posted Deposit Line" then
+                    if TempDocumentEntry."Table ID" <> DATABASE::"Posted Deposit Line" then
                         CurrReport.Break();
 
                     if NavigateDeposit then begin
@@ -1316,7 +1345,7 @@ report 35 "Document Entries"
             }
             dataitem("G/L Entry"; "G/L Entry")
             {
-                DataItemTableView = SORTING("G/L Account No.", "Posting Date");
+                DataItemTableView = sorting("G/L Account No.", "Posting Date");
                 column(PostingDate_GLEntry; Format("Posting Date"))
                 {
                 }
@@ -1374,7 +1403,7 @@ report 35 "Document Entries"
 
                 trigger OnPreDataItem()
                 begin
-                    if DocEntry."Table ID" <> DATABASE::"G/L Entry" then
+                    if TempDocumentEntry."Table ID" <> DATABASE::"G/L Entry" then
                         CurrReport.Break();
 
                     if NavigateDeposit then begin
@@ -1389,7 +1418,7 @@ report 35 "Document Entries"
             }
             dataitem("VAT Entry"; "VAT Entry")
             {
-                DataItemTableView = SORTING("Document No.", "Posting Date");
+                DataItemTableView = sorting("Document No.", "Posting Date");
                 column(PostingDate_VATEntry; Format("Posting Date"))
                 {
                 }
@@ -1417,7 +1446,7 @@ report 35 "Document Entries"
 
                 trigger OnPreDataItem()
                 begin
-                    if DocEntry."Table ID" <> DATABASE::"VAT Entry" then
+                    if TempDocumentEntry."Table ID" <> DATABASE::"VAT Entry" then
                         CurrReport.Break();
 
                     SetCurrentKey("Document No.", "Posting Date");
@@ -1427,7 +1456,7 @@ report 35 "Document Entries"
             }
             dataitem("Cust. Ledger Entry"; "Cust. Ledger Entry")
             {
-                DataItemTableView = SORTING("Document No.");
+                DataItemTableView = sorting("Document No.");
                 column(EntryNo_CustLedgEntry; "Entry No.")
                 {
                 }
@@ -1482,7 +1511,7 @@ report 35 "Document Entries"
 
                 trigger OnPreDataItem()
                 begin
-                    if DocEntry."Table ID" <> DATABASE::"Cust. Ledger Entry" then
+                    if TempDocumentEntry."Table ID" <> DATABASE::"Cust. Ledger Entry" then
                         CurrReport.Break();
 
                     if NavigateDeposit then begin
@@ -1497,7 +1526,7 @@ report 35 "Document Entries"
             }
             dataitem("Detailed Cust. Ledg. Entry"; "Detailed Cust. Ledg. Entry")
             {
-                DataItemTableView = SORTING("Document No.");
+                DataItemTableView = sorting("Document No.");
                 column(PostingDate_DetailedCustLedgEntry; Format("Posting Date"))
                 {
                 }
@@ -1546,7 +1575,7 @@ report 35 "Document Entries"
 
                 trigger OnPreDataItem()
                 begin
-                    if DocEntry."Table ID" <> DATABASE::"Detailed Cust. Ledg. Entry" then
+                    if TempDocumentEntry."Table ID" <> DATABASE::"Detailed Cust. Ledg. Entry" then
                         CurrReport.Break();
 
                     SetCurrentKey("Document No.");
@@ -1556,7 +1585,7 @@ report 35 "Document Entries"
             }
             dataitem("Reminder/Fin. Charge Entry"; "Reminder/Fin. Charge Entry")
             {
-                DataItemTableView = SORTING(Type, "No.");
+                DataItemTableView = sorting(Type, "No.");
                 column(EntryNo_ReminderFinChargeEntry; "Entry No.")
                 {
                 }
@@ -1596,7 +1625,7 @@ report 35 "Document Entries"
 
                 trigger OnPreDataItem()
                 begin
-                    if DocEntry."Table ID" <> DATABASE::"Reminder/Fin. Charge Entry" then
+                    if TempDocumentEntry."Table ID" <> DATABASE::"Reminder/Fin. Charge Entry" then
                         CurrReport.Break();
 
                     SetCurrentKey("Document No.", "Posting Date");
@@ -1606,7 +1635,7 @@ report 35 "Document Entries"
             }
             dataitem("Vendor Ledger Entry"; "Vendor Ledger Entry")
             {
-                DataItemTableView = SORTING("Document No.");
+                DataItemTableView = sorting("Document No.");
                 column(EntryNo_VendLedgEntry; "Entry No.")
                 {
                 }
@@ -1655,7 +1684,7 @@ report 35 "Document Entries"
 
                 trigger OnPreDataItem()
                 begin
-                    if DocEntry."Table ID" <> DATABASE::"Vendor Ledger Entry" then
+                    if TempDocumentEntry."Table ID" <> DATABASE::"Vendor Ledger Entry" then
                         CurrReport.Break();
 
                     if NavigateDeposit then begin
@@ -1670,7 +1699,7 @@ report 35 "Document Entries"
             }
             dataitem("Detailed Vendor Ledg. Entry"; "Detailed Vendor Ledg. Entry")
             {
-                DataItemTableView = SORTING("Document No.");
+                DataItemTableView = sorting("Document No.");
                 column(PostingDate_DetailedVendLedgEntry; Format("Posting Date"))
                 {
                 }
@@ -1719,7 +1748,7 @@ report 35 "Document Entries"
 
                 trigger OnPreDataItem()
                 begin
-                    if DocEntry."Table ID" <> DATABASE::"Detailed Vendor Ledg. Entry" then
+                    if TempDocumentEntry."Table ID" <> DATABASE::"Detailed Vendor Ledg. Entry" then
                         CurrReport.Break();
 
                     SetCurrentKey("Document No.");
@@ -1729,7 +1758,7 @@ report 35 "Document Entries"
             }
             dataitem("Item Ledger Entry"; "Item Ledger Entry")
             {
-                DataItemTableView = SORTING("Document No.");
+                DataItemTableView = sorting("Document No.");
                 column(EntryNo_ItemLedgEntry; "Entry No.")
                 {
                 }
@@ -1775,7 +1804,7 @@ report 35 "Document Entries"
 
                 trigger OnPreDataItem()
                 begin
-                    if DocEntry."Table ID" <> DATABASE::"Item Ledger Entry" then
+                    if TempDocumentEntry."Table ID" <> DATABASE::"Item Ledger Entry" then
                         CurrReport.Break();
 
                     SetCurrentKey("Document No.");
@@ -1785,7 +1814,7 @@ report 35 "Document Entries"
             }
             dataitem("Value Entry"; "Value Entry")
             {
-                DataItemTableView = SORTING("Document No.");
+                DataItemTableView = sorting("Document No.");
                 column(PostingDate_ValueEntry; Format("Posting Date"))
                 {
                 }
@@ -1825,7 +1854,7 @@ report 35 "Document Entries"
 
                 trigger OnPreDataItem()
                 begin
-                    if DocEntry."Table ID" <> DATABASE::"Value Entry" then
+                    if TempDocumentEntry."Table ID" <> DATABASE::"Value Entry" then
                         CurrReport.Break();
 
                     SetCurrentKey("Document No.");
@@ -1835,7 +1864,7 @@ report 35 "Document Entries"
             }
             dataitem("Phys. Inventory Ledger Entry"; "Phys. Inventory Ledger Entry")
             {
-                DataItemTableView = SORTING("Document No.", "Posting Date");
+                DataItemTableView = sorting("Document No.", "Posting Date");
                 column(EntryNo_PhysInvtLedgEntry; "Entry No.")
                 {
                 }
@@ -1887,7 +1916,7 @@ report 35 "Document Entries"
 
                 trigger OnPreDataItem()
                 begin
-                    if DocEntry."Table ID" <> DATABASE::"Phys. Inventory Ledger Entry" then
+                    if TempDocumentEntry."Table ID" <> DATABASE::"Phys. Inventory Ledger Entry" then
                         CurrReport.Break();
 
                     SetCurrentKey("Document No.", "Posting Date");
@@ -1897,7 +1926,7 @@ report 35 "Document Entries"
             }
             dataitem("Res. Ledger Entry"; "Res. Ledger Entry")
             {
-                DataItemTableView = SORTING("Document No.", "Posting Date");
+                DataItemTableView = sorting("Document No.", "Posting Date");
                 column(PostingDate_ResLedgEntry; Format("Posting Date"))
                 {
                 }
@@ -1943,7 +1972,7 @@ report 35 "Document Entries"
 
                 trigger OnPreDataItem()
                 begin
-                    if DocEntry."Table ID" <> DATABASE::"Res. Ledger Entry" then
+                    if TempDocumentEntry."Table ID" <> DATABASE::"Res. Ledger Entry" then
                         CurrReport.Break();
 
                     SetCurrentKey("Document No.", "Posting Date");
@@ -1953,7 +1982,7 @@ report 35 "Document Entries"
             }
             dataitem("Job Ledger Entry"; "Job Ledger Entry")
             {
-                DataItemTableView = SORTING("Document No.", "Posting Date");
+                DataItemTableView = sorting("Document No.", "Posting Date");
                 column(PostingDate_JobLedgEntry; Format("Posting Date"))
                 {
                 }
@@ -1999,7 +2028,7 @@ report 35 "Document Entries"
 
                 trigger OnPreDataItem()
                 begin
-                    if DocEntry."Table ID" <> DATABASE::"Job Ledger Entry" then
+                    if TempDocumentEntry."Table ID" <> DATABASE::"Job Ledger Entry" then
                         CurrReport.Break();
 
                     SetCurrentKey("Document No.", "Posting Date");
@@ -2009,7 +2038,7 @@ report 35 "Document Entries"
             }
             dataitem("Bank Account Ledger Entry"; "Bank Account Ledger Entry")
             {
-                DataItemTableView = SORTING("Document No.", "Posting Date");
+                DataItemTableView = sorting("Document No.", "Posting Date");
                 column(EntryNo_BankAccLedgEntry; "Entry No.")
                 {
                 }
@@ -2058,7 +2087,7 @@ report 35 "Document Entries"
 
                 trigger OnPreDataItem()
                 begin
-                    if DocEntry."Table ID" <> DATABASE::"Bank Account Ledger Entry" then
+                    if TempDocumentEntry."Table ID" <> DATABASE::"Bank Account Ledger Entry" then
                         CurrReport.Break();
 
                     if NavigateDeposit then begin
@@ -2073,7 +2102,7 @@ report 35 "Document Entries"
             }
             dataitem("Check Ledger Entry"; "Check Ledger Entry")
             {
-                DataItemTableView = SORTING("Document No.", "Posting Date");
+                DataItemTableView = sorting("Document No.", "Posting Date");
                 column(DocNo_CheckLedgEntry; "Document No.")
                 {
                 }
@@ -2131,7 +2160,7 @@ report 35 "Document Entries"
 
                 trigger OnPreDataItem()
                 begin
-                    if DocEntry."Table ID" <> DATABASE::"Check Ledger Entry" then
+                    if TempDocumentEntry."Table ID" <> DATABASE::"Check Ledger Entry" then
                         CurrReport.Break();
 
                     SetCurrentKey("Document No.", "Posting Date");
@@ -2141,7 +2170,7 @@ report 35 "Document Entries"
             }
             dataitem("FA Ledger Entry"; "FA Ledger Entry")
             {
-                DataItemTableView = SORTING("Document Type", "Document No.");
+                DataItemTableView = sorting("Document Type", "Document No.");
                 column(PostingDate_FALedgEntry; Format("Posting Date"))
                 {
                 }
@@ -2178,7 +2207,7 @@ report 35 "Document Entries"
 
                 trigger OnPreDataItem()
                 begin
-                    if DocEntry."Table ID" <> DATABASE::"FA Ledger Entry" then
+                    if TempDocumentEntry."Table ID" <> DATABASE::"FA Ledger Entry" then
                         CurrReport.Break();
 
                     SetCurrentKey("Document No.", "Posting Date");
@@ -2188,7 +2217,7 @@ report 35 "Document Entries"
             }
             dataitem("Maintenance Ledger Entry"; "Maintenance Ledger Entry")
             {
-                DataItemTableView = SORTING("Document No.", "Posting Date");
+                DataItemTableView = sorting("Document No.", "Posting Date");
                 column(EntryNo_MaintenanceLedgEntry; "Entry No.")
                 {
                 }
@@ -2225,7 +2254,7 @@ report 35 "Document Entries"
 
                 trigger OnPreDataItem()
                 begin
-                    if DocEntry."Table ID" <> DATABASE::"Maintenance Ledger Entry" then
+                    if TempDocumentEntry."Table ID" <> DATABASE::"Maintenance Ledger Entry" then
                         CurrReport.Break();
 
                     SetCurrentKey("Document No.", "Posting Date");
@@ -2235,7 +2264,7 @@ report 35 "Document Entries"
             }
             dataitem("Ins. Coverage Ledger Entry"; "Ins. Coverage Ledger Entry")
             {
-                DataItemTableView = SORTING("Document No.", "Posting Date");
+                DataItemTableView = sorting("Document No.", "Posting Date");
                 column(PostingDate_InsCoverageLedgEntry; Format("Posting Date"))
                 {
                 }
@@ -2275,7 +2304,7 @@ report 35 "Document Entries"
 
                 trigger OnPreDataItem()
                 begin
-                    if DocEntry."Table ID" <> DATABASE::"Ins. Coverage Ledger Entry" then
+                    if TempDocumentEntry."Table ID" <> DATABASE::"Ins. Coverage Ledger Entry" then
                         CurrReport.Break();
 
                     SetCurrentKey("Document No.", "Posting Date");
@@ -2285,7 +2314,7 @@ report 35 "Document Entries"
             }
             dataitem("Capacity Ledger Entry"; "Capacity Ledger Entry")
             {
-                DataItemTableView = SORTING("Document No.", "Posting Date");
+                DataItemTableView = sorting("Document No.", "Posting Date");
                 column(EntryNo_CapacityLedgEntry; "Entry No.")
                 {
                 }
@@ -2319,7 +2348,7 @@ report 35 "Document Entries"
 
                 trigger OnPreDataItem()
                 begin
-                    if DocEntry."Table ID" <> DATABASE::"Capacity Ledger Entry" then
+                    if TempDocumentEntry."Table ID" <> DATABASE::"Capacity Ledger Entry" then
                         CurrReport.Break();
 
                     SetCurrentKey("Document No.", "Posting Date");
@@ -2329,7 +2358,7 @@ report 35 "Document Entries"
             }
             dataitem("Warehouse Entry"; "Warehouse Entry")
             {
-                DataItemTableView = SORTING("Reference No.", "Registering Date");
+                DataItemTableView = sorting("Reference No.", "Registering Date");
                 column(EntryNo_WhseEntry; "Entry No.")
                 {
                 }
@@ -2375,7 +2404,7 @@ report 35 "Document Entries"
 
                 trigger OnPreDataItem()
                 begin
-                    if DocEntry."Table ID" <> DATABASE::"Warehouse Entry" then
+                    if TempDocumentEntry."Table ID" <> DATABASE::"Warehouse Entry" then
                         CurrReport.Break();
 
                     SetCurrentKey("Reference No.", "Registering Date");
@@ -2387,10 +2416,10 @@ report 35 "Document Entries"
             trigger OnAfterGetRecord()
             begin
                 if Number = 1 then begin
-                    if not DocEntry.Find('-') then
+                    if not TempDocumentEntry.Find('-') then
                         CurrReport.Break();
                 end else
-                    if DocEntry.Next() = 0 then
+                    if TempDocumentEntry.Next() = 0 then
                         CurrReport.Break();
                 CurrencyCaptionRBC := Text003;
             end;
@@ -2436,11 +2465,8 @@ report 35 "Document Entries"
     }
 
     var
-        DocEntry: Record "Document Entry" temporary;
         CurrExchRate: Record "Currency Exchange Rate";
         PostedDepositHeader: Record "Posted Deposit Header";
-        DocNoFilter: Text;
-        PostingDateFilter: Text;
         Text001: Label 'Document No. : ';
         Text002: Label 'Posting Date : ';
         PrintAmountsInLCY: Boolean;
@@ -2493,18 +2519,23 @@ report 35 "Document Entries"
         Text046: Label 'Posting Date';
         Text047: Label 'Registering Date';
 
-    procedure TransferDocEntries(var NewDocEntry: Record "Document Entry")
+    protected var
+        TempDocumentEntry: Record "Document Entry" temporary;
+        DocNoFilter: Text;
+        PostingDateFilter: Text;
+
+    procedure TransferDocEntries(var NewDocumentEntry: Record "Document Entry")
     var
-        TempDocumentEntry: Record "Document Entry";
+        TempDocumentEntry2: Record "Document Entry";
     begin
-        TempDocumentEntry := NewDocEntry;
-        NewDocEntry.Reset();
-        if NewDocEntry.Find('-') then
+        TempDocumentEntry2 := NewDocumentEntry;
+        NewDocumentEntry.Reset();
+        if NewDocumentEntry.Find('-') then
             repeat
-                DocEntry := NewDocEntry;
-                DocEntry.Insert();
-            until NewDocEntry.Next() = 0;
-        NewDocEntry := TempDocumentEntry;
+                TempDocumentEntry := NewDocumentEntry;
+                TempDocumentEntry.Insert();
+            until NewDocumentEntry.Next() = 0;
+        NewDocumentEntry := TempDocumentEntry2;
     end;
 
     procedure TransferFilters(NewDocNoFilter: Text; NewPostingDateFilter: Text)

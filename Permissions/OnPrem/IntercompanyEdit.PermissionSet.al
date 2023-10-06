@@ -1,3 +1,13 @@
+namespace System.Security.AccessControl;
+
+using Microsoft.Intercompany.Comment;
+using Microsoft.Intercompany.Inbox;
+using Microsoft.Intercompany.Outbox;
+using Microsoft.Intercompany.BankAccount;
+using Microsoft.Intercompany.Dimension;
+using Microsoft.Intercompany.Partner;
+using Microsoft.Intercompany.Setup;
+
 permissionset 3922 "Intercompany - Edit"
 {
     Access = Public;
@@ -16,6 +26,7 @@ permissionset 3922 "Intercompany - Edit"
                   tabledata "Handled IC Outbox Sales Header" = RIMD,
                   tabledata "Handled IC Outbox Sales Line" = RIMD,
                   tabledata "Handled IC Outbox Trans." = RIMD,
+                  tabledata "IC Bank Account" = R,
                   tabledata "IC Comment Line" = RIMD,
                   tabledata "IC Document Dimension" = RIMD,
                   tabledata "IC Inbox Jnl. Line" = RIMD,

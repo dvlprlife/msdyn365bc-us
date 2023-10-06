@@ -1,3 +1,50 @@
+namespace System.Security.AccessControl;
+
+using Microsoft.Finance.Analysis;
+using Microsoft.Projects.Project.Ledger;
+using Microsoft.Inventory.Item;
+using Microsoft.Foundation.Period;
+using Microsoft.Bank.Payment;
+using Microsoft.Bank.Reconciliation;
+using Microsoft.Bank.BankAccount;
+using Microsoft.Bank.Ledger;
+using Microsoft.Bank.Statement;
+using Microsoft.Finance.Currency;
+using Microsoft.Sales.Receivables;
+using Microsoft.Finance.GeneralLedger.Setup;
+using Microsoft.Inventory.Analysis;
+using Microsoft.Purchases.Document;
+using Microsoft.Inventory.Journal;
+using Microsoft.Inventory.Ledger;
+using Microsoft.Inventory.Item.Catalog;
+using Microsoft.Inventory.Tracking;
+using System.Threading;
+using System.Environment.Configuration;
+using Microsoft.Purchases.Vendor;
+using Microsoft.HumanResources.Payables;
+using Microsoft.Purchases.Payables;
+using Microsoft.Utilities;
+using Microsoft.Finance.VAT.Setup;
+using Microsoft.Warehouse.History;
+using Microsoft.Pricing.Asset;
+using Microsoft.Pricing.Calculation;
+using Microsoft.Pricing.PriceList;
+using Microsoft.Pricing.Source;
+using Microsoft.Pricing.Worksheet;
+using Microsoft.Purchases.History;
+using Microsoft.Purchases.Pricing;
+using Microsoft.Purchases.Archive;
+using Microsoft.Purchases.Remittance;
+using Microsoft.Inventory.Requisition;
+#if not CLEAN21
+using Microsoft.Projects.Resources.Pricing;
+#endif
+using Microsoft.Projects.Resources.Resource;
+using Microsoft.Sales.Document;
+using Microsoft.Sales.History;
+using Microsoft.Finance.VAT.Registration;
+using System.IO;
+
 permissionset 5289 "D365 ACC. PAYABLE"
 {
     Assignable = true;
@@ -29,9 +76,6 @@ permissionset 5289 "D365 ACC. PAYABLE"
                   tabledata "Item Analysis View Entry" = RIM,
                   tabledata "Item Charge Assignment (Purch)" = RIMD,
                   tabledata "Item Charge Assignment (Sales)" = Rm,
-#if not CLEAN19
-                  tabledata "Item Cross Reference" = R,
-#endif
                   tabledata "Item Entry Relation" = R,
                   tabledata "Item Journal Line" = RIMD,
                   tabledata "Item Ledger Entry" = Rimd,
@@ -49,6 +93,8 @@ permissionset 5289 "D365 ACC. PAYABLE"
                   tabledata "Payable Employee Ledger Entry" = RIMD,
                   tabledata "Payable Vendor Ledger Entry" = RIMD,
                   tabledata "Payment Matching Details" = RIMD,
+                  tabledata "Payment Rec. Related Entry" = RIMD,
+                  tabledata "Pmt. Rec. Applied-to Entry" = RIMD,
                   tabledata "Posted Payment Recon. Hdr" = RIMD,
                   tabledata "Posted Payment Recon. Line" = RIMD,
                   tabledata "Posted Whse. Receipt Header" = R,
@@ -72,14 +118,15 @@ permissionset 5289 "D365 ACC. PAYABLE"
                   tabledata "Purchase Header Archive" = RIMD,
                   tabledata "Purchase Line" = RIMD,
                   tabledata "Purchase Line Archive" = RIMD,
-#if not CLEAN19
+#if not CLEAN21
                   tabledata "Purchase Line Discount" = RIMD,
                   tabledata "Purchase Price" = RIMD,
 #endif
                   tabledata "Purchase Price Access" = RIMD,
                   tabledata "Record Buffer" = Rimd,
+                  tabledata "Remit Address" = RIMD,
                   tabledata "Requisition Line" = RIMD,
-#if not CLEAN19
+#if not CLEAN21
                   tabledata "Resource Cost" = R,
                   tabledata "Resource Price" = R,
 #endif
@@ -88,6 +135,7 @@ permissionset 5289 "D365 ACC. PAYABLE"
                   tabledata "Sales Invoice Line" = Rimd,
                   tabledata "Sales Line" = RIMD,
                   tabledata "VAT Registration No. Format" = IMD,
+                  tabledata "VAT Setup" = RM,
                   tabledata Vendor = D,
                   tabledata "Vendor Invoice Disc." = IMD,
                   tabledata "Work Type" = R;

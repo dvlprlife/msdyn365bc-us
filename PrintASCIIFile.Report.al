@@ -1,3 +1,8 @@
+namespace Microsoft.Utilities;
+
+using System.IO;
+using System.Utilities;
+
 report 1301 "Print ASCII File"
 {
     DefaultLayout = RDLC;
@@ -8,7 +13,7 @@ report 1301 "Print ASCII File"
     {
         dataitem("Integer"; "Integer")
         {
-            DataItemTableView = SORTING(Number);
+            DataItemTableView = sorting(Number);
             column(FORMAT_TODAY_0_4_; Format(Today, 0, 4))
             {
             }
@@ -30,14 +35,13 @@ report 1301 "Print ASCII File"
                 if TextFile.Len = TextFile.Pos then
                     CurrReport.Break();
                 TextFile.Read(TextLine);
-                if CopyStr(TextLine, 1, 4) = Text001 then begin
+                if CopyStr(TextLine, 1, 4) = Text001 then
                     TextLine := '';
-                end;
             end;
 
             trigger OnPostDataItem()
             begin
-                TextFile.Close;
+                TextFile.Close();
             end;
 
             trigger OnPreDataItem()

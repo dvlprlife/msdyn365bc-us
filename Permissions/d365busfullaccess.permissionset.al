@@ -1,4 +1,201 @@
-﻿permissionset 959 "D365 BUS FULL ACCESS"
+﻿namespace System.Security.AccessControl;
+
+using Microsoft;
+using Microsoft.AccountantPortal;
+using Microsoft.API;
+using Microsoft.API.Upgrade;
+using Microsoft.Assembly.Comment;
+using Microsoft.Assembly.Reports;
+using Microsoft.Booking;
+using Microsoft.Bank.Payment;
+using Microsoft.Bank.BankAccount;
+using Microsoft.Bank.Check;
+using Microsoft.Bank.Deposit;
+using Microsoft.Bank.DirectDebit;
+using Microsoft.Bank.PositivePay;
+using Microsoft.Bank.Reconciliation;
+using Microsoft.Bank.Setup;
+using Microsoft.CashFlow.Forecast;
+using Microsoft.CRM.Analysis;
+using Microsoft.CRM.Campaign;
+using Microsoft.CRM.Contact;
+using Microsoft.CRM.Duplicates;
+using Microsoft.CRM.Interaction;
+using Microsoft.CRM.Outlook;
+using Microsoft.CRM.RoleCenters;
+using Microsoft.CRM.Segment;
+using Microsoft.CRM.Task;
+using Microsoft.CRM.Team;
+using Microsoft.EServices.EDocument;
+using Microsoft.EServices.OnlineMap;
+using Microsoft.Finance.Analysis;
+using Microsoft.Finance.Currency;
+using Microsoft.Finance.Consolidation;
+using Microsoft.Finance.Deferral;
+using Microsoft.Finance.Dimension.Correction;
+using Microsoft.Finance.Dimension;
+using Microsoft.Finance.FinancialReports;
+using Microsoft.Finance.GeneralLedger.Account;
+using Microsoft.Finance.GeneralLedger.Budget;
+using Microsoft.Finance.GeneralLedger.Journal;
+using Microsoft.Finance.GeneralLedger.Reports;
+using Microsoft.Finance.GeneralLedger.Reversal;
+using Microsoft.Finance.GeneralLedger.Setup;
+using Microsoft.Finance.Payroll;
+using Microsoft.Finance.ReceivablesPayables;
+using Microsoft.Finance.RoleCenters;
+using Microsoft.Finance.SalesTax;
+using Microsoft.Finance.VAT.RateChange;
+using Microsoft.Finance.VAT.Registration;
+using Microsoft.Finance.VAT.Reporting;
+using Microsoft.FixedAssets.FixedAsset;
+using Microsoft.FixedAssets.Insurance;
+using Microsoft.FixedAssets.Journal;
+using Microsoft.FixedAssets.Maintenance;
+using Microsoft.FixedAssets.Posting;
+using Microsoft.FixedAssets.Setup;
+using Microsoft.Foundation.Address;
+using Microsoft.Foundation.Attachment;
+using Microsoft.Foundation.AuditCodes;
+using Microsoft.Foundation.Calendar;
+using Microsoft.Foundation.Comment;
+using Microsoft.Foundation.ExtendedText;
+using Microsoft.Foundation.Navigate;
+using Microsoft.Foundation.NoSeries;
+using Microsoft.Foundation.PaymentTerms;
+using Microsoft.Foundation.Reporting;
+using Microsoft.Foundation.Shipping;
+using Microsoft.Foundation.Task;
+using Microsoft.Foundation.UOM;
+using Microsoft.HumanResources.Absence;
+using Microsoft.HumanResources.Comment;
+using Microsoft.HumanResources.Employee;
+using Microsoft.HumanResources.Payables;
+using Microsoft.HumanResources.Setup;
+using Microsoft.Integration.D365Sales;
+using Microsoft.Integration.Dataverse;
+using Microsoft.Integration.Entity;
+using Microsoft.Integration.Graph;
+using Microsoft.Integration.PowerBI;
+using Microsoft.Inventory.Analysis;
+using Microsoft.Inventory.Availability;
+using Microsoft.Inventory.BOM;
+using Microsoft.Inventory.BOM.Tree;
+using Microsoft.Inventory.Comment;
+using Microsoft.Inventory.Costing;
+using Microsoft.Inventory.Counting.Journal;
+using Microsoft.Inventory.Document;
+using Microsoft.Inventory.History;
+using Microsoft.Inventory.Intrastat;
+using Microsoft.Inventory.Item;
+using Microsoft.Inventory.Item.Attribute;
+using Microsoft.Inventory.Item.Picture;
+using Microsoft.Inventory.Item.Substitution;
+using Microsoft.Inventory.Journal;
+using Microsoft.Inventory.Ledger;
+using Microsoft.Inventory.Planning;
+using Microsoft.Inventory.Reconciliation;
+using Microsoft.Inventory.Requisition;
+using Microsoft.Inventory.Setup;
+using Microsoft.Inventory.Tracking;
+using Microsoft.Manufacturing.Capacity;
+using Microsoft.Manufacturing.Document;
+using Microsoft.Manufacturing.Forecast;
+using Microsoft.Manufacturing.ProductionBOM;
+using Microsoft.Manufacturing.Reports;
+using Microsoft.Manufacturing.RoleCenters;
+using Microsoft.Manufacturing.Routing;
+using Microsoft.Manufacturing.Setup;
+using Microsoft.Manufacturing.StandardCost;
+using Microsoft.Manufacturing.WorkCenter;
+using Microsoft.Pricing.Asset;
+using Microsoft.Pricing.Calculation;
+using Microsoft.Pricing.PriceList;
+using Microsoft.Pricing.Source;
+using Microsoft.Pricing.Worksheet;
+using Microsoft.Projects.Project.Journal;
+using Microsoft.Projects.Project.WIP;
+using Microsoft.Projects.Resources.Analysis;
+using Microsoft.Projects.Resources.Journal;
+using Microsoft.Projects.Resources.Ledger;
+#if not CLEAN21
+using Microsoft.Projects.Resources.Pricing;
+#endif
+using Microsoft.Projects.Resources.Resource;
+using Microsoft.Projects.Resources.Setup;
+using Microsoft.Projects.TimeSheet;
+using Microsoft.Purchases.Archive;
+using Microsoft.Purchases.Comment;
+using Microsoft.Purchases.Document;
+using Microsoft.Purchases.History;
+using Microsoft.Purchases.Payables;
+#if not CLEAN21
+using Microsoft.Purchases.Pricing;
+#endif
+using Microsoft.Purchases.RoleCenters;
+using Microsoft.Purchases.Vendor;
+using Microsoft.RoleCenters;
+using Microsoft.Sales.Analysis;
+using Microsoft.Sales.Archive;
+using Microsoft.Sales.Comment;
+using Microsoft.Sales.Customer;
+using Microsoft.Sales.Document;
+using Microsoft.Sales.FinanceCharge;
+using Microsoft.Sales.History;
+#if not CLEAN21
+using Microsoft.Sales.Pricing;
+#endif
+using Microsoft.Sales.Reminder;
+using Microsoft.Sales.RoleCenters;
+using Microsoft.Service.Contract;
+using Microsoft.Service.Document;
+using Microsoft.Service.History;
+using Microsoft.Service.Item;
+using Microsoft.Service.Ledger;
+using Microsoft.Service.Loaner;
+using Microsoft.Service.Maintenance;
+using Microsoft.Service.Resources;
+using Microsoft.Service.RoleCenters;
+using Microsoft.Service.Setup;
+using Microsoft.Utilities;
+using Microsoft.Warehouse.ADCS;
+using Microsoft.Warehouse.Comment;
+using Microsoft.Warehouse.InternalDocument;
+using Microsoft.Warehouse.InventoryDocument;
+using Microsoft.Warehouse.Request;
+using Microsoft.Warehouse.RoleCenters;
+using Microsoft.Warehouse.Setup;
+using Microsoft.Warehouse.Structure;
+using Microsoft.Warehouse.Tracking;
+
+using System.AI;
+using System.Apps;
+using System.Automation;
+using System.DateTime;
+using System.Device;
+using System.Diagnostics;
+using System.Email;
+using System.Environment;
+using System.Environment.Configuration;
+using System.Globalization;
+using System.Integration;
+using System.Integration.PowerBI;
+using System.IO;
+using System.Privacy;
+using System.Reflection;
+using System.Security.Authentication;
+using System.Security.Encryption;
+using System.Security.User;
+using System.TestTools;
+using System.TestTools.TestRunner;
+using System.Text;
+using System.Threading;
+using System.Tooling;
+using System.Utilities;
+using System.Visualization;
+using System.Xml;
+
+permissionset 959 "D365 BUS FULL ACCESS"
 {
     Access = Public;
     Assignable = true;
@@ -44,12 +241,11 @@
                   tabledata "Object Access Intent Override" = Rimd,
                   tabledata Permission = imd,
                   tabledata "Permission Set" = imd,
-                  tabledata Profile = imd,
                   tabledata "Profile Configuration Symbols" = imd,
-                  tabledata "Profile Metadata" = IMD,
-                  tabledata "Profile Page Metadata" = IMD,
                   tabledata "Published Application" = Rimd,
+#pragma warning disable AL0432
                   tabledata "Tenant Profile" = imd,
+#pragma warning restore AL0432
                   tabledata "Tenant Profile Extension" = imd,
                   tabledata "Tenant Profile Setting" = imd,
                   tabledata "Tenant Web Service" = R,
@@ -69,6 +265,7 @@
                   tabledata "Administration Cue" = RIMD,
                   tabledata "Aged Report Entity" = RIMD,
                   tabledata "Aging Band Buffer" = RIMD,
+                  tabledata "Allocation Policy" = RIMD,
                   tabledata "Alternative Address" = IM,
                   tabledata "Analysis by Dim. Parameters" = RIMD,
                   tabledata "Analysis by Dim. User Param." = RIMD,
@@ -110,6 +307,7 @@
                   tabledata "Booking Staff" = RIMD,
                   tabledata "Booking Sync" = RIMD,
                   tabledata "Budget Buffer" = RIMD,
+                  tabledata "Bus. Unit In Cons. Process" = RIM,
                   tabledata "Business Chart Buffer" = RIMD,
                   tabledata "Business Chart Map" = RIMD,
                   tabledata "Business Chart User Setup" = RIMD,
@@ -146,6 +344,8 @@
                   tabledata "Confidential Information" = IM,
                   tabledata "Config. Media Buffer" = RIMD,
                   tabledata "Consolidation Account" = RIM,
+                  tabledata "Consolidation Process" = RIM,
+                  tabledata "Consolidation Setup" = RIM,
                   tabledata "Contact Alt. Addr. Date Range" = RIMD,
                   tabledata "Contact Alt. Address" = RIMD,
                   tabledata "Contact Dupl. Details Buffer" = RIMD,
@@ -174,9 +374,6 @@
                   tabledata "Customer Amount" = RIMD,
                   tabledata "Customer Sales Buffer" = RIMD,
                   tabledata "Customer Templ." = RIMD,
-#if not CLEAN18
-                  tabledata "Customer Template" = RIMD,
-#endif
                   tabledata "Customized Calendar Change" = RIMD,
                   tabledata "Customized Calendar Entry" = RIMD,
                   tabledata "CV Ledger Entry Buffer" = RIMD,
@@ -187,6 +384,8 @@
                   tabledata "Data Exch. Field Mapping Buf." = RIMD,
                   tabledata "Data Exch. Line Def" = RIMD,
                   tabledata "Data Exch. Mapping" = RIMD,
+                  tabledata "Data Exch. Field Grouping" = RIMD,
+                  tabledata "Data Exch. FlowField Gr. Buff." = RIMD,
                   tabledata "Data Exchange Type" = IM,
                   tabledata "DataExch-RapidStart Buffer" = RIMD,
                   tabledata "Date Lookup Buffer" = RIMD,
@@ -225,7 +424,9 @@
                   tabledata "Document Entry" = RIMD,
                   tabledata "Document Search Result" = RIMD,
                   tabledata "Document Sending Profile" = RIMD,
+#if not CLEAN23
                   tabledata "Document Service Cache" = Rimd,
+#endif
                   tabledata "Drop Shpt. Post. Buffer" = RIMD,
                   tabledata "ECSL VAT Report Line" = RIMD,
                   tabledata "ECSL VAT Report Line Relation" = RIMD,
@@ -254,7 +455,6 @@
                   tabledata "Exchange Sync" = RIMD,
                   tabledata "Experience Tier Buffer" = RIMD,
                   tabledata "Experience Tier Setup" = RIMD,
-                  tabledata "Ext Txt ID Integration Record" = RIMD,
                   tabledata "Extended Text Header" = RIMD,
                   tabledata "Extended Text Line" = RIMD,
                   tabledata "FA Journal Template" = IMD,
@@ -296,34 +496,29 @@
                   tabledata "Generic Chart Setup" = RIMD,
                   tabledata "Generic Chart Y-Axis" = RIMD,
                   tabledata Geolocation = RIMD,
+#if not CLEAN21
                   tabledata "Graph Mail Setup" = RIMD,
-#if not CLEAN20
-                  tabledata "Graph Subscription" = RIMD,
-                  tabledata "Graph Business Setting" = RIMD,
 #endif
                   tabledata "Grounds for Termination" = RIMD,
                   tabledata "HR Confidential Comment Line" = RIMD,
                   tabledata "Human Resource Comment Line" = IM,
                   tabledata "Hybrid Deployment Setup" = RIMD,
                   tabledata "Image Analysis Setup" = RIMD,
+                  tabledata "Image Analysis Scenario" = Rimd,
                   tabledata "Import G/L Transaction" = RIMD,
                   tabledata "Incoming Document Attachment" = RIMD,
                   tabledata "Insurance Journal Template" = IMD,
                   tabledata "Insurance Type" = IMD,
                   tabledata Integer = RIMD,
-                  tabledata "Integration Management Setup" = RIMD,
-                  tabledata "Integration Record" = RIMD,
-                  tabledata "Integration Record Archive" = RIMD,
                   tabledata "Interaction Template Setup" = RIMD,
                   tabledata "Intermediate Data Import" = IM,
                   tabledata "Internal Movement Header" = RIMD,
                   tabledata "Internal Movement Line" = RIMD,
-#if not CLEAN19
-                  tabledata "Intrastat Checklist Setup" = RIMD,
-#endif
+#if not CLEAN22
                   tabledata "Advanced Intrastat Checklist" = RIMD,
                   tabledata "Intrastat Jnl. Batch" = RIMD,
                   tabledata "Intrastat Jnl. Template" = RIMD,
+#endif
                   tabledata "Invalidated Dim Correction" = R,
                   tabledata "Inventory Adjmt. Entry (Order)" = Rim,
                   tabledata "Inventory Adjustment Buffer" = Rimd,
@@ -335,7 +530,7 @@
                   tabledata "Inventory Profile Track Buffer" = RIM,
                   tabledata "Inventory Report Entry" = RIM,
                   tabledata "Inventory Report Header" = RIM,
-#if not CLEAN20
+#if not CLEAN23
                   tabledata "Invoice Post. Buffer" = RIMD,
 #endif
                   tabledata "Invoice Posting Buffer" = RIMD,
@@ -369,9 +564,6 @@
                   tabledata "Item Charge" = RIMD,
                   tabledata "Item Charge Assignment (Purch)" = RIMD,
                   tabledata "Item Charge Assignment (Sales)" = RIMD,
-#if not CLEAN19
-                  tabledata "Item Cross Reference" = RIMD,
-#endif
                   tabledata "Item Discount Group" = RIMD,
                   tabledata "Item Entry Relation" = RIMD,
                   tabledata "Item Identifier" = RIMD,
@@ -382,9 +574,6 @@
                   tabledata "Item Statistics Buffer" = RIMD,
                   tabledata "Item Substitution" = RIMD,
                   tabledata "Item Templ." = RIMD,
-#if not CLEAN18
-                  tabledata "Item Template" = RIMD,
-#endif
                   tabledata "Item Tracing Buffer" = Rimd,
                   tabledata "Item Tracing History Buffer" = Rimd,
                   tabledata "Item Tracking Code" = RIMD,
@@ -416,10 +605,6 @@
                   tabledata "Merge Duplicates Buffer" = RIMD,
                   tabledata "Merge Duplicates Conflict" = RIMD,
                   tabledata "Merge Duplicates Line Buffer" = RIMD,
-#if not CLEAN18
-                  tabledata "Mini Customer Template" = RIMD,
-                  tabledata "Mini Vendor Template" = RIMD,
-#endif
                   tabledata "Miniform Function" = RIMD,
                   tabledata "Miniform Function Group" = RIMD,
                   tabledata "Miniform Header" = RIMD,
@@ -434,17 +619,12 @@
                   tabledata "My Vendor" = RIMD,
                   tabledata "Name/Value Buffer" = RIMD,
                   tabledata "Named Forward Link" = RIMD,
-#if not CLEAN20
-                  tabledata "Native - API Tax Setup" = RIMD,
-                  tabledata "Native - Export Invoices" = RIMD,
-                  tabledata "Native - Gen. Settings Buffer" = RIMD,
-                  tabledata "Native - Payment" = RIMD,
-#endif
                   tabledata "No. Series Tenant" = RIMD,
                   tabledata "Notification Context" = RIMD,
                   tabledata "Notification Schedule" = RIMD,
                   tabledata "Notification Setup" = RIMD,
                   tabledata "O365 Brand Color" = RIMD,
+#if not CLEAN21
                   tabledata "O365 C2Graph Event Settings" = RIMD,
                   tabledata "O365 Country/Region" = RIMD,
                   tabledata "O365 Coupon Claim" = RIMD,
@@ -452,18 +632,24 @@
                   tabledata "O365 Cust. Invoice Discount" = RIMD,
                   tabledata "O365 Customer" = RIMD,
                   tabledata "O365 Default Email Message" = RIMD,
+#endif
                   tabledata "O365 Device Setup Instructions" = RIMD,
+#if not CLEAN21
                   tabledata "O365 Email Setup" = RIMD,
                   tabledata "O365 Field Excel Mapping" = RIMD,
+#endif
                   tabledata "O365 Getting Started" = RIMD,
                   tabledata "O365 Getting Started Page Data" = RIMD,
                   tabledata "O365 HTML Template" = RIMD,
+#if not CLEAN21
                   tabledata "O365 Item Basket Entry" = RIMD,
                   tabledata "O365 Payment History Buffer" = RIMD,
                   tabledata "O365 Payment Instr. Transl." = RIMD,
                   tabledata "O365 Payment Instructions" = RIMD,
                   tabledata "O365 Payment Method" = RIMD,
+#endif
                   tabledata "O365 Payment Service Logo" = RIMD,
+#if not CLEAN21
                   tabledata "O365 Payment Terms" = RIMD,
                   tabledata "O365 Posted Coupon Claim" = Rimd,
                   tabledata "O365 Sales Cue" = RIMD,
@@ -474,6 +660,7 @@
                   tabledata "O365 Sales Invoice Document" = RIMD,
                   tabledata "O365 Settings Menu" = RIMD,
                   tabledata "O365 Social Network" = RIMD,
+#endif
                   tabledata "OAuth 2.0 Setup" = RIMD,
                   tabledata "Object Translation" = RIMD,
                   tabledata "OCR Service Document Template" = RIMD,
@@ -490,22 +677,13 @@
                   tabledata "Option Lookup Buffer" = rimd,
                   tabledata "Order Promising Line" = I,
                   tabledata "Order Tracking Entry" = RIMD,
-#if not CLEAN19
-                  tabledata "Outlook Synch. Dependency" = RIMD,
-                  tabledata "Outlook Synch. Entity" = RIMD,
-                  tabledata "Outlook Synch. Entity Element" = RIMD,
-                  tabledata "Outlook Synch. Field" = RIMD,
-                  tabledata "Outlook Synch. Filter" = RIMD,
-                  tabledata "Outlook Synch. Link" = RIMD,
-                  tabledata "Outlook Synch. Lookup Name" = RIMD,
-                  tabledata "Outlook Synch. Option Correl." = RIMD,
-                  tabledata "Outlook Synch. Setup Detail" = RIMD,
-                  tabledata "Outlook Synch. User Setup" = RIMD,
-#endif
                   tabledata "Outstanding Bank Transaction" = RIMD,
                   tabledata "Over-Receipt Code" = RIMD,
                   tabledata "Overdue Approval Entry" = Rimd,
+#if not CLEAN22
                   tabledata "Payment Buffer" = RIMD,
+#endif
+                  tabledata "Vendor Payment Buffer" = RIMD,
                   tabledata "Payment Export Data" = Rimd,
                   tabledata "Payment Export Remittance Text" = RIMD,
                   tabledata "Payment Jnl. Export Error Text" = RIMD,
@@ -523,9 +701,6 @@
                   tabledata "Permission Set Link" = rimd,
                   tabledata "Phys. Inventory Ledger Entry" = i,
                   tabledata "Picture Entity" = RIMD,
-#if not CLEAN20
-                  tabledata "Plan Permission Set" = Rim,
-#endif
                   tabledata "Planning Assignment" = IM,
                   tabledata "Planning Buffer" = RIMD,
                   tabledata "Planning Component" = M,
@@ -541,19 +716,24 @@
                   tabledata "Posted Docs. With No Inc. Buf." = RIMD,
                   tabledata "Posted Gen. Journal Batch" = RIMD,
                   tabledata "Posted Gen. Journal Line" = RIMD,
-                  tabledata "Power BI Chart Buffer" = RIMD,
-                  tabledata "Power BI Customer Reports" = RIMD,
-#if not CLEAN18
-                  tabledata "Power BI Ongoing Deployments" = RIMD,
-#endif
+#if not CLEAN21
                   tabledata "Power BI Report Buffer" = RIMD,
+                  tabledata "Power BI User License" = RIMD,
+#endif
+#if not CLEAN22
+                  tabledata "Power BI Service Status Setup" = RIMD,
+#endif
+#if not CLEAN23
+                  tabledata "Power BI User Configuration" = RIMD,
                   tabledata "Power BI Report Configuration" = RIMD,
+                  tabledata "Power BI User Status" = RIMD,
+#endif
+                  tabledata "Power BI Chart Buffer" = RIMD,
+                  tabledata "Power BI Context Settings" = RIMD,
+                  tabledata "Power BI Customer Reports" = RIMD,
+                  tabledata "Power BI Displayed Element" = RIMD,
                   tabledata "Power BI Report Labels" = R,
                   tabledata "Power BI Report Uploads" = RIMD,
-                  tabledata "Power BI Service Status Setup" = RIMD,
-                  tabledata "Power BI User Configuration" = RIMD,
-                  tabledata "Power BI User License" = RIMD,
-                  tabledata "Power BI User Status" = RIMD,
                   tabledata "Prepayment Inv. Line Buffer" = RIMD,
                   tabledata "Price Asset" = RIMD,
                   tabledata "Price Calculation Buffer" = RIMD,
@@ -578,10 +758,11 @@
                   tabledata "Production Order" = rm,
                   tabledata "Purch. Comment Line" = RIMD,
                   tabledata "Purch. Comment Line Archive" = RIMD,
+                  tabledata "Purch. Cr. Memo Entity Buffer" = RIMD,
                   tabledata "Purch. Cr. Memo Hdr." = IM,
                   tabledata "Purch. Inv. Entity Aggregate" = RIMD,
                   tabledata "Purch. Inv. Line Aggregate" = RIMD,
-#if not CLEAN19
+#if not CLEAN21
                   tabledata "Purch. Price Line Disc. Buff." = RIMD,
 #endif
                   tabledata "Purch. Rcpt. Header" = IM,
@@ -622,14 +803,17 @@
                   tabledata "Res. Ledger Entry" = Rimd,
                   tabledata "Reservation Entry" = IM,
                   tabledata "Reservation Entry Buffer" = RIMD,
+                  tabledata "Reservation Wksh. Batch" = RIMD,
+                  tabledata "Reservation Wksh. Line" = RIMD,
+                  tabledata "Reservation Worksheet Log" = RIMD,
                   tabledata "Resolution Code" = RIMD,
                   tabledata Resource = RIMD,
-#if not CLEAN19
+#if not CLEAN21
                   tabledata "Resource Cost" = IM,
 #endif
                   tabledata "Resource Group" = RIMD,
                   tabledata "Resource Location" = RIMD,
-#if not CLEAN19
+#if not CLEAN21
                   tabledata "Resource Price" = IM,
                   tabledata "Resource Price Change" = RIMD,
 #endif
@@ -654,7 +838,7 @@
                   tabledata "Sales Invoice Entity Aggregate" = RIMD,
                   tabledata "Sales Invoice Line Aggregate" = RIMD,
                   tabledata "Sales Order Entity Buffer" = RIMD,
-#if not CLEAN19
+#if not CLEAN21
                   tabledata "Sales Price and Line Disc Buff" = RIMD,
 #endif
                   tabledata "Sales Quote Entity Buffer" = RIMD,
@@ -672,11 +856,6 @@
                   tabledata "Service Shipment Buffer" = RimD,
                   tabledata "Shipment Method Translation" = RIMD,
                   tabledata "Skill Code" = RIMD,
-#if not CLEAN19
-                  tabledata "SmartList Designer Setup" = RIMD,
-                  tabledata "SmartList Export Results" = RIMD,
-                  tabledata "SmartList Import Results" = RIMD,
-#endif
                   tabledata "Sorting Table" = RIMD,
                   tabledata "Standard Address" = Rimd,
                   tabledata "Standard Cost Worksheet" = RIMD,
@@ -689,7 +868,9 @@
                   tabledata "Support Contact Information" = R,
                   tabledata "Symptom Code" = RIMD,
                   tabledata "Table Filter" = RIMD,
+#if not CLEAN21
                   tabledata "Table Permission Buffer" = RIMD,
+#endif
                   tabledata "Tax Area Buffer" = RIMD,
                   tabledata "Tax Group Buffer" = RIMD,
                   tabledata "Tax Rate Buffer" = RIMD,
@@ -722,10 +903,12 @@
                   tabledata "Unit of Measure Translation" = RIMD,
                   tabledata "Unlinked Attachment" = RIMD,
                   tabledata "Untracked Planning Element" = RIM,
+#if not CLEAN22
                   tabledata "User Group" = R,
                   tabledata "User Group Access Control" = R,
                   tabledata "User Group Permission Set" = R,
                   tabledata "User Group Plan" = Rimd,
+#endif
                   tabledata "User Preference" = RIMD,
                   tabledata "User Security Status" = RIM,
                   tabledata "User Task" = RIMD,

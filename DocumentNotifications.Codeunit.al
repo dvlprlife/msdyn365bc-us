@@ -1,3 +1,19 @@
+// ------------------------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+// ------------------------------------------------------------------------------------------------
+namespace Microsoft.Utilities;
+
+using Microsoft.Finance.GeneralLedger.Setup;
+using Microsoft.Foundation.Address;
+using Microsoft.Purchases.Document;
+using Microsoft.Purchases.Vendor;
+using Microsoft.Purchases.Payables;
+using Microsoft.Sales.Customer;
+using Microsoft.Sales.Document;
+using System.Environment.Configuration;
+using System.Security.User;
+
 codeunit 1390 "Document Notifications"
 {
 
@@ -24,7 +40,7 @@ codeunit 1390 "Document Notifications"
             UpdateAddress.SetExistingAddress(GetCustomerFullAddress(Customer));
             UpdateAddress.SetUpdatedAddress(GetSalesHeaderFullSellToAddress(SalesHeader));
 
-            if UpdateAddress.RunModal in [ACTION::OK, ACTION::LookupOK] then begin
+            if UpdateAddress.RunModal() in [ACTION::OK, ACTION::LookupOK] then begin
                 Customer.SetAddress(SalesHeader."Sell-to Address", SalesHeader."Sell-to Address 2",
                   SalesHeader."Sell-to Post Code", SalesHeader."Sell-to City", SalesHeader."Sell-to County",
                   SalesHeader."Sell-to Country/Region Code", SalesHeader."Sell-to Contact");
@@ -53,7 +69,7 @@ codeunit 1390 "Document Notifications"
             UpdateAddress.SetName(Customer.Name);
             UpdateAddress.SetUpdatedAddress(GetSalesHeaderFullBillToAddress(SalesHeader));
 
-            if UpdateAddress.RunModal in [ACTION::OK, ACTION::LookupOK] then begin
+            if UpdateAddress.RunModal() in [ACTION::OK, ACTION::LookupOK] then begin
                 Customer.SetAddress(SalesHeader."Bill-to Address", SalesHeader."Bill-to Address 2",
                   SalesHeader."Bill-to Post Code", SalesHeader."Bill-to City", SalesHeader."Bill-to County",
                   SalesHeader."Bill-to Country/Region Code", SalesHeader."Bill-to Contact");
@@ -136,7 +152,7 @@ codeunit 1390 "Document Notifications"
     var
         SalesHeader: Record "Sales Header";
     begin
-        SalesHeader.SetModifyCustomerAddressNotificationDefaultState;
+        SalesHeader.SetModifyCustomerAddressNotificationDefaultState();
     end;
 
     [EventSubscriber(ObjectType::Page, Page::"My Notifications", 'OnInitializingNotificationWithDefaultState', '', false, false)]
@@ -144,7 +160,7 @@ codeunit 1390 "Document Notifications"
     var
         SalesHeader: Record "Sales Header";
     begin
-        SalesHeader.SetModifyBillToCustomerAddressNotificationDefaultState;
+        SalesHeader.SetModifyBillToCustomerAddressNotificationDefaultState();
     end;
 
     procedure CopyBuyFromVendorAddressFieldsFromSalesDocument(var ModifyVendorAddressNotification: Notification)
@@ -166,7 +182,7 @@ codeunit 1390 "Document Notifications"
             UpdateAddress.SetExistingAddress(GetVendorFullAddress(Vendor));
             UpdateAddress.SetUpdatedAddress(GetPurchaseHeaderFullBuyFromAddress(PurchaseHeader));
 
-            if UpdateAddress.RunModal in [ACTION::OK, ACTION::LookupOK] then begin
+            if UpdateAddress.RunModal() in [ACTION::OK, ACTION::LookupOK] then begin
                 Vendor.SetAddress(PurchaseHeader."Buy-from Address", PurchaseHeader."Buy-from Address 2",
                   PurchaseHeader."Buy-from Post Code", PurchaseHeader."Buy-from City", PurchaseHeader."Buy-from County",
                   PurchaseHeader."Buy-from Country/Region Code", PurchaseHeader."Buy-from Contact");
@@ -194,7 +210,7 @@ codeunit 1390 "Document Notifications"
             UpdateAddress.SetUpdatedAddress(GetPurchaseHeaderFullPayToAddress(PurchaseHeader));
             UpdateAddress.SetExistingAddress(GetVendorFullAddress(Vendor));
 
-            if UpdateAddress.RunModal in [ACTION::OK, ACTION::LookupOK] then begin
+            if UpdateAddress.RunModal() in [ACTION::OK, ACTION::LookupOK] then begin
                 Vendor.SetAddress(PurchaseHeader."Pay-to Address", PurchaseHeader."Pay-to Address 2",
                   PurchaseHeader."Pay-to Post Code", PurchaseHeader."Pay-to City", PurchaseHeader."Pay-to County",
                   PurchaseHeader."Pay-to Country/Region Code", PurchaseHeader."Pay-to Contact");
@@ -213,7 +229,7 @@ codeunit 1390 "Document Notifications"
 
         Evaluate(EntryNo, Notification.GetData(VendorLedgerEntry.FieldName("Entry No.")));
         VendorLedgerEntry.Get(EntryNo);
-        VendorLedgerEntry.SetRecFilter;
+        VendorLedgerEntry.SetRecFilter();
 
         PAGE.RunModal(PAGE::"Vendor Ledger Entries", VendorLedgerEntry);
     end;
@@ -292,7 +308,7 @@ codeunit 1390 "Document Notifications"
     var
         PurchaseHeader: Record "Purchase Header";
     begin
-        PurchaseHeader.SetModifyVendorAddressNotificationDefaultState;
+        PurchaseHeader.SetModifyVendorAddressNotificationDefaultState();
     end;
 
     [EventSubscriber(ObjectType::Page, Page::"My Notifications", 'OnInitializingNotificationWithDefaultState', '', false, false)]
@@ -300,7 +316,7 @@ codeunit 1390 "Document Notifications"
     var
         PurchaseHeader: Record "Purchase Header";
     begin
-        PurchaseHeader.SetModifyPayToVendorAddressNotificationDefaultState;
+        PurchaseHeader.SetModifyPayToVendorAddressNotificationDefaultState();
     end;
 
     [EventSubscriber(ObjectType::Page, Page::"My Notifications", 'OnInitializingNotificationWithDefaultState', '', false, false)]

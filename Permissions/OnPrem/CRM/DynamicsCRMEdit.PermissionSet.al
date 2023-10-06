@@ -1,3 +1,9 @@
+namespace System.Security.AccessControl;
+
+using Microsoft.Integration.D365Sales;
+using Microsoft.Integration.Dataverse;
+using Microsoft.Integration.SyncEngine;
+
 permissionset 3544 "Dynamics CRM - Edit"
 {
     Access = Public;
@@ -7,8 +13,11 @@ permissionset 3544 "Dynamics CRM - Edit"
     Permissions = tabledata "CDS Solution" = RIMD,
                   tabledata "CDS Teammembership" = RIMD,
                   tabledata "CDS Teamroles" = RIMD,
+#if not CLEAN22
                   tabledata "Coupling Field Buffer" = RIMD,
+#endif
                   tabledata "Coupling Record Buffer" = RIMD,
+                  tabledata "Dataverse Entity Change" = RID,
                   tabledata "CRM Account" = RIMD,
                   tabledata "CRM Account Statistics" = RIMD,
                   tabledata "CRM Annotation" = RIMD,

@@ -1,4 +1,18 @@
-﻿codeunit 48 PostingSetupManagement
+namespace Microsoft.Finance.ReceivablesPayables;
+
+using Microsoft.Finance.GeneralLedger.Setup;
+using Microsoft.Finance.VAT.Setup;
+using Microsoft.FixedAssets.FixedAsset;
+using Microsoft.Foundation.Period;
+using Microsoft.Inventory.Item;
+using Microsoft.Projects.Project.Job;
+using Microsoft.Purchases.Vendor;
+using Microsoft.Sales.Customer;
+using Microsoft.Utilities;
+using System.Environment.Configuration;
+using System.Utilities;
+
+codeunit 48 PostingSetupManagement
 {
 
     trigger OnRun()
@@ -19,7 +33,7 @@
     var
         CustomerPostingGroup: Record "Customer Posting Group";
     begin
-        if not IsPostingSetupNotificationEnabled then
+        if not IsPostingSetupNotificationEnabled() then
             exit;
 
         if not CustomerPostingGroup.Get(PostingGroup) then
@@ -33,7 +47,7 @@
     var
         VendorPostingGroup: Record "Vendor Posting Group";
     begin
-        if not IsPostingSetupNotificationEnabled then
+        if not IsPostingSetupNotificationEnabled() then
             exit;
 
         if not VendorPostingGroup.Get(PostingGroup) then
@@ -47,7 +61,7 @@
     var
         GenPostingSetup: Record "General Posting Setup";
     begin
-        if not IsPostingSetupNotificationEnabled then
+        if not IsPostingSetupNotificationEnabled() then
             exit;
 
         if not GenPostingSetup.Get(GenBusGroupCode, GenProdGroupCode) then
@@ -62,7 +76,7 @@
     var
         GenPostingSetup: Record "General Posting Setup";
     begin
-        if not IsPostingSetupNotificationEnabled then
+        if not IsPostingSetupNotificationEnabled() then
             exit;
 
         if not GenPostingSetup.Get(GenBusGroupCode, GenProdGroupCode) then
@@ -77,7 +91,7 @@
     var
         GenPostingSetup: Record "General Posting Setup";
     begin
-        if not IsPostingSetupNotificationEnabled then
+        if not IsPostingSetupNotificationEnabled() then
             exit;
 
         if not GenPostingSetup.Get(GenBusGroupCode, GenProdGroupCode) then
@@ -91,8 +105,14 @@
     procedure CheckVATPostingSetupSalesAccount(VATBusGroupCode: Code[20]; VATProdGroupCode: Code[20])
     var
         VATPostingSetup: Record "VAT Posting Setup";
+        IsHandled: Boolean;
     begin
-        if not IsPostingSetupNotificationEnabled then
+        IsHandled := false;
+        OnBeforeCheckVATPostingSetupSalesAccount(VATBusGroupCode, VATProdGroupCode, IsHandled);
+        if IsHandled then
+            exit;
+
+        if not IsPostingSetupNotificationEnabled() then
             exit;
 
         if not VATPostingSetup.Get(VATBusGroupCode, VATProdGroupCode) then
@@ -109,7 +129,7 @@
     var
         VATPostingSetup: Record "VAT Posting Setup";
     begin
-        if not IsPostingSetupNotificationEnabled then
+        if not IsPostingSetupNotificationEnabled() then
             exit;
 
         if not VATPostingSetup.Get(VATBusGroupCode, VATProdGroupCode) then
@@ -132,7 +152,7 @@
         if IsHandled then
             exit;
 
-        if not IsPostingSetupNotificationEnabled then
+        if not IsPostingSetupNotificationEnabled() or not InventoryPostingSetup.WritePermission then
             exit;
 
         if not InventoryPostingSetup.Get(LocationCode, PostingGroup) then
@@ -164,7 +184,7 @@
         if GuiAllowed and
            InstructionMgt.IsMyNotificationEnabled(InstructionMgt.GetPostingAfterWorkingDateNotificationId())
         then
-            if PostingDate > WorkDate then begin
+            if PostingDate > WorkDate() then begin
                 if Confirm(ConfirmQst, false) then
                     exit(true);
                 Error(NotAllowedToPostAfterWorkingDateErr);
@@ -210,61 +230,61 @@
     var
         InstructionMgt: Codeunit "Instruction Mgt.";
     begin
-        exit(InstructionMgt.IsMyNotificationEnabled(GetPostingSetupNotificationID));
+        exit(InstructionMgt.IsMyNotificationEnabled(GetPostingSetupNotificationID()));
     end;
 
     local procedure SendPostingSetupNotification(NotificationMsg: Text; ActionMsg: Text; ActionName: Text; GroupCode1: Code[20]; GroupCode2: Code[20])
     var
         SendNotification: Notification;
     begin
-        SendNotification.Id := CreateGuid;
+        SendNotification.Id := CreateGuid();
         SendNotification.Message(NotificationMsg);
         SendNotification.Scope(NOTIFICATIONSCOPE::LocalScope);
         SendNotification.SetData('GroupCode1', GroupCode1);
         if GroupCode2 <> '' then
             SendNotification.SetData('GroupCode2', GroupCode2);
         SendNotification.AddAction(ActionMsg, CODEUNIT::PostingSetupManagement, ActionName);
-        SendNotification.Send;
+        SendNotification.Send();
     end;
 
     procedure SendCustPostingGroupNotification(CustomerPostingGroup: Record "Customer Posting Group"; FieldCaption: Text)
     begin
-        if not IsPostingSetupNotificationEnabled then
+        if not IsPostingSetupNotificationEnabled() then
             exit;
 
         SendPostingSetupNotification(
-          StrSubstNo(MissingAccountTxt, FieldCaption, CustomerPostingGroup.TableCaption),
+          StrSubstNo(MissingAccountTxt, FieldCaption, CustomerPostingGroup.TableCaption()),
           SetupMissingAccountTxt, 'ShowCustomerPostingGroups', CustomerPostingGroup.Code, '');
     end;
 
     procedure SendVendPostingGroupNotification(VendorPostingGroup: Record "Vendor Posting Group"; FieldCaption: Text)
     begin
-        if not IsPostingSetupNotificationEnabled then
+        if not IsPostingSetupNotificationEnabled() then
             exit;
 
         SendPostingSetupNotification(
-          StrSubstNo(MissingAccountTxt, FieldCaption, VendorPostingGroup.TableCaption),
+          StrSubstNo(MissingAccountTxt, FieldCaption, VendorPostingGroup.TableCaption()),
           SetupMissingAccountTxt, 'ShowVendorPostingGroups', VendorPostingGroup.Code, '');
     end;
 
     procedure SendInvtPostingSetupNotification(InvtPostingSetup: Record "Inventory Posting Setup"; FieldCaption: Text)
     begin
-        if not IsPostingSetupNotificationEnabled then
+        if not IsPostingSetupNotificationEnabled() then
             exit;
 
         SendPostingSetupNotification(
-          StrSubstNo(MissingAccountTxt, FieldCaption, InvtPostingSetup.TableCaption),
+          StrSubstNo(MissingAccountTxt, FieldCaption, InvtPostingSetup.TableCaption()),
           SetupMissingAccountTxt, 'ShowInventoryPostingSetup',
           InvtPostingSetup."Invt. Posting Group Code", InvtPostingSetup."Location Code");
     end;
 
     procedure SendGenPostingSetupNotification(GenPostingSetup: Record "General Posting Setup"; FieldCaption: Text)
     begin
-        if not IsPostingSetupNotificationEnabled then
+        if not IsPostingSetupNotificationEnabled() then
             exit;
 
         SendPostingSetupNotification(
-          StrSubstNo(MissingAccountTxt, FieldCaption, GenPostingSetup.TableCaption),
+          StrSubstNo(MissingAccountTxt, FieldCaption, GenPostingSetup.TableCaption()),
           SetupMissingAccountTxt, 'ShowGenPostingSetup',
           GenPostingSetup."Gen. Bus. Posting Group", GenPostingSetup."Gen. Prod. Posting Group");
     end;
@@ -353,11 +373,11 @@
 
     procedure SendVATPostingSetupNotification(VATPostingSetup: Record "VAT Posting Setup"; FieldCaption: Text)
     begin
-        if not IsPostingSetupNotificationEnabled then
+        if not IsPostingSetupNotificationEnabled() then
             exit;
 
         SendPostingSetupNotification(
-          StrSubstNo(MissingAccountTxt, FieldCaption, VATPostingSetup.TableCaption),
+          StrSubstNo(MissingAccountTxt, FieldCaption, VATPostingSetup.TableCaption()),
           SetupMissingAccountTxt, 'ShowVATPostingSetup',
           VATPostingSetup."VAT Bus. Posting Group", VATPostingSetup."VAT Prod. Posting Group");
     end;
@@ -452,11 +472,16 @@
     local procedure OnInitializingNotificationWithDefaultState()
     begin
         MyNotifications.InsertDefault(
-          GetPostingSetupNotificationID, MissingAccountNotificationTxt, MissingAccountNotificationDescriptionTxt, true);
+          GetPostingSetupNotificationID(), MissingAccountNotificationTxt, MissingAccountNotificationDescriptionTxt, true);
     end;
 
     [IntegrationEvent(false, false)]
     local procedure OnBeforeCheckInvtPostingSetupInventoryAccount(var LocationCode: Code[10]; var PostingGroup: Code[20]; var IsHandled: Boolean)
+    begin
+    end;
+
+    [IntegrationEvent(false, false)]
+    local procedure OnBeforeCheckVATPostingSetupSalesAccount(VATBusGroupCode: Code[20]; VATProdGroupCode: Code[20]; var IsHandled: Boolean)
     begin
     end;
 }

@@ -1,3 +1,36 @@
+namespace System.Security.AccessControl;
+
+using Microsoft.Bank.BankAccount;
+using Microsoft.Bank.Ledger;
+using Microsoft.Bank.Check;
+using Microsoft.HumanResources.Payables;
+using Microsoft.Purchases.Payables;
+using Microsoft.Pricing.Calculation;
+using Microsoft.Pricing.PriceList;
+using Microsoft.FixedAssets.Setup;
+using Microsoft.Finance.GeneralLedger.Account;
+using Microsoft.Finance.GeneralLedger.Ledger;
+using Microsoft.CRM.Interaction;
+using Microsoft.Inventory.Item;
+using Microsoft.Inventory.Ledger;
+using Microsoft.Foundation.NoSeries;
+using Microsoft.Inventory.Costing;
+using Microsoft.Pricing.Asset;
+using Microsoft.Pricing.Source;
+using Microsoft.Pricing.Worksheet;
+using Microsoft.Purchases.History;
+using Microsoft.Purchases.Pricing;
+using Microsoft.Inventory.Tracking;
+using Microsoft.Sales.History;
+using System.Environment.Configuration;
+using Microsoft.Warehouse.Request;
+using Microsoft.Foundation.BatchProcessing;
+using Microsoft.Finance.VAT.Ledger;
+using Microsoft.Projects.Project.Setup;
+using Microsoft.Finance.VAT.Registration;
+using Microsoft.Finance.VAT.Setup;
+using Microsoft.Finance.VAT.Calculation;
+
 permissionset 2909 "D365 PURCH DOC, POST"
 {
     Assignable = true;
@@ -23,10 +56,8 @@ permissionset 2909 "D365 PURCH DOC, POST"
                   tabledata "G/L Register" = Rimd,
                   tabledata "Interaction Template" = R,
                   tabledata "Interaction Tmpl. Language" = R,
+                  tabledata "Interaction Log Entry" = Rimd,
                   tabledata "Item Charge" = R,
-#if not CLEAN19
-                  tabledata "Item Cross Reference" = R,
-#endif
                   tabledata "Item Entry Relation" = R,
                   tabledata "Item Ledger Entry" = Rimd,
                   tabledata "Item Register" = Rimd,
@@ -48,7 +79,7 @@ permissionset 2909 "D365 PURCH DOC, POST"
                   tabledata "Purch. Rcpt. Header" = imD,
                   tabledata "Purch. Rcpt. Line" = imd,
                   tabledata "Purchase Discount Access" = RIMD,
-#if not CLEAN19
+#if not CLEAN21
                   tabledata "Purchase Line Discount" = RIMD,
                   tabledata "Purchase Price" = RIMD,
 #endif
@@ -61,6 +92,8 @@ permissionset 2909 "D365 PURCH DOC, POST"
                   tabledata "Sent Notification Entry" = RIMD,
                   tabledata "VAT Entry" = Rimd,
                   tabledata "VAT Registration No. Format" = R,
+                  tabledata "VAT Setup" = R,
+                  tabledata "VAT Posting Parameters" = R,
                   tabledata "Vendor Ledger Entry" = iMd,
                   tabledata "Warehouse Request" = RIMD,
                   tabledata "Whse. Put-away Request" = RIMD;

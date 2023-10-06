@@ -1,3 +1,17 @@
+namespace System.Security.AccessControl;
+
+using Microsoft.Finance.GeneralLedger.Setup;
+using Microsoft.Inventory.Item.Catalog;
+using Microsoft.Inventory.Tracking;
+using Microsoft.Sales.History;
+using Microsoft.Sales.Comment;
+using Microsoft.Finance.SalesTax;
+using System.Security.User;
+using Microsoft.Foundation.Reporting;
+using Microsoft.Finance.VAT.Setup;
+using Microsoft.Finance.VAT.RateChange;
+using Microsoft.Finance.VAT.Reporting;
+
 permissionset 312 "Recievables Documents - View"
 {
     Access = Public;
@@ -5,9 +19,6 @@ permissionset 312 "Recievables Documents - View"
     Caption = 'Read posted shipments, etc.';
 
     Permissions = tabledata "General Posting Setup" = r,
-#if not CLEAN19
-                  tabledata "Item Cross Reference" = R,
-#endif
                   tabledata "Item Reference" = R,
                   tabledata "Item Tracking Code" = R,
                   tabledata "Report Selections" = R,

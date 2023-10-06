@@ -1,3 +1,5 @@
+namespace System.Automation;
+
 page 1550 "Restricted Records"
 {
     ApplicationArea = Suite;
@@ -14,7 +16,7 @@ page 1550 "Restricted Records"
         {
             repeater(Group)
             {
-                field(ID; ID)
+                field(ID; Rec.ID)
                 {
                     ApplicationArea = Basic, Suite;
                     ToolTip = 'Specifies the record in the Restricted Record table.';
@@ -26,7 +28,7 @@ page 1550 "Restricted Records"
                     Caption = 'Record Details';
                     ToolTip = 'Specifies details about what imposed the restriction on the record.';
                 }
-                field(Details; Details)
+                field(Details; Rec.Details)
                 {
                     ApplicationArea = Suite;
                     ToolTip = 'Specifies details about what imposed the restriction on the record.';
@@ -44,28 +46,36 @@ page 1550 "Restricted Records"
                 ApplicationArea = Suite;
                 Caption = 'Record';
                 Image = Document;
-                Promoted = true;
-                PromotedCategory = Process;
-                PromotedIsBig = true;
                 ShortCutKey = 'Return';
                 ToolTip = 'Open the record that is restricted from certain usage, as defined by the workflow response.';
 
                 trigger OnAction()
                 begin
-                    ShowRecord;
+                    Rec.ShowRecord();
                 end;
+            }
+        }
+        area(Promoted)
+        {
+            group(Category_Process)
+            {
+                Caption = 'Process';
+
+                actionref(Record_Promoted; Record)
+                {
+                }
             }
         }
     }
 
     trigger OnAfterGetCurrRecord()
     begin
-        RecordDetails := Format("Record ID", 0, 1);
+        RecordDetails := Format(Rec."Record ID", 0, 1);
     end;
 
     trigger OnAfterGetRecord()
     begin
-        RecordDetails := Format("Record ID", 0, 1);
+        RecordDetails := Format(Rec."Record ID", 0, 1);
     end;
 
     var

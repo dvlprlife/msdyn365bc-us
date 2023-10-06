@@ -1,3 +1,8 @@
+namespace System.Security.AccessControl;
+
+using Microsoft.Integration.D365Sales;
+using Microsoft.Integration.Dataverse;
+
 permissionset 8708 "Dataverse - Admin"
 {
     Access = Public;
@@ -10,6 +15,7 @@ permissionset 8708 "Dataverse - Admin"
                   tabledata "CDS Environment" = RIMD,
                   tabledata "CDS Solution" = RIMD,
                   tabledata "CDS Teamroles" = RIMD,
+                  tabledata "Dataverse Entity Change" = RID,
                   tabledata "CRM Account" = RIMD,
                   tabledata "CRM Businessunit" = RIMD,
                   tabledata "CRM Contact" = RIMD,

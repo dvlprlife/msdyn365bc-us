@@ -1,12 +1,71 @@
+namespace System.Security.AccessControl;
+
+using Microsoft.Utilities;
+using Microsoft.Sales.Customer;
+using Microsoft.Inventory.Intrastat;
+using Microsoft.Sales.Document;
+using Microsoft.Sales.Archive;
+using Microsoft.CRM.Team;
+using Microsoft.Projects.Project.Job;
+using Microsoft.Inventory.Location;
+using Microsoft.Foundation.Reporting;
+using Microsoft.Finance.VAT.Reporting;
+using Microsoft.Projects.Project.Ledger;
+using Microsoft.Projects.Project.Planning;
+using Microsoft.Projects.Project.Posting;
+using Microsoft.Foundation.AuditCodes;
+using Microsoft.Foundation.Shipping;
+using Microsoft.Foundation.UOM;
+using Microsoft.Finance.VAT.Calculation;
+using Microsoft.Finance.VAT.Setup;
+using Microsoft.Finance.VAT.RateChange;
+using Microsoft.Bank.BankAccount;
+using Microsoft.Warehouse.Structure;
+using Microsoft.Inventory.BOM;
+using Microsoft.CRM.Opportunity;
+using Microsoft.Foundation.Comment;
+using Microsoft.Foundation.Address;
+using Microsoft.Finance.Currency;
+using Microsoft.Sales.Receivables;
+using Microsoft.Finance.Dimension;
+using Microsoft.Pricing.Calculation;
+using Microsoft.Pricing.PriceList;
+using Microsoft.Inventory.Tracking;
+using Microsoft.Foundation.ExtendedText;
+using Microsoft.Finance.GeneralLedger.Account;
+using Microsoft.Finance.GeneralLedger.Setup;
+using Microsoft.Inventory.Item;
+using Microsoft.Inventory.Ledger;
+using Microsoft.Purchases.Document;
+using Microsoft.Inventory.Journal;
+using Microsoft.Inventory.Item.Catalog;
+using Microsoft.Inventory.Item.Substitution;
+using Microsoft.Foundation.PaymentTerms;
+using Microsoft.Inventory.Planning;
+using Microsoft.Pricing.Asset;
+using Microsoft.Pricing.Source;
+using Microsoft.Pricing.Worksheet;
+using Microsoft.Manufacturing.Document;
+using Microsoft.Inventory.Requisition;
+using Microsoft.Projects.Resources.Resource;
+#if not CLEAN21
+using Microsoft.Projects.Resources.Pricing;
+#endif
+using Microsoft.Sales.History;
+using Microsoft.Sales.Comment;
+using Microsoft.Sales.Pricing;
+using Microsoft.Finance.SalesTax;
+using Microsoft.CRM.Task;
+using System.Security.User;
+
 permissionset 8651 "Recievables Documents - Edit"
 {
     Access = Public;
     Assignable = false;
     Caption = 'Create sales orders etc.';
 
-    IncludedPermissionSets = "Language - Read";
-
-    Permissions = tabledata "Bank Account" = R,
+    Permissions = tabledata "Alt. Customer Posting Group" = R,
+                  tabledata "Bank Account" = R,
                   tabledata Bin = R,
                   tabledata "BOM Component" = R,
                   tabledata "Close Opportunity Code" = R,
@@ -40,9 +99,6 @@ permissionset 8651 "Recievables Documents - Edit"
                   tabledata "Item Charge" = R,
                   tabledata "Item Charge Assignment (Purch)" = Rm,
                   tabledata "Item Charge Assignment (Sales)" = RIMD,
-#if not CLEAN19
-                  tabledata "Item Cross Reference" = R,
-#endif
                   tabledata "Item Journal Line" = Rm,
                   tabledata "Item Ledger Entry" = Rm,
                   tabledata "Item Reference" = R,
@@ -86,7 +142,7 @@ permissionset 8651 "Recievables Documents - Edit"
                   tabledata "Requisition Line" = Rim,
                   tabledata "Reservation Entry" = Rimd,
                   tabledata Resource = R,
-#if not CLEAN19
+#if not CLEAN21
                   tabledata "Resource Cost" = R,
                   tabledata "Resource Price" = R,
 #endif
@@ -102,11 +158,11 @@ permissionset 8651 "Recievables Documents - Edit"
                   tabledata "Sales Invoice Line" = R,
                   tabledata "Sales Line" = RIMD,
                   tabledata "Sales Line Archive" = RIMD,
-#if not CLEAN19
+#if not CLEAN21
                   tabledata "Sales Line Discount" = R,
 #endif
                   tabledata "Sales Planning Line" = Rimd,
-#if not CLEAN19
+#if not CLEAN21
                   tabledata "Sales Price" = R,
 #endif
                   tabledata "Sales Price Access" = R,
@@ -146,5 +202,7 @@ permissionset 8651 "Recievables Documents - Edit"
                   tabledata "VAT Rate Change Setup" = R,
                   tabledata "VAT Reporting Code" = R,
                   tabledata "VAT Setup Posting Groups" = R,
+                  tabledata "VAT Setup" = R,
+                  tabledata "VAT Posting Parameters" = R,
                   tabledata "Work Type" = R;
 }

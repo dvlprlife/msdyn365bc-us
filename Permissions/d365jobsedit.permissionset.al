@@ -1,3 +1,23 @@
+namespace System.Security.AccessControl;
+
+using Microsoft.Pricing.Calculation;
+using Microsoft.Pricing.PriceList;
+using Microsoft.Projects.RoleCenters;
+using Microsoft.Pricing.Asset;
+using Microsoft.Pricing.Source;
+using Microsoft.Pricing.Worksheet;
+using Microsoft.Projects.Project.Job;
+using Microsoft.Projects.Project.Journal;
+#if not CLEAN21
+using Microsoft.Projects.Project.Pricing;
+#endif
+using Microsoft.Projects.Project.Ledger;
+using Microsoft.Projects.Project.Planning;
+using Microsoft.Projects.Project.WIP;
+using Microsoft.Finance.VAT.Setup;
+using Microsoft.Finance.VAT.Calculation;
+using Microsoft.Finance.VAT.Reporting;
+
 permissionset 9886 "D365 JOBS, EDIT"
 {
     Assignable = true;
@@ -11,7 +31,7 @@ permissionset 9886 "D365 JOBS, EDIT"
                   tabledata Job = IMD,
                   tabledata "Job Cue" = IMD,
                   tabledata "Job Entry No." = IMD,
-#if not CLEAN19
+#if not CLEAN21
                   tabledata "Job G/L Account Price" = IMD,
                   tabledata "Job Item Price" = IMD,
 #endif
@@ -23,7 +43,7 @@ permissionset 9886 "D365 JOBS, EDIT"
                   tabledata "Job Planning Line" = IMD,
                   tabledata "Job Planning Line Invoice" = IMD,
                   tabledata "Job Register" = imd,
-#if not CLEAN19
+#if not CLEAN21
                   tabledata "Job Resource Price" = IMD,
 #endif
                   tabledata "Job Task" = IMD,
@@ -43,5 +63,7 @@ permissionset 9886 "D365 JOBS, EDIT"
                   tabledata "Price List Line" = RIMD,
                   tabledata "Price Source" = RIMD,
                   tabledata "Price Worksheet Line" = RIMD,
+                  tabledata "VAT Setup" = R,
+                  tabledata "VAT Posting Parameters" = R,
                   tabledata "VAT Reporting Code" = R;
 }

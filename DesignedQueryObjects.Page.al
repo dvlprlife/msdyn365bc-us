@@ -1,3 +1,5 @@
+namespace System.Tooling;
+
 page 9847 "Designed Query Objects"
 {
     Caption = 'Designed Query Objects';
@@ -12,13 +14,13 @@ page 9847 "Designed Query Objects"
             repeater(Group)
             {
                 ShowCaption = false;
-                field("Object ID"; "Object ID")
+                field("Object ID"; Rec."Object ID")
                 {
                     ApplicationArea = Basic, Suite;
                     Caption = 'Object ID';
                     ToolTip = 'Specifies the ID of the object.';
                 }
-                field("Object Name"; "Object Name")
+                field("Object Name"; Rec."Object Name")
                 {
                     ApplicationArea = Basic, Suite;
                     Caption = 'Object Name';

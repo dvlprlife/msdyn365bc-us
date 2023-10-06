@@ -1,4 +1,79 @@
-﻿codeunit 2 "Company-Initialize"
+// ------------------------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+// ------------------------------------------------------------------------------------------------
+namespace Microsoft.Foundation.Company;
+
+using Microsoft.Assembly.Setup;
+using Microsoft.Bank.Check;
+using Microsoft.Bank.DirectDebit;
+using Microsoft.Bank.Ledger;
+using Microsoft.Bank.Reconciliation;
+using Microsoft.Bank.Setup;
+using Microsoft.CRM.Interaction;
+using Microsoft.CRM.Setup;
+using Microsoft.CashFlow.Setup;
+using Microsoft.CostAccounting.Setup;
+using Microsoft.EServices.EDocument;
+using Microsoft.Finance.Currency;
+using Microsoft.Finance.FinancialReports;
+using Microsoft.Finance.GeneralLedger.Journal;
+using Microsoft.Finance.GeneralLedger.Ledger;
+using Microsoft.Finance.GeneralLedger.Setup;
+using Microsoft.Finance.SalesTax;
+using Microsoft.Finance.VAT.Ledger;
+using Microsoft.Finance.VAT.Registration;
+using Microsoft.Finance.VAT.Reporting;
+using Microsoft.FixedAssets.Insurance;
+using Microsoft.FixedAssets.Journal;
+using Microsoft.FixedAssets.Ledger;
+using Microsoft.FixedAssets.Maintenance;
+using Microsoft.FixedAssets.Setup;
+using Microsoft.Foundation.AuditCodes;
+using Microsoft.Foundation.Reporting;
+using Microsoft.HumanResources.Setup;
+using Microsoft.Intercompany.Setup;
+using Microsoft.Inventory;
+using Microsoft.Inventory.Analysis;
+using Microsoft.Inventory.Costing;
+using Microsoft.Inventory.Counting.Document;
+using Microsoft.Inventory.Counting.Journal;
+using Microsoft.Inventory.Document;
+using Microsoft.Inventory.Item.Catalog;
+using Microsoft.Inventory.Journal;
+using Microsoft.Inventory.Setup;
+using Microsoft.Manufacturing.Capacity;
+using Microsoft.Manufacturing.Journal;
+using Microsoft.Projects.Project.Journal;
+using Microsoft.Projects.Project.Setup;
+using Microsoft.Projects.Project.WIP;
+using Microsoft.Projects.Resources.Journal;
+using Microsoft.Projects.Resources.Ledger;
+using Microsoft.Projects.Resources.Setup;
+using Microsoft.Purchases.Payables;
+using Microsoft.Purchases.Setup;
+using Microsoft.Sales.Peppol;
+using Microsoft.Sales.Receivables;
+using Microsoft.Sales.Setup;
+using Microsoft.Service.Setup;
+using Microsoft.Warehouse.Journal;
+using Microsoft.Warehouse.Ledger;
+using Microsoft.Warehouse.Setup;
+using Microsoft.Utilities;
+using System.Automation;
+using System.Environment;
+using System.Environment.Configuration;
+using System.Integration;
+using System.Globalization;
+using System.Feedback;
+using System.IO;
+using System.Reflection;
+#if not CLEAN22
+using System.Security.AccessControl;
+#endif
+using System.Upgrade;
+
+codeunit 2 "Company-Initialize"
 {
     Permissions = TableData "Company Information" = i,
                   TableData "General Ledger Setup" = ri,
@@ -23,8 +98,10 @@
                   TableData "Warehouse Setup" = i,
                   TableData "Service Mgt. Setup" = i,
                   tabledata "Trial Balance Setup" = i,
-                  TableData "Config. Setup" = i,
-                  TableData "User Group Member" = d;
+#if not CLEAN22
+                  TableData "User Group Member" = d,
+#endif
+                  TableData "Config. Setup" = i;
 
     trigger OnRun()
     var
@@ -36,12 +113,10 @@
         SatisfactionSurveyMgt: Codeunit "Satisfaction Survey Mgt.";
         UpgradeTag: Codeunit "Upgrade Tag";
         Window: Dialog;
-        InitializeCompanyOnRunLogLbl: Label 'OnRun executed in Codeunit 2 "Company-Initialize". Current language is %1.', Comment = '%1 = The language lcid.';
     begin
         Window.Open(Text000);
 
         OnBeforeOnRun();
-        Session.LogMessage('0000HQL', StrSubstNo(InitializeCompanyOnRunLogLbl, GlobalLanguage()), Verbosity::Normal, DataClassification::SystemMetadata, TelemetryScope::All, 'Category', 'CompanyInitialize'); 
 
         InitSetupTables();
         AddOnIntegrMgt.InitMfgSetup();
@@ -187,6 +262,7 @@
         Text116: Label 'Cost Allocation';
         Text117: Label 'TRABUD', Comment = 'Uppercase of the translation of Transfer Budget to Actual with a max of 10 char';
         Text118: Label 'Transfer Budget to Actual';
+        DocumentCreatedToAvoidGapInNoSeriesTxt: Label 'Document created to avoid gap in No. Series';
         InvtReceiptsTxt: Label 'INVTRCPT', Comment = 'INVENTORY RECEIPTS';
         InvtShipmentsTxt: Label 'INVTSHPT', Comment = 'INVENTORY SHIPMENTS';
         InvtOrderTxt: Label 'INVTORDER', Comment = 'INVENTORY ORDERS';
@@ -202,6 +278,8 @@
         SourceCodeGeneralDeferralTxt: Label 'General Deferral';
         SourceCodeSalesDeferralTxt: Label 'Sales Deferral';
         SourceCodePurchaseDeferralTxt: Label 'Purchase Deferral';
+        ProductionOrderLbl: Label 'PRODUCTION';
+        ProductionOrderTxt: Label 'Production Order';
 
     internal procedure InitializeCompany()
     var
@@ -382,6 +460,8 @@
             ICSetup.Init();
             ICSetup.Insert();
         end;
+
+        OnAfterInitSetupTables();
     end;
 
     local procedure InitSourceCodeSetup()
@@ -389,14 +469,14 @@
         SourceCode: Record "Source Code";
         SourceCodeSetup: Record "Source Code Setup";
     begin
-        if not (SourceCodeSetup.FindFirst or SourceCode.FindFirst()) then
+        if not (SourceCodeSetup.FindFirst() or SourceCode.FindFirst()) then
             with SourceCodeSetup do begin
                 Init();
                 InsertSourceCode(Sales, Text001, Text002);
                 InsertSourceCode(Purchases, Text003, Text004);
-                InsertSourceCode("Deleted Document", Text005, CopyStr(FieldCaption("Deleted Document"), 1, 30));
+                InsertSourceCode("Deleted Document", Text005, DocumentCreatedToAvoidGapInNoSeriesTxt);
                 InsertSourceCode("Inventory Post Cost", Text006, ReportName(REPORT::"Post Inventory Cost to G/L"));
-#if not CLEAN20
+#if not CLEAN23
                 InsertSourceCode("Exchange Rate Adjmt.", Text007, ReportName(REPORT::"Adjust Exchange Rates"));
 #else
                 InsertSourceCode("Exchange Rate Adjmt.", Text007, ReportName(REPORT::"Exch. Rate Adjustment"));
@@ -475,6 +555,7 @@
                 InsertSourceCode("Purchase Deferral", SourceCodePurchaseDeferralLbl, SourceCodePurchaseDeferralTxt);
                 InsertSourceCode("Bank Rec. Adjustment", Text1020000, Text1020001);
                 InsertSourceCode(Deposits, Text1020002, Text1020003);
+                InsertSourceCode("Production Order", ProductionOrderLbl, ProductionOrderTxt);
                 Insert();
             end;
     end;
@@ -549,7 +630,7 @@
         DocExchServiceSetup: Record "Doc. Exch. Service Setup";
     begin
         with DocExchServiceSetup do
-            if not Get then begin
+            if not Get() then begin
                 Init();
                 SetURLsToDefault();
                 Insert();
@@ -630,14 +711,6 @@
           'Microsoft Dynamics BusinessChart control add-in',
           ApplicationPath + 'Add-ins\BusinessChart\Microsoft.Dynamics.Nav.Client.BusinessChart.zip');
         InsertClientAddIn(
-          'Microsoft.Dynamics.Nav.Client.TimelineVisualization', '31bf3856ad364e35', '',
-          ClientAddIn.Category::"DotNet Control Add-in",
-          'Interactive visualizion for a timeline of events', '');
-        InsertClientAddIn(
-          'Microsoft.Dynamics.Nav.Client.PingPong', '31bf3856ad364e35', '',
-          ClientAddIn.Category::"DotNet Control Add-in",
-          'Microsoft Dynamics PingPong control add-in', '');
-        InsertClientAddIn(
           'Microsoft.Dynamics.Nav.Client.VideoPlayer', '31bf3856ad364e35', '',
           ClientAddIn.Category::"JavaScript Control Add-in",
           'Microsoft Dynamics VideoPlayer control add-in',
@@ -697,7 +770,7 @@
         if ClientAddIn.Insert() then;
     end;
 
-    local procedure InsertJobWIPMethod("Code": Code[20]; Description: Text[100]; RecognizedCosts: Option; RecognizedSales: Option; SystemDefinedIndex: Integer)
+    local procedure InsertJobWIPMethod("Code": Code[20]; Description: Text[100]; RecognizedCosts: Enum "Job WIP Recognized Costs Type"; RecognizedSales: Enum "Job WIP Recognized Sales Type"; SystemDefinedIndex: Integer)
     var
         JobWIPMethod: Record "Job WIP Method";
     begin
@@ -745,7 +818,7 @@
             if EnvironmentInfo.IsSaaS() then begin
                 Company.Get(CompanyName);
 
-                if not (CompanyInformationMgt.IsDemoCompany or Company."Evaluation Company") then
+                if not (CompanyInformationMgt.IsDemoCompany() or Company."Evaluation Company") then
                     ApplicationAreaMgmtFacade.SaveExperienceTierCurrentCompany(ExperienceTierSetup.FieldCaption(Essential))
                 else
                     ApplicationAreaMgmtFacade.SaveExperienceTierCurrentCompany(ExperienceTierSetup.FieldCaption(Basic));
@@ -770,8 +843,10 @@
     local procedure OnAfterCompanyDeleteRemoveReferences(var Rec: Record Company; RunTrigger: Boolean)
     var
         AssistedCompanySetupStatus: Record "Assisted Company Setup Status";
+#if not CLEAN22
         UserGroupMember: Record "User Group Member";
         UserGroupAccessControl: Record "User Group Access Control";
+#endif
         ApplicationAreaSetup: Record "Application Area Setup";
         CustomReportLayout: Record "Custom Report Layout";
         ReportLayoutSelection: Record "Report Layout Selection";
@@ -782,10 +857,12 @@
 
         AssistedCompanySetupStatus.SetRange("Company Name", Rec.Name);
         AssistedCompanySetupStatus.DeleteAll();
+#if not CLEAN22
         UserGroupMember.SetRange("Company Name", Rec.Name);
         UserGroupMember.DeleteAll();
         UserGroupAccessControl.SetRange("Company Name", Rec.Name);
         UserGroupAccessControl.DeleteAll();
+#endif
         ApplicationAreaSetup.SetRange("Company Name", Rec.Name);
         ApplicationAreaSetup.DeleteAll();
         CustomReportLayout.SetRange("Company Name", Rec.Name);
@@ -801,9 +878,7 @@
     local procedure CompanyInitializeOnAfterLogin()
     var
         ClientTypeManagement: Codeunit "Client Type Management";
-        InitializeCompanyLogLbl: Label 'CompanyInitializeOnAfterLogin executed InitializeCompany in Codeunit 2 "Company-Initialize". Current language is %1.', Comment = '%1 = The language lcid.';
     begin
-        
         if not GuiAllowed() then
             exit;
 
@@ -813,8 +888,12 @@
         if GetExecutionContext() <> ExecutionContext::Normal then
             exit;
 
-        Session.LogMessage('0000HQ2', StrSubstNo(InitializeCompanyLogLbl, GlobalLanguage()), Verbosity::Normal, DataClassification::SystemMetadata, TelemetryScope::All, 'Category', 'CompanyInitialize');        
         InitializeCompany();
+    end;
+
+    [IntegrationEvent(false, false)]
+    local procedure OnAfterInitSetupTables()
+    begin
     end;
 }
 

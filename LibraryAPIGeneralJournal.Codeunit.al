@@ -1,3 +1,7 @@
+namespace Microsoft.Finance.GeneralLedger.Journal;
+
+using Microsoft.Foundation.NoSeries;
+
 codeunit 5469 "Library API - General Journal"
 {
 
@@ -43,7 +47,7 @@ codeunit 5469 "Library API - General Journal"
     begin
         if not GenJournalBatch.Get(TemplateNameTxt, BatchNameTxt) then begin
             GenJournalBatch.Validate("Journal Template Name", TemplateNameTxt);
-            GenJournalBatch.SetupNewBatch;
+            GenJournalBatch.SetupNewBatch();
             GenJournalBatch.Validate(Name, BatchNameTxt);
             GenJournalBatch.Validate(Description, GenJournalBatch.Name);
             GenJournalBatch.Insert(true);
@@ -103,7 +107,7 @@ codeunit 5469 "Library API - General Journal"
         if CopyValuesFromGenJnlLineSpecified and
            (CopyValuesFromGenJnlLine."Document No." = GenJournalLine."Document No.") and
            (CopyValuesFromGenJnlLine."External Document No." <> GenJournalLine."External Document No.")
-        then begin
+        then
             if GenJnlBatch."No. Series" <> '' then begin
                 NoSeriesMgt.SetNoSeriesLineFilter(NoSeriesLine, GenJnlBatch."No. Series", GenJournalLine."Posting Date");
                 if NoSeriesLine."Increment-by No." > 1 then
@@ -112,7 +116,6 @@ codeunit 5469 "Library API - General Journal"
                     GenJournalLine."Document No." := IncStr(GenJournalLine."Document No.");
             end else
                 GenJournalLine."Document No." := IncStr(GenJournalLine."Document No.");
-        end;
     end;
 
     procedure GetBatchNameFromId(JournalBatchId: Guid): Code[10]

@@ -1,3 +1,9 @@
+// ------------------------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+// ------------------------------------------------------------------------------------------------
+namespace Microsoft;
+
 page 181 "Additional Customer Terms"
 {
     Caption = 'Additional Customer Terms';
@@ -8,6 +14,8 @@ page 181 "Additional Customer Terms"
     ModifyAllowed = false;
     PageType = Card;
     Permissions = tabledata "License Agreement" = rim;
+    InherentEntitlements = X;
+    InherentPermissions = X;
     SourceTable = "License Agreement";
 
     layout
@@ -24,7 +32,7 @@ page 181 "Additional Customer Terms"
 
                     trigger OnDrillDown()
                     begin
-                        ShowEULA
+                        Rec.ShowEULA();
                     end;
                 }
                 label(Control3)
@@ -33,18 +41,18 @@ page 181 "Additional Customer Terms"
                     CaptionClass = ConfirmationForAcceptingLicenseTermsQst;
                     ShowCaption = false;
                 }
-                field(Accepted; Accepted)
+                field(Accepted; Rec.Accepted)
                 {
                     ApplicationArea = Basic, Suite;
                     ToolTip = 'Specifies if the license agreement was accepted.';
                 }
-                field("Accepted By"; "Accepted By")
+                field("Accepted By"; Rec."Accepted By")
                 {
                     ApplicationArea = Basic, Suite;
                     Editable = false;
                     ToolTip = 'Specifies the person that accepted the license agreement.';
                 }
-                field("Accepted On"; "Accepted On")
+                field("Accepted On"; Rec."Accepted On")
                 {
                     ApplicationArea = Basic, Suite;
                     Editable = false;
@@ -63,13 +71,11 @@ page 181 "Additional Customer Terms"
                 ApplicationArea = Basic, Suite;
                 Caption = 'Read the Additional Customer Terms';
                 Image = Agreement;
-                Promoted = true;
-                PromotedCategory = Process;
                 ToolTip = 'Read the additional customer terms.';
 
                 trigger OnAction()
                 begin
-                    ShowEULA;
+                    Rec.ShowEULA();
                 end;
             }
             action("&Accept the Additional Customer Terms")
@@ -77,15 +83,27 @@ page 181 "Additional Customer Terms"
                 ApplicationArea = Basic, Suite;
                 Caption = '&Accept the Additional Customer Terms';
                 Image = Approve;
-                Promoted = true;
-                PromotedCategory = Process;
                 ToolTip = 'Accept the additional customer terms.';
 
                 trigger OnAction()
                 begin
-                    Validate(Accepted, true);
+                    Rec.Validate(Accepted, true);
                     CurrPage.Update();
                 end;
+            }
+        }
+        area(Promoted)
+        {
+            group(Category_Process)
+            {
+                Caption = 'Process';
+
+                actionref("Read the Additional Customer Terms_Promoted"; "Read the Additional Customer Terms")
+                {
+                }
+                actionref("&Accept the Additional Customer Terms_Promoted"; "&Accept the Additional Customer Terms")
+                {
+                }
             }
         }
     }

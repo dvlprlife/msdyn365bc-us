@@ -1,3 +1,17 @@
+namespace System.Security.AccessControl;
+
+using Microsoft.Finance.GeneralLedger.Setup;
+using Microsoft.Inventory.Item.Catalog;
+using Microsoft.Inventory.Tracking;
+using Microsoft.Purchases.Comment;
+using Microsoft.Purchases.History;
+using Microsoft.Finance.SalesTax;
+using System.Security.User;
+using Microsoft.Foundation.Reporting;
+using Microsoft.Finance.VAT.Setup;
+using Microsoft.Finance.VAT.RateChange;
+using Microsoft.Finance.VAT.Reporting;
+
 permissionset 5951 "Payables Documents - View"
 {
     Access = Public;
@@ -5,9 +19,6 @@ permissionset 5951 "Payables Documents - View"
     Caption = 'Read posted receipts etc.';
 
     Permissions = tabledata "General Posting Setup" = r,
-#if not CLEAN19
-                  tabledata "Item Cross Reference" = R,
-#endif
                   tabledata "Item Reference" = R,
                   tabledata "Item Tracking Code" = R,
                   tabledata "Purch. Comment Line" = RIMD,

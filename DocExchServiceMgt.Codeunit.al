@@ -1,7 +1,23 @@
+namespace Microsoft.EServices.EDocument;
+
+using Microsoft.Purchases.Document;
+using Microsoft.Sales.History;
+using Microsoft.Service.History;
+using Microsoft.Utilities;
+using System;
+using System.Azure.KeyVault;
+using System.Environment;
+using System.IO;
+using System.Utilities;
+using System.Xml;
+using System.Integration;
+using System.Security.Authentication;
+using System.Telemetry;
+
 codeunit 1410 "Doc. Exch. Service Mgt."
 {
-    Permissions = TableData "Sales Invoice Header" = m,
-                  TableData "Sales Cr.Memo Header" = m;
+    Permissions = TableData "Sales Invoice Header" = rm,
+                  TableData "Sales Cr.Memo Header" = rm;
 
     trigger OnRun()
     begin
@@ -124,7 +140,6 @@ codeunit 1410 "Doc. Exch. Service Mgt."
         EmptyIdTokenTxt: Label 'The ID token is empty.';
 
 
-    [Scope('OnPrem')]
     procedure IsSandbox(var DocExchServiceSetup: Record "Doc. Exch. Service Setup"): Boolean
     begin
         exit(DocExchServiceSetup."Service URL".Contains(SandboxTxt));
@@ -137,7 +152,14 @@ codeunit 1410 "Doc. Exch. Service Mgt."
 
     [Scope('OnPrem')]
     procedure SetURLsToDefault(var DocExchServiceSetup: Record "Doc. Exch. Service Setup"; Sandbox: Boolean)
+    var
+        IsHandled: Boolean;
     begin
+        IsHandled := false;
+        OnBeforeSetURLsToDefault(DocExchServiceSetup, Sandbox, IsHandled);
+        if IsHandled then
+            exit;
+
         if not Sandbox then begin
             DocExchServiceSetup."Sign-up URL" := DefaultSignUpUrlProdTxt;
             DocExchServiceSetup."Sign-in URL" := DefaultSignInUrlProdTxt;
@@ -430,7 +452,6 @@ codeunit 1410 "Doc. Exch. Service Mgt."
         RenewTokenNotification.Send();
     end;
 
-    [Scope('OnPrem')]
     procedure RecallActivateAppNotification()
     var
         ActivateAppNotification: Notification;
@@ -446,7 +467,13 @@ codeunit 1410 "Doc. Exch. Service Mgt."
         ActivateAppNotification: Notification;
         ClientId: Text;
         Sandbox: Boolean;
+        IsHandled: Boolean;
     begin
+        IsHandled := false;
+        OnBeforeSendActivateAppNotification(IsHandled);
+        if IsHandled then
+            exit;
+
         if not GuiAllowed() then
             exit;
 
@@ -532,6 +559,13 @@ codeunit 1410 "Doc. Exch. Service Mgt."
         exit(GuidVar);
     end;
 
+    internal procedure GetFeatureTelemetryName(): Text
+    var
+        DocumentExchangeTelemetryNameTxt: Label 'Document Exchange', Locked = true;
+    begin
+        exit(DocumentExchangeTelemetryNameTxt);
+    end;
+
     [TryFunction]
     [NonDebuggable]
     local procedure TryCheckConnection()
@@ -568,8 +602,11 @@ codeunit 1410 "Doc. Exch. Service Mgt."
     procedure SendUBLDocument(DocVariant: Variant; var TempBlob: Codeunit "Temp Blob"): Text
     var
         DocRecRef: RecordRef;
+        FeatureTelemetry: Codeunit "Feature Telemetry";
     begin
         CheckServiceEnabled();
+        FeatureTelemetry.LogUptake('0000IM9', TelemetryCategoryTok, Enum::"Feature Uptake Status"::Used);
+        FeatureTelemetry.LogUsage('0000IMP', TelemetryCategoryTok, 'Document send');
 
         DocRecRef.GetTable(DocVariant);
 
@@ -614,65 +651,6 @@ codeunit 1410 "Doc. Exch. Service Mgt."
         exit(DocIdentifier);
     end;
 
-#if not CLEAN20
-    [Scope('OnPrem')]
-    [Obsolete('Replaced by SendUBLDocument with TempBlob parameter.', '20.0')]
-    procedure SendUBLDocument(DocVariant: Variant; FileName: Text): Text
-    var
-        FileManagement: codeunit "File Management";
-        TempBlob: Codeunit "Temp Blob";
-        DocRecRef: RecordRef;
-    begin
-        CheckServiceEnabled();
-
-        DocRecRef.GetTable(DocVariant);
-
-        CheckDocumentStatus(DocRecRef);
-
-        FileManagement.BLOBImportFromServerFile(TempBlob, FileName);
-        if not ExecuteWebServicePostRequest(GetPostSalesURL(DocRecRef), TempBlob) then
-            LogActivityFailedAndError(DocRecRef.RecordId, SendDocTxt, '');
-
-        LogActivitySucceeded(DocRecRef.RecordId, SendDocTxt, DocSendSuccessMsg);
-
-        DocExchLinks.UpdateDocumentRecord(DocRecRef, GLBLastUsedGUID, '');
-
-        LogTelemetryDocumentSent();
-
-        if GuiAllowed then
-            Message(DocSendSuccessMsg);
-
-        exit(GLBLastUsedGUID);
-    end;
-
-    [Scope('OnPrem')]
-    [Obsolete('Replaced by SendDocument with TempBlob parameter.', '20.0')]
-    procedure SendDocument(DocVariant: Variant; FileName: Text): Text
-    var
-        FileManagement: codeunit "File Management";
-        TempBlob: Codeunit "Temp Blob";
-        DocRecRef: RecordRef;
-        DocIdentifier: Text;
-    begin
-        CheckServiceEnabled();
-
-        DocIdentifier := GetGUID();
-        DocRecRef.GetTable(DocVariant);
-
-        CheckDocumentStatus(DocRecRef);
-
-        FileManagement.BLOBImportFromServerFile(TempBlob, FileName);
-        PutDocument(TempBlob, DocIdentifier, DocRecRef);
-        DispatchDocument(DocIdentifier, DocRecRef);
-
-        LogTelemetryDocumentSent();
-
-        if GuiAllowed() then
-            Message(DocSendSuccessMsg);
-
-        exit(DocIdentifier);
-    end;
-#endif
     [Scope('OnPrem')]
     [NonDebuggable]
     procedure HasPredefinedOAuth2Params(): Boolean
@@ -1349,7 +1327,7 @@ codeunit 1410 "Doc. Exch. Service Mgt."
         CheckServiceEnabled(DocExchServiceSetup);
     end;
 
-    local procedure GetServiceSetUp(var DocExchServiceSetup: Record "Doc. Exch. Service Setup")
+    procedure GetServiceSetUp(var DocExchServiceSetup: Record "Doc. Exch. Service Setup")
     begin
         if not DocExchServiceSetup.Get() then begin
             Session.LogMessage('0000EYY', NotSetUpTxt, Verbosity::Warning, DataClassification::SystemMetadata, TelemetryScope::ExtensionPublisher, 'Category', TelemetryCategoryTok);
@@ -1462,13 +1440,13 @@ codeunit 1410 "Doc. Exch. Service Mgt."
     local procedure GetPostSalesInvURL(): Text
     begin
         exit(GetFullURL(StrSubstNo('/documents/dispatcher?documentId=%1&documentProfileId=tradeshift.invoice.ubl.1.0',
-              GetGUID)));
+              GetGUID())));
     end;
 
     local procedure GetPostSalesCrMemoURL(): Text
     begin
         exit(GetFullURL(StrSubstNo('/documents/dispatcher?documentId=%1&documentProfileId=tradeshift.creditnote.ubl.1.0',
-              GetGUID)));
+              GetGUID())));
     end;
 
     local procedure GetDocStatusURL(DocIdentifier: Text): Text
@@ -1547,32 +1525,32 @@ codeunit 1410 "Doc. Exch. Service Mgt."
 
     local procedure GetErrorXPath(): Text
     begin
-        exit(StrSubstNo('//%1:Message', GetPrefix));
+        exit(StrSubstNo('//%1:Message', GetPrefix()));
     end;
 
     local procedure GetStatusXPath(): Text
     begin
-        exit(StrSubstNo('//%1:DeliveryState', GetPrefix));
+        exit(StrSubstNo('//%1:DeliveryState', GetPrefix()));
     end;
 
     local procedure GetDocumentIDXPath(): Text
     begin
-        exit(StrSubstNo('.//%1:DocumentId', GetPrefix));
+        exit(StrSubstNo('.//%1:DocumentId', GetPrefix()));
     end;
 
     local procedure GetDocumentTypeXPath(): Text
     begin
-        exit(StrSubstNo('.//%1:DocumentType', GetPrefix));
+        exit(StrSubstNo('.//%1:DocumentType', GetPrefix()));
     end;
 
     local procedure GetDocumentIDForDescriptionXPath(): Text
     begin
-        exit(StrSubstNo('.//%1:ID', GetPrefix));
+        exit(StrSubstNo('.//%1:ID', GetPrefix()));
     end;
 
     local procedure GetEmbeddedDocXPath(): Text
     begin
-        exit(StrSubstNo('//%1:EmbeddedDocumentBinaryObject', GetPrefix));
+        exit(StrSubstNo('//%1:EmbeddedDocumentBinaryObject', GetPrefix()));
     end;
 
     local procedure GetPrefix(): Text
@@ -1616,7 +1594,7 @@ codeunit 1410 "Doc. Exch. Service Mgt."
         exit(Format(PurchaseHeader."Document Type"));
     end;
 
-    local procedure LogActivitySucceeded(RelatedRecordID: RecordID; ActivityDescription: Text; ActivityMessage: Text)
+    procedure LogActivitySucceeded(RelatedRecordID: RecordID; ActivityDescription: Text; ActivityMessage: Text)
     var
         ActivityLog: Record "Activity Log";
     begin
@@ -1624,7 +1602,7 @@ codeunit 1410 "Doc. Exch. Service Mgt."
           ActivityDescription, ActivityMessage);
     end;
 
-    local procedure LogActivityFailed(RelatedRecordID: RecordID; ActivityDescription: Text; ActivityMessage: Text)
+    procedure LogActivityFailed(RelatedRecordID: RecordID; ActivityDescription: Text; ActivityMessage: Text)
     var
         ActivityMessageVar: Text;
     begin
@@ -1632,7 +1610,7 @@ codeunit 1410 "Doc. Exch. Service Mgt."
         LogActivityFailedCommon(RelatedRecordID, ActivityDescription, ActivityMessageVar);
     end;
 
-    local procedure LogActivityFailedAndError(RelatedRecordID: RecordID; ActivityDescription: Text; ActivityMessage: Text)
+    procedure LogActivityFailedAndError(RelatedRecordID: RecordID; ActivityDescription: Text; ActivityMessage: Text)
     begin
         LogActivityFailedCommon(RelatedRecordID, ActivityDescription, ActivityMessage);
         if DelChr(ActivityMessage, '<>', ' ') <> '' then
@@ -1714,7 +1692,13 @@ codeunit 1410 "Doc. Exch. Service Mgt."
         DocExchServiceSetup: Record "Doc. Exch. Service Setup";
         PageDocExchServiceSetup: Page "Doc. Exch. Service Setup";
         Success: Boolean;
+        IsHandled: Boolean;
     begin
+        IsHandled := false;
+        OnBeforeVerifyPrerequisites(ShowFailure, Success, IsHandled);
+        if IsHandled then
+            exit(Success);
+
         if DocExchServiceSetup.Get() then
             if DocExchServiceSetup."Service URL" <> '' then
                 if DocExchServiceSetup."Auth URL" <> '' then
@@ -1742,6 +1726,21 @@ codeunit 1410 "Doc. Exch. Service Mgt."
         GetServiceSetUp(DocExchServiceSetup);
         Session.LogMessage('000089T', DocExchServiceDocumentSuccessfullyReceivedTxt, Verbosity::Normal, DataClassification::SystemMetadata, TelemetryScope::ExtensionPublisher, 'Category', TelemetryCategoryTok);
         Session.LogMessage('000089U', DocExchServiceSetup."Service URL", Verbosity::Normal, DataClassification::CustomerContent, TelemetryScope::ExtensionPublisher, 'Category', TelemetryCategoryTok);
+    end;
+
+    [IntegrationEvent(false, false)]
+    local procedure OnBeforeSendActivateAppNotification(var IsHandled: Boolean)
+    begin
+    end;
+
+    [IntegrationEvent(false, false)]
+    local procedure OnBeforeSetURLsToDefault(var DocExchServiceSetup: Record "Doc. Exch. Service Setup"; Sandbox: Boolean; var IsHandled: Boolean)
+    begin
+    end;
+
+    [IntegrationEvent(false, false)]
+    local procedure OnBeforeVerifyPrerequisites(ShowFailure: Boolean; var Success: Boolean; var IsHandled: Boolean)
+    begin
     end;
 }
 

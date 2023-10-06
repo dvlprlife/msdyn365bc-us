@@ -1,3 +1,13 @@
+namespace System.Security.AccessControl;
+
+using Microsoft.Finance.GeneralLedger.Setup;
+using Microsoft.Intercompany.Comment;
+using Microsoft.Intercompany.Inbox;
+using Microsoft.Intercompany.Outbox;
+using Microsoft.Intercompany.Setup;
+using Microsoft.Finance.VAT.Setup;
+using Microsoft.Intercompany.Dimension;
+
 permissionset 1562 "D365 IC, EDIT"
 {
     Assignable = true;
@@ -5,7 +15,8 @@ permissionset 1562 "D365 IC, EDIT"
 
     IncludedPermissionSets = "D365 IC, VIEW";
 
-    Permissions = tabledata "General Ledger Setup" = RIM,
+    Permissions = tabledata "General Ledger Setup" = RM,
+                  tabledata "VAT Setup" = RM,
                   tabledata "Handled IC Inbox Jnl. Line" = IMD,
                   tabledata "Handled IC Inbox Purch. Header" = IMD,
                   tabledata "Handled IC Inbox Purch. Line" = IMD,

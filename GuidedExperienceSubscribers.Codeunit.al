@@ -1,3 +1,18 @@
+namespace System.Environment;
+
+using Microsoft.Bank.BankAccount;
+using Microsoft.Finance.GeneralLedger.Account;
+using Microsoft.Finance.RoleCenters;
+using Microsoft.Inventory.Item;
+using Microsoft.RoleCenters;
+using Microsoft.Sales.Customer;
+using Microsoft.Sales.Document;
+using Microsoft.Sales.History;
+using Microsoft.Sales.RoleCenters;
+using System.Environment.Configuration;
+using System.Globalization;
+using System.Media;
+
 codeunit 1878 "Guided Experience Subscribers"
 {
     var
@@ -17,13 +32,20 @@ codeunit 1878 "Guided Experience Subscribers"
         CustomerListSpotlightTourStep1TextTxt: Label 'This is the list of your customers. You can view, edit, and analyze lists like this in Microsoft Excel.';
         CustomerListSpotlightTourStep2TitleTxt: Label 'Open in Excel';
         CustomerListSpotlightTourStep2TextTxt: Label 'When you choose to open the list in Excel you can use it for analysis and calculations that you do not need to save back into Business Central.';
+        MarketingAISpotlightTourTitleTxt: Label 'AI-powered product descriptions';
+        MarketingAISpotlightTourShortTitleTxt: Label 'Create with Copilot';
+        MarketingAISpotlightTourDescriptionTxt: Label 'Copilot in Business Central helps you get more done with less effort. Experience how product description suggestions (preview) accelerate your time to market.';
+        MarketingAISpotlightStep1TitleTxt: Label 'Stop typing and start selling';
+        MarketingAISpotlightStep1TextTxt: Label 'Creating product descriptions has never been easier. Get AI-powered marketing text for your products in a style that speaks to your customers and reflects your brand, right from where you manage your products.';
+        MarketingAISpotlightStep2TitleTxt: Label 'Ready. Set. Create!';
+        MarketingAISpotlightStep2TextTxt: Label 'Copilot can draft text based on item attributes - more attributes result in better suggestions.';
         ItemCardShareToTeamsShortTitleTxt: Label 'Share to Teams';
         ItemCardShareToTeamsTitleTxt: Label 'Share business data to Teams';
         ItemCardShareToTeamsDescriptionTxt: Label 'Quickly share and collaborate on business tasks in Microsoft Teams. For example, sharing a link to an item card without the need to switch apps.';
         ItemCardSpotlightTourStep1TitleTxt: Label 'Share item details to Teams';
         ItemCardSpotlightTourStep1TextTxt: Label 'This is an item card, where you manage information about a product or service. You can share information in cards with your colleagues through Microsoft Teams.';
         ItemCardSpotlightTourStep2TitleTxt: Label 'Share to Teams';
-        ItemCardSpotlightTourStep2TextTxt: Label 'Need to colaborate with a co-worker about the details of an item? Simply share this item by hitting the share icon.';
+        ItemCardSpotlightTourStep2TextTxt: Label 'Use the Share icon to share this to a Teams chat or channel. Others will be able to view or edit this information if they already have permission.';
         YourSalesWithinOutlookShortTitleTxt: Label 'Manage sales in Outlook';
         YourSalesWithinOutlookTitleTxt: Label 'Manage sales while in Outlook';
         YourSalesWithinOutlookDescriptionTxt: Label 'Business Central is available in Outlook. You can manage quotes and invoices right next to a mail you received, without leaving Outlook.';
@@ -53,8 +75,8 @@ codeunit 1878 "Guided Experience Subscribers"
         TryWithYourOwnDataShortTitleTxt: Label 'Try with your own data';
         TryWithYourOwnDataDescriptionTxt: Label 'Try out Business Central in 30-day trial with your own data.';
         ReadyToGoTitleTxt: Label 'Want to get started or learn more?';
-        ReadyToGoShortTitleTxt: Label 'Ready to go?';
-        ReadyToGoDescriptionTxt: Label 'Excited? You can get more elaborate demos from Business Central resellers, called Microsoft Partners. They can also help you buy a subscription. Contact a reseller here.';
+        ReadyToGoShortTitleTxt: Label 'Get ready to go';
+        ReadyToGoDescriptionTxt: Label 'Microsoft Partners can give detailed Business Central demos to clarify whether it’s right for your business. They can also help you subscribe. Contact a partner here.';
         ReadyToGoLinkTxt: Label 'https://go.microsoft.com/fwlink/?linkid=2198402', Locked = true;
 
     procedure GetYourSalesWithinOutlookVideoLinkTxt(): Text
@@ -122,7 +144,21 @@ codeunit 1878 "Guided Experience Subscribers"
                 GuidedExperience.AddTranslationForSetupObjectDescription("Guided Experience Type"::"Application Feature", ObjectType::Codeunit,
                     Codeunit::"Start Trial", Language.GetDefaultApplicationLanguageId(), TryWithYourOwnDataDescriptionTxt);
                 GLOBALLANGUAGE(CurrentGlobalLanguage);
+
+                GuidedExperience.InsertSpotlightTour(MarketingAISpotlightTourTitleTxt, MarketingAISpotlightTourShortTitleTxt,
+                    MarketingAISpotlightTourDescriptionTxt, 2, Page::"Item Card", SpotlightTourType::"Copilot", GetMarketingAISpotlightDictionary());
             end;
+    end;
+
+    local procedure GetMarketingAISpotlightDictionary() MarketingAISpotlightDictionary: Dictionary of [Enum "Spotlight Tour Text", Text]
+    var
+        SpotlightTourText: Enum "Spotlight Tour Text";
+    begin
+        MarketingAISpotlightDictionary.Add(SpotlightTourText::Step1Title, MarketingAISpotlightStep1TitleTxt);
+        MarketingAISpotlightDictionary.Add(SpotlightTourText::Step1Text, MarketingAISpotlightStep1TextTxt);
+
+        MarketingAISpotlightDictionary.Add(SpotlightTourText::Step2Title, MarketingAISpotlightStep2TitleTxt);
+        MarketingAISpotlightDictionary.Add(SpotlightTourText::Step2Text, MarketingAISpotlightStep2TextTxt);
     end;
 
     local procedure GetCustomerListSpotlightDictionary(var CustomerListSpotlightDictionary: Dictionary of [Enum "Spotlight Tour Text", Text])

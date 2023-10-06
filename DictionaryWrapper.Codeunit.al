@@ -1,3 +1,7 @@
+namespace System.Utilities;
+
+using System;
+
 codeunit 708 "Dictionary Wrapper"
 {
 
@@ -15,7 +19,7 @@ codeunit 708 "Dictionary Wrapper"
     var
         Found: Boolean;
     begin
-        InitializeDictionary;
+        InitializeDictionary();
         SYSTEM.Clear(Value);
 
         if not Dictionary.ContainsKey(Key) then
@@ -29,8 +33,8 @@ codeunit 708 "Dictionary Wrapper"
     var
         "Count": Integer;
     begin
-        InitializeDictionary;
-        InitializeKeysArray;
+        InitializeDictionary();
+        InitializeKeysArray();
         SYSTEM.Clear(Key);
 
         Count := Dictionary.Count();
@@ -53,21 +57,21 @@ codeunit 708 "Dictionary Wrapper"
 
     procedure ContainsKey("Key": Variant): Boolean
     begin
-        InitializeDictionary;
+        InitializeDictionary();
 
         exit(Dictionary.ContainsKey(Key));
     end;
 
     procedure "Count"(): Integer
     begin
-        InitializeDictionary;
+        InitializeDictionary();
 
         exit(Dictionary.Count);
     end;
 
     procedure Set("Key": Variant; Value: Variant)
     begin
-        InitializeDictionary;
+        InitializeDictionary();
 
         if not Dictionary.ContainsKey(Key) then begin
             KeysArrayInitialized := false;
@@ -81,7 +85,7 @@ codeunit 708 "Dictionary Wrapper"
 
     procedure Remove("Key": Variant)
     begin
-        InitializeDictionary;
+        InitializeDictionary();
 
         if Dictionary.ContainsKey(Key) then begin
             KeysArrayInitialized := false;
@@ -91,10 +95,10 @@ codeunit 708 "Dictionary Wrapper"
 
     procedure Clear()
     begin
-        InitializeDictionary;
+        InitializeDictionary();
 
         KeysArrayInitialized := false;
-        Dictionary.Clear;
+        Dictionary.Clear();
     end;
 
     local procedure InitializeDictionary()
@@ -102,7 +106,7 @@ codeunit 708 "Dictionary Wrapper"
         if DictionaryInitialized then
             exit;
 
-        Dictionary := Dictionary.Dictionary;
+        Dictionary := Dictionary.Dictionary();
         DictionaryInitialized := true;
         KeysArrayInitialized := false;
     end;

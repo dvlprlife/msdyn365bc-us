@@ -1,3 +1,9 @@
+// ------------------------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+// ------------------------------------------------------------------------------------------------
+namespace Microsoft;
+
 page 9193 "Thirty Day Trial Dialog"
 {
     Caption = 'Set up a company';
@@ -46,7 +52,7 @@ page 9193 "Thirty Day Trial Dialog"
                 group("We're ready, let's get started")
                 {
                     Caption = 'We''re ready, let''s get started';
-                    InstructionalText = 'You can keep using the Cronus demo company for evaluation, also when the trial ends. Just go to My Settings and choose the Cronus company.';
+                    InstructionalText = 'When the trial ends, you can keep using the Cronus company demo data for evaluation purposes.';
                 }
                 field(Content4Lbl; Content4Lbl)
                 {
@@ -99,7 +105,7 @@ page 9193 "Thirty Day Trial Dialog"
             {
                 ApplicationArea = Basic, Suite;
                 Caption = 'Next';
-                Enabled = NextActionEnabled;
+                Visible = NextActionEnabled;
                 Image = NextRecord;
                 InFooterBar = true;
 
@@ -113,15 +119,16 @@ page 9193 "Thirty Day Trial Dialog"
                 ApplicationArea = Basic, Suite;
                 Caption = 'Get started';
                 Enabled = TermsAndConditionsAccepted;
+                Visible = FinalStepVisible;
                 Gesture = None;
-                Image = Approve;
+                Image = NextRecord;
                 InFooterBar = true;
                 //The property 'ToolTip' cannot be empty.
                 //ToolTip = '';
 
                 trigger OnAction()
                 begin
-                    StartTrialAction;
+                    StartTrialAction();
                 end;
             }
         }
@@ -130,7 +137,7 @@ page 9193 "Thirty Day Trial Dialog"
     trigger OnOpenPage()
     begin
         Step := Step::Start;
-        EnableControls;
+        EnableControls();
         OnIsRunningPreview(IsPreview);
     end;
 
@@ -161,13 +168,13 @@ page 9193 "Thirty Day Trial Dialog"
 
     local procedure EnableControls()
     begin
-        ResetControls;
+        ResetControls();
 
         case Step of
             Step::Start:
-                ShowStartStep;
+                ShowStartStep();
             Step::Finish:
-                ShowFinalStep;
+                ShowFinalStep();
         end;
     end;
 
@@ -178,7 +185,7 @@ page 9193 "Thirty Day Trial Dialog"
         else
             Step := Step + 1;
 
-        EnableControls;
+        EnableControls();
     end;
 
     local procedure ShowStartStep()
@@ -205,7 +212,7 @@ page 9193 "Thirty Day Trial Dialog"
     local procedure StartTrialAction()
     begin
         TrialWizardCompleted := true;
-        CurrPage.Close;
+        CurrPage.Close();
     end;
 
     procedure Confirmed(): Boolean

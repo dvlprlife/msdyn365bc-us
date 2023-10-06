@@ -1,3 +1,5 @@
+namespace System.Environment;
+
 page 9900 "Import Data"
 {
     Caption = 'Import from a Data File';
@@ -29,7 +31,7 @@ page 9900 "Import Data"
 
                     trigger OnAssistEdit()
                     var
-                        Companies: Record Company temporary;
+                        TempCompany: Record Company temporary;
                     begin
                         if not DataFileInformation(
                              true,
@@ -40,28 +42,28 @@ page 9900 "Import Data"
                              ContainsGlobalData,
                              OriginalTenantId,
                              ExportDate,
-                             Companies)
+                             TempCompany)
                         then
                             exit;
 
-                        DeleteAll();
-                        ContainsCompanies := Companies.FindSet();
+                        Rec.DeleteAll();
+                        ContainsCompanies := TempCompany.FindSet();
                         if ContainsCompanies then
                             repeat
-                                Rec := Companies;
-                                Insert;
-                            until Companies.Next() = 0;
+                                Rec := TempCompany;
+                                Rec.Insert();
+                            until TempCompany.Next() = 0;
 
                         IncludeApplicationData := false;
                         IncludeGlobalData := false;
                         IncludeAllCompanies := ContainsCompanies;
 
-                        MarkAll;
+                        MarkAll();
                     end;
 
                     trigger OnValidate()
                     var
-                        Companies: Record Company temporary;
+                        TempCompany: Record Company temporary;
                     begin
                         if not DataFileInformation(
                              false,
@@ -72,26 +74,26 @@ page 9900 "Import Data"
                              ContainsGlobalData,
                              OriginalTenantId,
                              ExportDate,
-                             Companies)
+                             TempCompany)
                         then
                             exit;
 
-                        DeleteAll();
-                        ContainsCompanies := Companies.FindSet();
+                        Rec.DeleteAll();
+                        ContainsCompanies := TempCompany.FindSet();
                         if ContainsCompanies then
                             repeat
-                                Rec := Companies;
-                                Insert;
-                            until Companies.Next() = 0;
+                                Rec := TempCompany;
+                                Rec.Insert();
+                            until TempCompany.Next() = 0;
 
                         IncludeApplicationData := false;
                         IncludeGlobalData := false;
                         IncludeAllCompanies := ContainsCompanies;
 
-                        MarkAll;
+                        MarkAll();
                     end;
                 }
-                field(TenantId; TenantId)
+                field(TenantId; TenantId())
                 {
                     ApplicationArea = Basic, Suite;
                     Caption = 'Tenant ID';
@@ -124,7 +126,7 @@ page 9900 "Import Data"
 
                         trigger OnValidate()
                         begin
-                            MarkAll;
+                            MarkAll();
                         end;
                     }
                     field(IncludeGlobalData; IncludeGlobalData)
@@ -154,16 +156,16 @@ page 9900 "Import Data"
                         trigger OnValidate()
                         begin
                             if Selected then begin
-                                SelectedCompany := Rec;
-                                if SelectedCompany.Insert() then;
+                                TempSelectedCompany := Rec;
+                                if TempSelectedCompany.Insert() then;
                             end else begin
                                 IncludeAllCompanies := false;
-                                if SelectedCompany.Get(Name) then
-                                    SelectedCompany.Delete();
+                                if TempSelectedCompany.Get(Rec.Name) then
+                                    TempSelectedCompany.Delete();
                             end;
                         end;
                     }
-                    field(Name; Name)
+                    field(Name; Rec.Name)
                     {
                         ApplicationArea = Basic, Suite;
                         Caption = 'Company Name';
@@ -181,14 +183,14 @@ page 9900 "Import Data"
 
     trigger OnAfterGetRecord()
     begin
-        Selected := SelectedCompany.Get(Name);
+        Selected := TempSelectedCompany.Get(Rec.Name);
     end;
 
     trigger OnInit()
     var
         EnvironmentInfo: Codeunit "Environment Information";
     begin
-        if EnvironmentInfo.IsSaaS then
+        if EnvironmentInfo.IsSaaS() then
             error(OnPremiseOnlyErr);
         OriginalTenantId := '';
         ContainsApplication := false;
@@ -199,16 +201,16 @@ page 9900 "Import Data"
     trigger OnQueryClosePage(CloseAction: Action): Boolean
     begin
         if CloseAction = ACTION::OK then begin
-            if IncludeApplicationData or IncludeGlobalData then begin
+            if IncludeApplicationData or IncludeGlobalData then
                 if not Confirm(OverwriteQst, false) then
                     exit(false);
-            end;
+
             if ImportData(
                  false,
                  FileName,
                  IncludeApplicationData,
                  IncludeGlobalData,
-                 SelectedCompany)
+                 TempSelectedCompany)
             then begin
                 Message(CompletedMsg);
                 exit(true)
@@ -218,7 +220,7 @@ page 9900 "Import Data"
     end;
 
     var
-        SelectedCompany: Record Company temporary;
+        TempSelectedCompany: Record Company temporary;
         FileName: Text;
         Description: Text;
         OriginalTenantId: Text;
@@ -237,14 +239,14 @@ page 9900 "Import Data"
 
     local procedure MarkAll()
     begin
-        SelectedCompany.DeleteAll();
+        TempSelectedCompany.DeleteAll();
 
         if IncludeAllCompanies then
-            if FindSet() then
+            if Rec.FindSet() then
                 repeat
-                    SelectedCompany := Rec;
-                    SelectedCompany.Insert();
-                until Next() = 0;
+                    TempSelectedCompany := Rec;
+                    TempSelectedCompany.Insert();
+                until Rec.Next() = 0;
 
         CurrPage.Update(false);
     end;

@@ -1,3 +1,7 @@
+namespace System.Privacy;
+
+using System.IO;
+
 page 1181 "Data Privacy ListPage"
 {
     Caption = 'Data Privacy ListPage';
@@ -15,14 +19,14 @@ page 1181 "Data Privacy ListPage"
             repeater(Group)
             {
                 Editable = false;
-                field("Table Name"; "Table Name")
+                field("Table Name"; Rec."Table Name")
                 {
                     ApplicationArea = Basic, Suite;
                     DrillDown = false;
                     Editable = false;
                     Enabled = false;
                 }
-                field("Field Name"; "Field Name")
+                field("Field Name"; Rec."Field Name")
                 {
                     ApplicationArea = Basic, Suite;
                     DrillDown = false;
@@ -30,7 +34,7 @@ page 1181 "Data Privacy ListPage"
                     Enabled = false;
                     ToolTip = 'Specifies the name of the field.';
                 }
-                field("Field Value"; "Field Value")
+                field("Field Value"; Rec."Field Value")
                 {
                     ApplicationArea = Basic, Suite;
                     DrillDown = false;
@@ -62,8 +66,8 @@ page 1181 "Data Privacy ListPage"
     begin
         Counter := 1;
         Clear(Rec);
-        Reset;
-        DeleteAll();
+        Rec.Reset();
+        Rec.DeleteAll();
         CurrPage.Update();
 
         if ConfigPackage.Get(PackageCode) then begin
@@ -82,22 +86,22 @@ page 1181 "Data Privacy ListPage"
                             if ConfigPackageField.FindSet() then
                                 repeat
                                     FieldRef := RecRef.Field(ConfigPackageField."Field ID");
-                                    Init;
-                                    ID := Counter;
-                                    "Table No." := ConfigPackageTable."Table ID";
-                                    "Field No." := ConfigPackageField."Field ID";
-                                    "Field Value" := Format(FieldRef.Value);
-                                    "Field DataType" := Format(FieldRef.Type);
-                                    if not Insert() then
+                                    Rec.Init();
+                                    Rec.ID := Counter;
+                                    Rec."Table No." := ConfigPackageTable."Table ID";
+                                    Rec."Field No." := ConfigPackageField."Field ID";
+                                    Rec."Field Value" := Format(FieldRef.Value);
+                                    Rec."Field DataType" := Format(FieldRef.Type);
+                                    if not Rec.Insert() then
                                         repeat
                                             Counter := Counter + 1;
-                                            ID := Counter;
-                                        until Insert;
+                                            Rec.ID := Counter;
+                                        until Rec.Insert();
                                 until ConfigPackageField.Next() = 0;
                         until RecRef.Next() = 0;
-                    RecRef.Close;
+                    RecRef.Close();
                 until ConfigPackageTable.Next() = 0;
-            ConfigProgressBar.Close;
+            ConfigProgressBar.Close();
         end;
     end;
 }

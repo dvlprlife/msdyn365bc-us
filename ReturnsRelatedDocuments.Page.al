@@ -1,3 +1,5 @@
+namespace Microsoft.Sales.Document;
+
 page 6670 "Returns-Related Documents"
 {
     Caption = 'Returns-Related Documents';
@@ -12,12 +14,12 @@ page 6670 "Returns-Related Documents"
             {
                 Editable = false;
                 ShowCaption = false;
-                field("Document Type"; "Document Type")
+                field("Document Type"; Rec."Document Type")
                 {
                     ApplicationArea = SalesReturnOrder;
                     ToolTip = 'Specifies the type of the related document.';
                 }
-                field("No."; "No.")
+                field("No."; Rec."No.")
                 {
                     ApplicationArea = SalesReturnOrder;
                     ToolTip = 'Specifies the number of the involved entry or record, according to the specified number series.';
@@ -53,6 +55,22 @@ page 6670 "Returns-Related Documents"
                     Caption = 'Card';
                     Image = EditLines;
                     ShortCutKey = 'Shift+F7';
+                    ToolTip = 'View or change detailed information about the record on the document or journal line.';
+                    ObsoleteReason = 'Replaced by "Show Document" action';
+                    ObsoleteState = Pending;
+                    ObsoleteTag = '22.0';
+
+                    trigger OnAction()
+                    begin
+                        Rec.ShowDocumentCard();
+                    end;
+                }
+                action(ShowDocument)
+                {
+                    ApplicationArea = SalesReturnOrder;
+                    Caption = 'Show Document';
+                    Image = EditLines;
+                    ShortCutKey = 'Return';
                     ToolTip = 'View or change detailed information about the record on the document or journal line.';
 
                     trigger OnAction()

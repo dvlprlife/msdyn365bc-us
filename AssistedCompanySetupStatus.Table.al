@@ -1,8 +1,21 @@
+// ------------------------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+// ------------------------------------------------------------------------------------------------
+namespace Microsoft.Utilities;
+
+using System.Environment;
+
 table 1802 "Assisted Company Setup Status"
 {
     Caption = 'Assisted Company Setup Status';
     DataPerCompany = false;
     ReplicateData = false;
+#pragma warning disable AS0034
+    InherentEntitlements = rX;
+    InherentPermissions = rX;
+#pragma warning restore AS0034
+    Permissions = tabledata "Assisted Company Setup Status" = r;
 
     fields
     {
@@ -55,14 +68,6 @@ table 1802 "Assisted Company Setup Status"
     {
     }
 
-#if not CLEAN19
-    [Obsolete('Replaced with GetCompanySetupStatusValue', '19.0')]
-    procedure GetCompanySetupStatus(Name: Text[30]) SetupStatus: Integer
-    begin
-        SetupStatus := GetCompanySetupStatusValue(Name).AsInteger();
-    end;
-#endif
-
     procedure GetCompanySetupStatusValue(Name: Text[30]) SetupStatus: Enum "Company Setup Status"
     begin
         if "Company Name" <> Name then
@@ -101,14 +106,6 @@ table 1802 "Assisted Company Setup Status"
     begin
     end;
 
-#if not CLEAN19
-    [IntegrationEvent(false, false)]
-    [Obsolete('Replaced with OnGetCompanySetupStatusValue', '19.0')]
-    internal procedure OnGetCompanySetupStatus(Name: Text[30]; var SetupStatus: Integer)
-    begin
-    end;
-#endif
-
     [IntegrationEvent(false, false)]
     local procedure OnGetCompanySetupStatusValue(Name: Text[30]; var SetupStatus: Enum "Company Setup Status")
     begin
@@ -124,7 +121,7 @@ table 1802 "Assisted Company Setup Status"
         AssistedCompanySetupStatus: Record "Assisted Company Setup Status";
         EnvironmentInfo: Codeunit "Environment Information";
     begin
-        if not EnvironmentInfo.IsSaaS then
+        if not EnvironmentInfo.IsSaaS() then
             exit;
 
         if AssistedCompanySetupStatus.GetCompanySetupStatusValue(CompanyNameFrom) = Enum::"Company Setup Status"::Completed then begin

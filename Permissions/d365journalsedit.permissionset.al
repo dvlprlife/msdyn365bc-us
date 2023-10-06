@@ -1,9 +1,44 @@
+namespace System.Security.AccessControl;
+
+using Microsoft.Finance.AllocationAccount;
+using Microsoft.Bank.BankAccount;
+using Microsoft.Warehouse.Structure;
+using Microsoft.Bank.Check;
+using Microsoft.Sales.Receivables;
+using Microsoft.HumanResources.Payables;
+using Microsoft.Purchases.Payables;
+using Microsoft.Finance.GeneralLedger.Account;
+using Microsoft.Finance.GeneralLedger.Ledger;
+using Microsoft.Finance.GeneralLedger.Journal;
+using Microsoft.Inventory.Journal;
+using Microsoft.Inventory.Tracking;
+using Microsoft.Inventory.Counting.Journal;
+using Microsoft.Inventory.Planning;
+using Microsoft.Inventory.Costing;
+using Microsoft.Inventory.Location;
+using Microsoft.Inventory.Ledger;
+using Microsoft.Purchases.Vendor;
+using Microsoft.Warehouse.Ledger;
+using Microsoft.Inventory.Intrastat;
+using Microsoft.Inventory.Item;
+using Microsoft.Finance.VAT.RateChange;
+using Microsoft.Finance.VAT.Registration;
+using Microsoft.Finance.VAT.Setup;
+using Microsoft.Finance.VAT.Calculation;
+using Microsoft.Finance.VAT.Reporting;
+using System.IO;
+
 permissionset 242 "D365 JOURNALS, EDIT"
 {
     Assignable = true;
 
     Caption = 'Dynamics 365 Edit journals';
-    Permissions = tabledata "Bank Account" = R,
+    Permissions =
+                  tabledata "Alloc. Acc. Manual Override" = RIMD,
+                  tabledata "Alloc. Account Distribution" = RIMD,
+                  tabledata "Allocation Account" = RIMD,
+                  tabledata "Allocation Line" = RIMD,
+                  tabledata "Bank Account" = R,
                   tabledata Bin = R,
                   tabledata "Check Ledger Entry" = Rimd,
                   tabledata "Cust. Ledger Entry" = Rm,
@@ -14,7 +49,9 @@ permissionset 242 "D365 JOURNALS, EDIT"
                   tabledata "G/L Account" = R,
                   tabledata "G/L Register" = Rimd,
                   tabledata "Gen. Journal Line" = RIMD,
+#if not CLEAN22
                   tabledata "Intrastat Jnl. Line" = RIMD,
+#endif
                   tabledata "Item Entry Relation" = R,
                   tabledata "Item Journal Line" = RIMD,
                   tabledata "Item Tracing Buffer" = Rimd,
@@ -40,6 +77,8 @@ permissionset 242 "D365 JOURNALS, EDIT"
                   tabledata "VAT Rate Change Log Entry" = Ri,
                   tabledata "VAT Rate Change Setup" = R,
                   tabledata "VAT Registration No. Format" = R,
+                  tabledata "VAT Setup" = R,
+                  tabledata "VAT Posting Parameters" = R,
                   tabledata "VAT Reporting Code" = R,
                   tabledata "Vendor Invoice Disc." = R,
                   tabledata "Vendor Ledger Entry" = Rm,

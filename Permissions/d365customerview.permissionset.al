@@ -1,3 +1,16 @@
+namespace System.Security.AccessControl;
+
+using Microsoft.CRM.Profiling;
+using Microsoft.Sales.Customer;
+using Microsoft.Sales.Receivables;
+using Microsoft.Inventory.Item.Catalog;
+using Microsoft.Sales.FinanceCharge;
+using Microsoft.Service.Setup;
+using Microsoft.Sales.Pricing;
+using Microsoft.Foundation.Shipping;
+using Microsoft.Inventory.Intrastat;
+using Microsoft.Finance.VAT.Registration;
+
 permissionset 865 "D365 CUSTOMER, VIEW"
 {
     Assignable = true;
@@ -7,9 +20,6 @@ permissionset 865 "D365 CUSTOMER, VIEW"
                   tabledata "Cust. Invoice Disc." = R,
                   tabledata "Cust. Ledger Entry" = R,
                   tabledata "Customer Bank Account" = R,
-#if not CLEAN19
-                  tabledata "Item Cross Reference" = R,
-#endif
                   tabledata "Item Reference" = R,
                   tabledata "Profile Questionnaire Line" = R,
                   tabledata "Reminder/Fin. Charge Entry" = R,

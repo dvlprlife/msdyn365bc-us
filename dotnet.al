@@ -1,5 +1,15 @@
 dotnet
 {
+    assembly("Microsoft.Dynamics.Nav.ClientExtensions")
+    {
+        type("Microsoft.Dynamics.Nav.Client.Capabilities.CameraBarcodeScannerProvider"; "CameraBarcodeScannerProvider")
+        {
+        }
+
+        type("Microsoft.Dynamics.Nav.Client.Capabilities.BarcodeScannerProvider"; "BarcodeScannerProvider")
+        {
+        }
+    }
     assembly("Microsoft.Dynamics.Nav.Client.RoleCenterSelector")
     {
         type("Microsoft.Dynamics.Nav.Client.RoleCenterSelector.IRoleCenterSelector"; "Microsoft.Dynamics.Nav.Client.RoleCenterSelector")
@@ -19,25 +29,6 @@ dotnet
     assembly("Microsoft.Dynamics.Nav.Client.OAuthIntegration")
     {
         type("Microsoft.Dynamics.Nav.Client.OAuthIntegration.OAuthIntegration"; "Microsoft.Dynamics.Nav.Client.OAuthIntegration")
-        {
-            IsControlAddIn = true;
-        }
-    }
-
-    assembly("Microsoft.Dynamics.Nav.Client.PingPong")
-    {
-        type("Microsoft.Dynamics.Nav.Client.PingPong.PingPongAddIn"; "Microsoft.Dynamics.Nav.Client.PingPong")
-        {
-            IsControlAddIn = true;
-        }
-    }
-
-    assembly("Microsoft.Dynamics.Nav.Client.TimelineVisualization")
-    {
-        Culture = 'neutral';
-        PublicKeyToken = '31bf3856ad364e35';
-
-        type("Microsoft.Dynamics.Nav.Client.TimelineVisualization.InteractiveTimelineVisualizationAddIn"; "Microsoft.Dynamics.Nav.Client.TimelineVisualization")
         {
             IsControlAddIn = true;
         }
@@ -102,12 +93,16 @@ dotnet
         type("Microsoft.Dynamics.Nav.Runtime.DesignedQuery.AL.DqExporter"; "DqExporter")
         {
         }
-        
+
         type("Microsoft.Dynamics.Nav.Runtime.AL.ALCloudMigration"; "ALCloudMigration")
         {
         }
 
         type("Microsoft.Dynamics.Nav.Runtime.LastError"; "LastError")
+        {
+        }
+
+        type("Microsoft.Dynamics.Nav.Runtime.VSCodeRequestHelper"; "VSCodeRequestHelper")
         {
         }
     }
@@ -123,5 +118,9 @@ dotnet
         type(Microsoft.Dynamics.QRCode.ErrorCorrectionLevel; "QRCode Error Correction Level") { }
         type(Microsoft.Dynamics.Nav.MX.BarcodeProviders.IBarcodeProvider; "IBarcode Provider") { }
         type(Microsoft.Dynamics.Nav.MX.BarcodeProviders.QRCodeProvider; "QRCode Provider") { }
+    }
+    assembly(Microsoft.AspNetCore.StaticFiles)
+    {
+        type(Microsoft.AspNetCore.StaticFiles.FileExtensionContentTypeProvider; FileExtensionContentTypeProvider) { }
     }
 }

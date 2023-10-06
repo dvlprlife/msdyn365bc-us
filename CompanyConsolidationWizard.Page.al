@@ -1,3 +1,16 @@
+// ------------------------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+// ------------------------------------------------------------------------------------------------
+namespace Microsoft.Utilities;
+
+using Microsoft.Finance.Consolidation;
+using Microsoft.Finance.GeneralLedger.Setup;
+using Microsoft.Finance.Currency;
+using System.Environment;
+using System.Environment.Configuration;
+using System.Utilities;
+
 page 1826 "Company Consolidation Wizard"
 {
     Caption = 'Company Consolidation';
@@ -155,7 +168,7 @@ page 1826 "Company Consolidation Wizard"
 
                             trigger OnValidate()
                             begin
-                                UpdateDataDescription;
+                                UpdateDataDescription();
                             end;
                         }
                         field(NewCompanyDataDescription; NewCompanyDataDescription)
@@ -217,7 +230,7 @@ page 1826 "Company Consolidation Wizard"
                                 BusinessUnit.ChangeCompany(ConsolidatedCompany);
                                 BusinessUnit.Reset();
                                 BusinessUnit.SetRange(Code, BusinessUnitCode);
-                                if BusinessUnit.FindFirst() then
+                                if not BusinessUnit.IsEmpty() then
                                     Error(RecordExistsErr);
                             end;
                         end;
@@ -398,11 +411,11 @@ page 1826 "Company Consolidation Wizard"
                 var
                     GuidedExperience: Codeunit "Guided Experience";
                 begin
-                    CreateAction;
+                    CreateAction();
                     GuidedExperience.CompleteAssistedSetup(ObjectType::Page, PAGE::"Company Consolidation Wizard");
                     if SelectCompanyOption = SelectCompanyOption::"Create a new company" then
                         Message(AfterCreateCompanyMsg);
-                    CurrPage.Close;
+                    CurrPage.Close();
                 end;
             }
         }
@@ -410,25 +423,25 @@ page 1826 "Company Consolidation Wizard"
 
     trigger OnClosePage()
     begin
-        DeleteTempRecords;
+        DeleteTempRecords();
     end;
 
     trigger OnInit()
     begin
         if not BusinessUnitSetup.WritePermission then
             Error(PermissionsErr);
-        LoadTopBanners;
+        LoadTopBanners();
     end;
 
     trigger OnOpenPage()
     begin
         Step := Step::Start;
         NewCompanyData := NewCompanyData::"Standard Data";
-        UpdateDataDescription;
-        EnableControls;
+        UpdateDataDescription();
+        EnableControls();
         ConsolidatedAccountsCreated := false;
         ThatsItInstructions := ThatsItCreateTxt;
-        DeleteTempRecords;
+        DeleteTempRecords();
     end;
 
     trigger OnQueryClosePage(CloseAction: Action): Boolean
@@ -517,25 +530,25 @@ page 1826 "Company Consolidation Wizard"
 
     local procedure EnableControls()
     begin
-        ResetControls;
+        ResetControls();
 
         case Step of
             Step::Start:
-                ShowStartStep;
+                ShowStartStep();
             Step::Consolidated:
-                ShowConsolidatedStep;
+                ShowConsolidatedStep();
             Step::Select:
-                ShowSelectStep;
+                ShowSelectStep();
             Step::Creation:
-                ShowCreationStep;
+                ShowCreationStep();
             Step::"Business Units Setup":
-                ShowBusinessUnitsSetup;
+                ShowBusinessUnitsSetup();
             Step::"Business Units":
-                ShowBusinessUnits;
+                ShowBusinessUnits();
             Step::"Business Units 2":
-                ShowBusinessUnits2;
+                ShowBusinessUnits2();
             Step::Finish:
-                ShowFinalStep;
+                ShowFinalStep();
         end;
     end;
 
@@ -549,10 +562,10 @@ page 1826 "Company Consolidation Wizard"
             AssistedCompanySetup.SetUpNewCompany(NewCompanyName, CompanyDataType);
             ConsolidatedCompany := NewCompanyName;
         end;
-        CreateBusinessUnits;
+        CreateBusinessUnits();
 
         if SelectCompanyOption = SelectCompanyOption::"Use an existing company" then
-            RunConsolidationTestDatabaseReport;
+            RunConsolidationTestDatabaseReport();
         Finished := true;
     end;
 
@@ -618,7 +631,7 @@ page 1826 "Company Consolidation Wizard"
         if Step = Step::"Business Units 2" then
             if not Backwards then begin
                 BackActionBusUnit2 := false;
-                SaveBusinessUnitInformation;
+                SaveBusinessUnitInformation();
                 UpdateBusinessUnitSetupComplete(BusinessUnitCompanyName, true);
                 BusinessUnitSetup.SetRange(Completed, false);
                 if BusinessUnitSetup.FindFirst() then
@@ -643,7 +656,7 @@ page 1826 "Company Consolidation Wizard"
         else
             Step := Step + 1;
 
-        EnableControls;
+        EnableControls();
     end;
 
     local procedure ShowStartStep()
@@ -692,9 +705,9 @@ page 1826 "Company Consolidation Wizard"
             if SelectCompanyOption = SelectCompanyOption::"Create a new company" then
                 if NewCompanyData = NewCompanyData::"Standard Data" then begin
                     if ConsolidationAccount.ValidateCountry('CA') then
-                        ConsolidationAccount.PopulateAccountsForCA;
+                        ConsolidationAccount.PopulateAccountsForCA();
                     if ConsolidationAccount.ValidateCountry('US') then
-                        ConsolidationAccount.PopulateaccountsForUS;
+                        ConsolidationAccount.PopulateaccountsForUS();
                 end;
             ConsolidatedAccountsCreated := true
         end;
@@ -703,7 +716,7 @@ page 1826 "Company Consolidation Wizard"
         BackActionEnabled := false;
         if not BackActionBusUnit2 then begin
             StepIndex := StepIndex + 1;
-            ClearBusinessUnitInformation;
+            ClearBusinessUnitInformation();
             BusinessUnitSetup.Reset();
             BusinessUnitSetup.SetFilter(Include, '=TRUE');
             MaxNumberOfSteps := BusinessUnitSetup.Count();
@@ -751,8 +764,8 @@ page 1826 "Company Consolidation Wizard"
 
     local procedure LoadTopBanners()
     begin
-        if MediaRepositoryStandard.Get('AssistedSetup-NoText-400px.png', Format(ClientTypeManagement.GetCurrentClientType)) and
-           MediaRepositoryDone.Get('AssistedSetupDone-NoText-400px.png', Format(ClientTypeManagement.GetCurrentClientType))
+        if MediaRepositoryStandard.Get('AssistedSetup-NoText-400px.png', Format(ClientTypeManagement.GetCurrentClientType())) and
+           MediaRepositoryDone.Get('AssistedSetupDone-NoText-400px.png', Format(ClientTypeManagement.GetCurrentClientType()))
         then
             if MediaResourcesStandard.Get(MediaRepositoryStandard."Media Resources Ref") and
                MediaResourcesDone.Get(MediaRepositoryDone."Media Resources Ref")
@@ -762,7 +775,7 @@ page 1826 "Company Consolidation Wizard"
 
     local procedure SaveBusinessUnitInformation()
     begin
-        BusinessUnitInformation.Reset();
+        BusinessUnitInformation.Init();
         BusinessUnitInformation.Validate(Code, BusinessUnitCode);
         BusinessUnitInformation.Validate(Name, BusinessUnitName);
         BusinessUnitInformation.Validate("Company Name", BusinessUnitCompanyName);
@@ -830,8 +843,8 @@ page 1826 "Company Consolidation Wizard"
 
         BusinessUnit.ChangeCompany(ConsolidatedCompany);
         with BusinessUnitInformation do begin
-            Reset;
-            if Find('-') then begin
+            Reset();
+            if Find('-') then
                 repeat
                     BusinessUnit.Init();
                     BusinessUnit.Code := Code;
@@ -853,12 +866,11 @@ page 1826 "Company Consolidation Wizard"
 
                     BusinessUnit.Insert();
                 until Next() = 0;
-            end;
         end;
 
         Commit();
 
-        Window.Close;
+        Window.Close();
     end;
 
     local procedure UpdateDataDescription()

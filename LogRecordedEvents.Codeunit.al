@@ -1,3 +1,7 @@
+namespace System.Tooling;
+
+using System;
+
 codeunit 9804 "Log Recorded Events"
 {
     EventSubscriberInstance = Manual;
@@ -19,20 +23,20 @@ codeunit 9804 "Log Recorded Events"
         TempRecordedEventBuffer.DeleteAll();
 
         if IsNull(EventReceiver) then
-            EventReceiver := EventReceiver.NavEventEventReceiver;
+            EventReceiver := EventReceiver.NavEventEventReceiver();
 
-        EventReceiver.RegisterForEvents;
+        EventReceiver.RegisterForEvents();
     end;
 
     procedure Stop(var TempRecordedEventBufferVar: Record "Recorded Event Buffer" temporary)
     begin
         // Returns the list of all events collected.
-        EventReceiver.UnregisterEvents;
+        EventReceiver.UnregisterEvents();
 
         TempRecordedEventBufferVar.Copy(TempRecordedEventBuffer, true);
     end;
 
-trigger EventReceiver::OnEventCheckEvent(sender: Variant; e: DotNet EventCheckEventArgs)
+    trigger EventReceiver::OnEventCheckEvent(sender: Variant; e: DotNet EventCheckEventArgs)
     var
         IsEventLogged: Boolean;
     begin
@@ -53,7 +57,7 @@ trigger EventReceiver::OnEventCheckEvent(sender: Variant; e: DotNet EventCheckEv
         TempRecordedEventBuffer."Object Type" := e.ObjectType;
         TempRecordedEventBuffer."Object ID" := e.ObjectId;
         TempRecordedEventBuffer."Event Name" := e.EventName;
-        TempRecordedEventBuffer."Element Name" := e.ElementName;        
+        TempRecordedEventBuffer."Element Name" := e.ElementName;
         TempRecordedEventBuffer."Event Type" := e.EventType;
         TempRecordedEventBuffer."Calling Object Type" := e.CallingObjectType;
         TempRecordedEventBuffer."Calling Object ID" := e.CallingObjectId;

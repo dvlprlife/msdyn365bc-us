@@ -1,3 +1,31 @@
+namespace System.Security.AccessControl;
+
+using Microsoft.Warehouse.Structure;
+using Microsoft.Pricing.Calculation;
+using Microsoft.Pricing.PriceList;
+using Microsoft.Finance.GeneralLedger.Account;
+using Microsoft.Inventory.Setup;
+using Microsoft.Inventory.Item;
+using Microsoft.Inventory.Journal;
+using Microsoft.Inventory.Tracking;
+using Microsoft.Inventory.Location;
+using Microsoft.Inventory.Item.Catalog;
+using Microsoft.Inventory.Availability;
+using Microsoft.Pricing.Asset;
+using Microsoft.Pricing.Source;
+using Microsoft.Pricing.Worksheet;
+using Microsoft.Purchases.Pricing;
+using Microsoft.Sales.Pricing;
+using Microsoft.Inventory.Transfer;
+using Microsoft.Warehouse.Setup;
+using Microsoft.Foundation.Calendar;
+using Microsoft.Foundation.AuditCodes;
+using Microsoft.Utilities;
+using Microsoft.Foundation.Shipping;
+using Microsoft.Inventory.Intrastat;
+using Microsoft.Foundation.UOM;
+using Microsoft.Finance.VAT.RateChange;
+
 permissionset 2928 "Inventory - Admin"
 {
     Access = Public;
@@ -34,7 +62,7 @@ permissionset 2928 "Inventory - Admin"
                   tabledata "Price Source" = RIMD,
                   tabledata "Price Worksheet Line" = RIMD,
                   tabledata "Purchase Discount Access" = RIMD,
-#if not CLEAN19
+#if not CLEAN21
                   tabledata "Purchase Line Discount" = RIMD,
                   tabledata "Purchase Price" = RIMD,
 #endif
@@ -43,7 +71,7 @@ permissionset 2928 "Inventory - Admin"
                   tabledata "Reason Code" = R,
                   tabledata "Rounding Method" = RIMD,
                   tabledata "Sales Discount Access" = RIMD,
-#if not CLEAN19
+#if not CLEAN21
                   tabledata "Sales Line Discount" = RIMD,
 #endif
                   tabledata "Shipping Agent" = RIMD,

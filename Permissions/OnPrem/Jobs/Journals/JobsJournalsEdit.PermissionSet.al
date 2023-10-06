@@ -1,3 +1,41 @@
+namespace System.Security.AccessControl;
+
+using Microsoft.Utilities;
+using Microsoft.Inventory.Intrastat;
+using Microsoft.Projects.Project.Job;
+using Microsoft.Inventory.Location;
+using Microsoft.Projects.TimeSheet;
+using Microsoft.Projects.Project.Journal;
+#if not CLEAN21
+using Microsoft.Projects.Project.Pricing;
+#endif
+using Microsoft.Projects.Project.Ledger;
+using Microsoft.Projects.Project.Planning;
+using Microsoft.Projects.Project.WIP;
+using Microsoft.Foundation.AuditCodes;
+using Microsoft.Foundation.UOM;
+using Microsoft.Finance.VAT.Setup;
+using Microsoft.Finance.VAT.RateChange;
+using Microsoft.Finance.GeneralLedger.Setup;
+using Microsoft.Warehouse.Structure;
+using Microsoft.Foundation.Comment;
+using Microsoft.Foundation.Address;
+using Microsoft.Finance.Dimension;
+using Microsoft.Pricing.Calculation;
+using Microsoft.Pricing.PriceList;
+using Microsoft.Finance.GeneralLedger.Account;
+using Microsoft.Inventory.Item;
+using Microsoft.Inventory.Ledger;
+using Microsoft.Pricing.Asset;
+using Microsoft.Pricing.Source;
+using Microsoft.Pricing.Worksheet;
+using Microsoft.Projects.Resources.Resource;
+#if not CLEAN21
+using Microsoft.Projects.Resources.Pricing;
+#endif
+using Microsoft.Sales.Pricing;
+using Microsoft.Foundation.Period;
+
 permissionset 7787 "Jobs Journals - Edit"
 {
     Access = Public;
@@ -23,7 +61,7 @@ permissionset 7787 "Jobs Journals - Edit"
                   tabledata "Item Unit of Measure" = R,
                   tabledata "Item Variant" = R,
                   tabledata Job = R,
-#if not CLEAN19
+#if not CLEAN21
                   tabledata "Job G/L Account Price" = R,
                   tabledata "Job Item Price" = R,
 #endif
@@ -34,7 +72,7 @@ permissionset 7787 "Jobs Journals - Edit"
                   tabledata "Job Ledger Entry" = R,
                   tabledata "Job Planning Line - Calendar" = R,
                   tabledata "Job Planning Line" = R,
-#if not CLEAN19
+#if not CLEAN21
                   tabledata "Job Resource Price" = R,
 #endif
                   tabledata "Job Task" = R,
@@ -51,15 +89,15 @@ permissionset 7787 "Jobs Journals - Edit"
                   tabledata "Price Worksheet Line" = R,
                   tabledata "Reason Code" = R,
                   tabledata Resource = R,
-#if not CLEAN19
+#if not CLEAN21
                   tabledata "Resource Cost" = R,
 #endif
                   tabledata "Resource Group" = R,
-#if not CLEAN19
+#if not CLEAN21
                   tabledata "Resource Price" = R,
 #endif
                   tabledata "Resource Unit of Measure" = R,
-#if not CLEAN19
+#if not CLEAN21
                   tabledata "Sales Price" = R,
 #endif
                   tabledata "Sales Price Access" = R,
@@ -74,5 +112,6 @@ permissionset 7787 "Jobs Journals - Edit"
                   tabledata "Unit of Measure" = R,
                   tabledata "Value Entry" = R,
                   tabledata "VAT Rate Change Log Entry" = Ri,
+                  tabledata "VAT Setup" = RM,
                   tabledata "Work Type" = R;
 }

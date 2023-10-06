@@ -1,3 +1,5 @@
+namespace System.Privacy;
+
 page 1754 "Data Subject"
 {
     Extensible = false;
@@ -15,7 +17,7 @@ page 1754 "Data Subject"
         {
             repeater(Group)
             {
-                field("Table Caption"; "Table Caption")
+                field("Table Caption"; Rec."Table Caption")
                 {
                     ApplicationArea = All;
                     ShowCaption = false;
@@ -24,7 +26,7 @@ page 1754 "Data Subject"
 
                     trigger OnDrillDown()
                     begin
-                        PAGE.Run("Page No.");
+                        PAGE.Run(Rec."Page No.");
                     end;
                 }
             }
@@ -40,19 +42,28 @@ page 1754 "Data Subject"
                 ApplicationArea = All;
                 Caption = 'Data Privacy Utility';
                 Image = Setup;
-                Promoted = true;
-                PromotedCategory = Process;
                 ToolTip = 'Open the Data Privacy Setup page.';
 
                 trigger OnAction()
                 var
                     DataPrivacyWizard: Page "Data Privacy Wizard";
                 begin
-                    if "Table Caption" <> '' then begin
-                        DataPrivacyWizard.SetEntitityType(Rec, "Table Caption");
+                    if Rec."Table Caption" <> '' then begin
+                        DataPrivacyWizard.SetEntitityType(Rec, Rec."Table Caption");
                         DataPrivacyWizard.RunModal();
                     end;
                 end;
+            }
+        }
+        area(Promoted)
+        {
+            group(Category_Process)
+            {
+                Caption = 'Process';
+
+                actionref("Data Privacy Setup_Promoted"; "Data Privacy Setup")
+                {
+                }
             }
         }
     }

@@ -1,3 +1,270 @@
+namespace System.Security.AccessControl;
+
+using Microsoft.AccountantPortal;
+using Microsoft.Booking;
+using Microsoft.Intercompany.Comment;
+using Microsoft.CostAccounting.Setup;
+using Microsoft.Manufacturing.Reports;
+using Microsoft.Bank.Payment;
+using Microsoft.Foundation.Reporting;
+using Microsoft.EServices.EDocument;
+using Microsoft.Foundation.Attachment;
+using Microsoft.Foundation.Navigate;
+using Microsoft.Finance.VAT.Reporting;
+using Microsoft.Finance.VAT.Ledger;
+using Microsoft.eServices.OnlineMap;
+using Microsoft.Finance.Payroll;
+using Microsoft.Inventory.Reconciliation;
+using Microsoft.Projects.Project.Journal;
+#if not CLEAN21
+using Microsoft.Projects.Project.Pricing;
+#endif
+using Microsoft.Projects.Project.Ledger;
+using Microsoft.Projects.Project.Planning;
+using Microsoft.Projects.Project.Posting;
+using Microsoft.Projects.Project.WIP;
+using Microsoft.Projects.Project.Setup;
+using System.Security.Authentication;
+using System.Globalization;
+using Microsoft.Foundation.AuditCodes;
+using Microsoft.Foundation.Shipping;
+using Microsoft.Foundation.UOM;
+using Microsoft.Foundation.Task;
+using Microsoft.Finance.VAT.Calculation;
+using Microsoft.Finance.VAT.Setup;
+using Microsoft.Finance.VAT.Clause;
+using Microsoft.Finance.VAT.RateChange;
+using Microsoft.Finance.VAT.Registration;
+using Microsoft.Assembly.Comment;
+using Microsoft.Assembly.Document;
+using Microsoft.Assembly.History;
+using Microsoft.Assembly.Reports;
+using Microsoft.Assembly.Setup;
+using Microsoft.Bank.BankAccount;
+using Microsoft.Bank.Check;
+using Microsoft.Bank.DirectDebit;
+using Microsoft.Bank.Ledger;
+using Microsoft.Bank.PositivePay;
+using Microsoft.Bank.Reconciliation;
+using Microsoft.Bank.Setup;
+using Microsoft.Bank.Statement;
+using Microsoft.CashFlow.Account;
+using Microsoft.CashFlow.Comment;
+using Microsoft.CashFlow.Forecast;
+using Microsoft.CashFlow.Setup;
+using Microsoft.CashFlow.Worksheet;
+using Microsoft.CostAccounting.Account;
+using Microsoft.CostAccounting.Allocation;
+using Microsoft.CostAccounting.Budget;
+using Microsoft.CostAccounting.Journal;
+using Microsoft.CostAccounting.Ledger;
+using Microsoft.CRM.Analysis;
+using Microsoft.CRM.BusinessRelation;
+using Microsoft.CRM.Campaign;
+using Microsoft.CRM.Comment;
+using Microsoft.CRM.Contact;
+using Microsoft.CRM.Duplicates;
+using Microsoft.CRM.Interaction;
+using Microsoft.CRM.Opportunity;
+using Microsoft.CRM.Outlook;
+using Microsoft.CRM.Profiling;
+using Microsoft.CRM.RoleCenters;
+using Microsoft.CRM.Segment;
+using Microsoft.CRM.Setup;
+using Microsoft.CRM.Task;
+using Microsoft.CRM.Team;
+using Microsoft.Finance.AllocationAccount;
+using Microsoft.Finance.Analysis;
+using Microsoft.Finance.Consolidation;
+using Microsoft.Finance.Currency;
+using Microsoft.Finance.Deferral;
+using Microsoft.Finance.Dimension.Correction;
+using Microsoft.Finance.Dimension;
+using Microsoft.Finance.FinancialReports;
+using Microsoft.Finance.GeneralLedger.Account;
+using Microsoft.Finance.GeneralLedger.Budget;
+using Microsoft.Finance.GeneralLedger.Journal;
+using Microsoft.Finance.GeneralLedger.Ledger;
+using Microsoft.Finance.GeneralLedger.Reports;
+using Microsoft.Finance.GeneralLedger.Reversal;
+using Microsoft.Finance.GeneralLedger.Setup;
+using Microsoft.Finance.ReceivablesPayables;
+using Microsoft.Finance.RoleCenters;
+using Microsoft.Finance.SalesTax;
+using Microsoft.FixedAssets.Depreciation;
+using Microsoft.FixedAssets.FixedAsset;
+using Microsoft.FixedAssets.Insurance;
+using Microsoft.FixedAssets.Journal;
+using Microsoft.FixedAssets.Ledger;
+using Microsoft.FixedAssets.Maintenance;
+using Microsoft.FixedAssets.Posting;
+using Microsoft.FixedAssets.Setup;
+using Microsoft.Foundation.Address;
+using Microsoft.Foundation.Comment;
+using Microsoft.Foundation.Company;
+using Microsoft.Foundation.ExtendedText;
+using Microsoft.Foundation.NoSeries;
+using Microsoft.Foundation.PaymentTerms;
+using Microsoft.HumanResources.Comment;
+using Microsoft.HumanResources.Employee;
+using Microsoft.HumanResources.Payables;
+using Microsoft.HumanResources.Setup;
+using Microsoft.Integration.D365Sales;
+using Microsoft.Integration.Dataverse;
+using Microsoft.Integration.Entity;
+using Microsoft.Integration.Graph;
+using Microsoft.Integration.SyncEngine;
+using Microsoft.Integration.PowerBI;
+using Microsoft.Intercompany.BankAccount;
+using Microsoft.Intercompany.Dimension;
+using Microsoft.Intercompany.GLAccount;
+using Microsoft.Intercompany.Inbox;
+using Microsoft.Intercompany.Outbox;
+using Microsoft.Intercompany.Partner;
+using Microsoft.Intercompany.Setup;
+using Microsoft.Inventory.Analysis;
+using Microsoft.Inventory.Availability;
+using Microsoft.Inventory.BOM.Tree;
+using Microsoft.Inventory.BOM;
+using Microsoft.Inventory.Comment;
+using Microsoft.Inventory.Costing;
+using Microsoft.Inventory.Counting.Comment;
+using Microsoft.Inventory.Counting.Document;
+using Microsoft.Inventory.Counting.History;
+using Microsoft.Inventory.Counting.Journal;
+using Microsoft.Inventory.Counting.Recording;
+using Microsoft.Inventory.Counting.Tracking;
+using Microsoft.Inventory.Document;
+using Microsoft.Inventory.History;
+using Microsoft.Inventory.Item.Attribute;
+using Microsoft.Inventory.Item.Catalog;
+using Microsoft.Inventory.Item.Picture;
+using Microsoft.Inventory.Item.Substitution;
+using Microsoft.Inventory.Item;
+using Microsoft.Inventory.Journal;
+using Microsoft.Inventory.Ledger;
+using Microsoft.Inventory.Location;
+using Microsoft.Inventory.Planning;
+using Microsoft.Inventory.Requisition;
+using Microsoft.Inventory.Setup;
+using Microsoft.Inventory.Tracking;
+using Microsoft.Inventory.Transfer;
+using Microsoft.Manufacturing.Capacity;
+using Microsoft.Manufacturing.Comment;
+using Microsoft.Manufacturing.Document;
+using Microsoft.Manufacturing.Family;
+using Microsoft.Manufacturing.Forecast;
+using Microsoft.Manufacturing.MachineCenter;
+using Microsoft.Manufacturing.ProductionBOM;
+using Microsoft.Manufacturing.RoleCenters;
+using Microsoft.Manufacturing.Routing;
+using Microsoft.Manufacturing.Setup;
+using Microsoft.Manufacturing.StandardCost;
+using Microsoft.Manufacturing.WorkCenter;
+using Microsoft.Pricing.Asset;
+using Microsoft.Pricing.Calculation;
+using Microsoft.Pricing.PriceList;
+using Microsoft.Pricing.Source;
+using Microsoft.Pricing.Worksheet;
+using Microsoft.Projects.Resources.Analysis;
+using Microsoft.Projects.Resources.Journal;
+using Microsoft.Projects.Resources.Ledger;
+#if not CLEAN21
+using Microsoft.Projects.Resources.Pricing;
+#endif
+using Microsoft.Projects.Resources.Resource;
+using Microsoft.Projects.Resources.Setup;
+using Microsoft.Projects.RoleCenters;
+using Microsoft.Purchases.Archive;
+using Microsoft.Purchases.Comment;
+using Microsoft.Purchases.Document;
+using Microsoft.Purchases.History;
+using Microsoft.Purchases.Payables;
+using Microsoft.Purchases.Pricing;
+using Microsoft.Purchases.Remittance;
+using Microsoft.Purchases.RoleCenters;
+using Microsoft.Purchases.Setup;
+using Microsoft.Purchases.Vendor;
+using Microsoft.Sales.Analysis;
+using Microsoft.Sales.Archive;
+using Microsoft.Sales.Comment;
+using Microsoft.Sales.Customer;
+using Microsoft.Sales.Document;
+using Microsoft.Sales.FinanceCharge;
+using Microsoft.Sales.History;
+using Microsoft.Sales.Pricing;
+using Microsoft.Sales.Receivables;
+using Microsoft.Sales.Reminder;
+using Microsoft.Sales.RoleCenters;
+using Microsoft.Sales.Setup;
+using Microsoft.Service.Comment;
+using Microsoft.Service.Contract;
+using Microsoft.Service.Document;
+using Microsoft.Service.Email;
+using Microsoft.Service.History;
+using Microsoft.Service.Item;
+using Microsoft.Service.Ledger;
+using Microsoft.Service.Loaner;
+using Microsoft.Service.Maintenance;
+using Microsoft.Service.Posting;
+using Microsoft.Service.Pricing;
+using Microsoft.Service.Resources;
+using Microsoft.Service.RoleCenters;
+using Microsoft.Service.Setup;
+using Microsoft.Warehouse.Activity.History;
+using Microsoft.Warehouse.Activity;
+using Microsoft.Warehouse.ADCS;
+using Microsoft.Warehouse.Comment;
+using Microsoft.Warehouse.CrossDock;
+using Microsoft.Warehouse.Document;
+using Microsoft.Warehouse.History;
+using Microsoft.Warehouse.InternalDocument;
+using Microsoft.Warehouse.InventoryDocument;
+using Microsoft.Warehouse.Journal;
+using Microsoft.Warehouse.Ledger;
+using Microsoft.Warehouse.Request;
+using Microsoft.Warehouse.RoleCenters;
+using Microsoft.Warehouse.Setup;
+using Microsoft.Warehouse.Structure;
+using Microsoft.Warehouse.Tracking;
+using Microsoft.Warehouse.Worksheet;
+using System.AI;
+using System.Automation;
+using System.Azure.Identity;
+using System.DateTime;
+using System.Device;
+using System.Diagnostics;
+using System.Email;
+using System.Environment.Configuration;
+using System.Environment;
+using System.Integration.PowerBI;
+using System.Integration;
+using System.IO;
+using System.Privacy;
+using System.Reflection;
+using System.Security.Encryption;
+using System.Security.User;
+using System.TestTools;
+using System.Text;
+using System.Threading;
+using System.Tooling;
+using System.Utilities;
+using System.Visualization;
+using System.Xml;
+using System.Apps;
+using System.Upgrade;
+using Microsoft.RoleCenters;
+using Microsoft.Projects.Project.Job;
+using Microsoft.Projects.TimeSheet;
+using Microsoft.Foundation.Period;
+using Microsoft.Utilities;
+using Microsoft.Inventory.Intrastat;
+using Microsoft.Foundation.Calendar;
+using Microsoft.Foundation.BatchProcessing;
+using Microsoft.HumanResources.Absence;
+using Microsoft.API;
+using Microsoft;
+
 permissionset 6121 "INTELLIGENT CLOUD"
 {
     Access = Public;
@@ -52,10 +319,7 @@ permissionset 6121 "INTELLIGENT CLOUD"
                   tabledata "Object Options" = M,
                   tabledata Permission = m,
                   tabledata "Permission Set" = m,
-                  tabledata Profile = IMD,
                   tabledata "Profile Configuration Symbols" = IMD,
-                  tabledata "Profile Metadata" = IMD,
-                  tabledata "Profile Page Metadata" = IMD,
                   tabledata "Published Application" = R,
                   tabledata "Query Navigation" = R,
                   tabledata "Report Layout" = Rm,
@@ -64,15 +328,14 @@ permissionset 6121 "INTELLIGENT CLOUD"
                   tabledata "SID - Account ID" = R,
                   tabledata "Table Information" = R,
                   tabledata "Table Synch. Setup" = R,
+#pragma warning disable AL0432
                   tabledata "Tenant Profile" = IMD,
+#pragma warning restore AL0432
                   tabledata "Tenant Profile Extension" = IMD,
                   tabledata "Tenant Profile Page Metadata" = IMD,
                   tabledata "Tenant Profile Setting" = IMD,
                   tabledata "Tenant Web Service" = RIMD,
                   tabledata "Upgrade Blob Storage" = Rm,
-#if not CLEAN19
-                  tabledata "User Callouts" = RIMD,
-#endif
                   tabledata User = RM,
                   tabledata "User Property" = Rimd,
                   report "Account Schedule" = X,
@@ -83,11 +346,18 @@ permissionset 6121 "INTELLIGENT CLOUD"
                   table "My Item" = X,
                   table "My Job" = X,
                   table "My Time Sheets" = X,
-                  table "Power BI Chart Buffer" = X,
+#if not CLEAN21
                   table "Power BI Report Buffer" = X,
-                  table "Power BI Report Configuration" = X,
+#endif
+                  table "Power BI Chart Buffer" = X,
+                  table "Power BI Context Settings" = X,
+                  table "Power BI Displayed Element" = X,
                   table "Power BI Report Labels" = X,
+#if not CLEAN23
+                  table "Power BI Report Configuration" = X,
                   table "Power BI User Configuration" = X,
+#endif
+
                   tabledata "AAD Application" = R,
                   tabledata "Acc. Sched. Cell Value" = R,
                   tabledata "Acc. Sched. Chart Setup Line" = R,
@@ -97,6 +367,8 @@ permissionset 6121 "INTELLIGENT CLOUD"
                   tabledata "Acc. Schedule Line" = R,
                   tabledata "Acc. Schedule Line Entity" = R,
                   tabledata "Acc. Schedule Name" = R,
+                  tabledata "Financial Report" = R,
+                  tabledata "Financial Report User Filters" = RIMD,
                   tabledata "Account Schedules Chart Setup" = RIMD,
                   tabledata "Account Use Buffer" = R,
                   tabledata "Accounting Period" = R,
@@ -112,6 +384,10 @@ permissionset 6121 "INTELLIGENT CLOUD"
                   tabledata "Administration Cue" = RIMD,
                   tabledata "Aged Report Entity" = R,
                   tabledata "Aging Band Buffer" = R,
+                  tabledata "Alloc. Acc. Manual Override" = R,
+                  tabledata "Alloc. Account Distribution" = R,
+                  tabledata "Allocation Account" = R,
+                  tabledata "Allocation Line" = R,
                   tabledata "Alternative Address" = R,
                   tabledata "Analysis by Dim. Parameters" = R,
                   tabledata "Analysis by Dim. User Param." = R,
@@ -198,6 +474,7 @@ permissionset 6121 "INTELLIGENT CLOUD"
                   tabledata "Booking Staff" = R,
                   tabledata "Booking Sync" = R,
                   tabledata "Budget Buffer" = R,
+                  tabledata "Bus. Unit In Cons. Process" = R,
                   tabledata "Business Chart Buffer" = R,
                   tabledata "Business Chart Map" = R,
                   tabledata "Business Chart User Setup" = RIM,
@@ -231,11 +508,14 @@ permissionset 6121 "INTELLIGENT CLOUD"
                   tabledata "Cash Flow Worksheet Line" = R,
                   tabledata "Cause of Absence" = R,
                   tabledata "Cause of Inactivity" = R,
+                  tabledata "CDS Available Virtual Table" = R,
                   tabledata "CDS Company" = R,
                   tabledata "CDS Connection Setup" = R,
                   tabledata "CDS Coupled Business Unit" = R,
                   tabledata "CDS Environment" = R,
+#if not CLEAN22
                   tabledata "CDS Failed Option Mapping" = R,
+#endif
                   tabledata "CDS Solution" = R,
                   tabledata "CDS Teammembership" = R,
                   tabledata "CDS Teamroles" = R,
@@ -299,6 +579,8 @@ permissionset 6121 "INTELLIGENT CLOUD"
                   tabledata "Contract Group" = R,
                   tabledata "Contract Trend Buffer" = R,
                   tabledata "Contract/Service Discount" = R,
+                  tabledata "Consolidation Process" = R,
+                  tabledata "Consolidation Setup" = R,
                   tabledata "Copy Gen. Journal Parameters" = R,
                   tabledata "Copy Item Buffer" = R,
                   tabledata "Copy Item Parameters" = R,
@@ -321,11 +603,14 @@ permissionset 6121 "INTELLIGENT CLOUD"
                   tabledata "Cost Type" = R,
                   tabledata "Country/Region" = R,
                   tabledata "Country/Region Translation" = R,
+#if not CLEAN22
                   tabledata "Coupling Field Buffer" = R,
+#endif
                   tabledata "Coupling Record Buffer" = R,
                   tabledata "Credit Trans Re-export History" = R,
                   tabledata "Credit Transfer Entry" = R,
                   tabledata "Credit Transfer Register" = R,
+                  tabledata "Dataverse Entity Change" = Rd,
                   tabledata "CRM Account" = R,
                   tabledata "CRM Account Statistics" = R,
                   tabledata "CRM Annotation" = R,
@@ -398,9 +683,6 @@ permissionset 6121 "INTELLIGENT CLOUD"
                   tabledata "Customer Price Group" = R,
                   tabledata "Customer Sales Buffer" = R,
                   tabledata "Customer Templ." = R,
-#if not CLEAN18
-                  tabledata "Customer Template" = R,
-#endif
                   tabledata "Customized Calendar Change" = R,
                   tabledata "Customized Calendar Entry" = R,
                   tabledata "CV Ledger Entry Buffer" = R,
@@ -412,7 +694,10 @@ permissionset 6121 "INTELLIGENT CLOUD"
                   tabledata "Data Exch. Field Mapping Buf." = R,
                   tabledata "Data Exch. Line Def" = R,
                   tabledata "Data Exch. Mapping" = R,
+                  tabledata "Data Exch. Field Grouping" = R,
+                  tabledata "Data Exch. FlowField Gr. Buff." = R,
                   tabledata "Data Exchange Type" = R,
+                  tabledata "Data Exch. Table Filter" = R,
                   tabledata "Data Migration Entity" = R,
                   tabledata "Data Migration Error" = R,
                   tabledata "Data Migration Parameters" = R,
@@ -472,7 +757,9 @@ permissionset 6121 "INTELLIGENT CLOUD"
                   tabledata "Document Entry" = R,
                   tabledata "Document Search Result" = R,
                   tabledata "Document Sending Profile" = R,
+#if not CLEAN23
                   tabledata "Document Service Cache" = R,
+#endif
                   tabledata "Drop Shpt. Post. Buffer" = R,
                   tabledata "Dtld. Price Calculation Setup" = R,
                   tabledata "Duplicate Price Line" = R,
@@ -514,7 +801,6 @@ permissionset 6121 "INTELLIGENT CLOUD"
                   tabledata "Exp. Phys. Invt. Tracking" = R,
                   tabledata "Experience Tier Buffer" = R,
                   tabledata "Experience Tier Setup" = R,
-                  tabledata "Ext Txt ID Integration Record" = R,
                   tabledata "Extended Text Header" = R,
                   tabledata "Extended Text Line" = R,
                   tabledata "FA Allocation" = R,
@@ -593,10 +879,8 @@ permissionset 6121 "INTELLIGENT CLOUD"
                   tabledata "Generic Chart Setup" = R,
                   tabledata "Generic Chart Y-Axis" = R,
                   tabledata Geolocation = R,
+#if not CLEAN21
                   tabledata "Graph Mail Setup" = R,
-#if not CLEAN20
-                  tabledata "Graph Subscription" = RIMD,
-                  tabledata "Graph Business Setting" = RIMD,
 #endif
                   tabledata "Grounds for Termination" = R,
                   tabledata "Handled IC Inbox Jnl. Line" = R,
@@ -616,6 +900,7 @@ permissionset 6121 "INTELLIGENT CLOUD"
                   tabledata "Human Resource Unit of Measure" = R,
                   tabledata "Human Resources Setup" = R,
                   tabledata "Hybrid Deployment Setup" = R,
+                  tabledata "IC Bank Account" = R,
                   tabledata "IC Comment Line" = R,
                   tabledata "IC Dimension" = R,
                   tabledata "IC Dimension Value" = R,
@@ -637,6 +922,7 @@ permissionset 6121 "INTELLIGENT CLOUD"
                   tabledata "IC Partner" = R,
                   tabledata "IC Setup" = R,
                   tabledata "Image Analysis Setup" = R,
+                  tabledata "Image Analysis Scenario" = R,
                   tabledata "Import G/L Transaction" = R,
                   tabledata "Inc. Doc. Attachment Overview" = R,
                   tabledata "Incoming Document" = R,
@@ -652,9 +938,6 @@ permissionset 6121 "INTELLIGENT CLOUD"
                   tabledata "Insurance Register" = R,
                   tabledata "Insurance Type" = R,
                   tabledata "Integration Field Mapping" = R,
-                  tabledata "Integration Management Setup" = R,
-                  tabledata "Integration Record" = R,
-                  tabledata "Integration Record Archive" = R,
                   tabledata "Integration Synch. Job" = R,
                   tabledata "Integration Synch. Job Errors" = R,
                   tabledata "Integration Table Mapping" = R,
@@ -668,14 +951,13 @@ permissionset 6121 "INTELLIGENT CLOUD"
                   tabledata "Intermediate Data Import" = R,
                   tabledata "Internal Movement Header" = R,
                   tabledata "Internal Movement Line" = R,
-#if not CLEAN19
-                  tabledata "Intrastat Checklist Setup" = R,
-#endif
+#if not CLEAN22
                   tabledata "Advanced Intrastat Checklist" = R,
                   tabledata "Intrastat Jnl. Batch" = R,
                   tabledata "Intrastat Jnl. Line" = R,
                   tabledata "Intrastat Jnl. Template" = R,
                   tabledata "Intrastat Setup" = R,
+#endif
                   tabledata "Invalidated Dim Correction" = R,
                   tabledata "Inventory Adjmt. Entry (Order)" = R,
                   tabledata "Inventory Adjustment Buffer" = R,
@@ -692,7 +974,7 @@ permissionset 6121 "INTELLIGENT CLOUD"
                   tabledata "Inventory Report Entry" = R,
                   tabledata "Inventory Report Header" = R,
                   tabledata "Inventory Setup" = R,
-#if not CLEAN20
+#if not CLEAN23
                   tabledata "Invoice Post. Buffer" = R,
 #endif
                   tabledata "Invoice Posting Buffer" = R,
@@ -734,9 +1016,6 @@ permissionset 6121 "INTELLIGENT CLOUD"
                   tabledata "Item Charge" = R,
                   tabledata "Item Charge Assignment (Purch)" = R,
                   tabledata "Item Charge Assignment (Sales)" = R,
-#if not CLEAN19
-                  tabledata "Item Cross Reference" = R,
-#endif
                   tabledata "Item Discount Group" = R,
                   tabledata "Item Entry Relation" = R,
                   tabledata "Item Identifier" = R,
@@ -751,9 +1030,6 @@ permissionset 6121 "INTELLIGENT CLOUD"
                   tabledata "Item Statistics Buffer" = R,
                   tabledata "Item Substitution" = R,
                   tabledata "Item Templ." = R,
-#if not CLEAN18
-                  tabledata "Item Template" = R,
-#endif
                   tabledata "Item Tracing Buffer" = R,
                   tabledata "Item Tracing History Buffer" = R,
                   tabledata "Item Tracking Code" = R,
@@ -769,7 +1045,7 @@ permissionset 6121 "INTELLIGENT CLOUD"
                   tabledata "Job Cue" = RIMD,
                   tabledata "Job Difference Buffer" = R,
                   tabledata "Job Entry No." = R,
-#if not CLEAN19
+#if not CLEAN21
                   tabledata "Job G/L Account Price" = R,
                   tabledata "Job Item Price" = R,
 #endif
@@ -788,7 +1064,7 @@ permissionset 6121 "INTELLIGENT CLOUD"
                   tabledata "Job Queue Entry Buffer" = R,
                   tabledata "Job Queue Log Entry" = R,
                   tabledata "Job Register" = R,
-#if not CLEAN19
+#if not CLEAN21
                   tabledata "Job Resource Price" = R,
 #endif
                   tabledata "Job Responsibility" = R,
@@ -829,10 +1105,6 @@ permissionset 6121 "INTELLIGENT CLOUD"
                   tabledata "Marketing Setup" = R,
                   tabledata "Media Repository" = R,
                   tabledata "Memoized Result" = R,
-#if not CLEAN18
-                  tabledata "Mini Customer Template" = R,
-                  tabledata "Mini Vendor Template" = R,
-#endif
                   tabledata "Miniform Function" = R,
                   tabledata "Miniform Function Group" = R,
                   tabledata "Miniform Header" = R,
@@ -849,12 +1121,6 @@ permissionset 6121 "INTELLIGENT CLOUD"
                   tabledata "My Vendor" = RIMD,
                   tabledata "Name/Value Buffer" = R,
                   tabledata "Named Forward Link" = R,
-#if not CLEAN20
-                  tabledata "Native - API Tax Setup" = R,
-                  tabledata "Native - Export Invoices" = R,
-                  tabledata "Native - Gen. Settings Buffer" = R,
-                  tabledata "Native - Payment" = R,
-#endif
                   tabledata "No. Series" = R,
                   tabledata "No. Series Line" = R,
                   tabledata "No. Series Relationship" = R,
@@ -866,6 +1132,7 @@ permissionset 6121 "INTELLIGENT CLOUD"
                   tabledata "Notification Schedule" = R,
                   tabledata "Notification Setup" = R,
                   tabledata "O365 Brand Color" = R,
+#if not CLEAN21
                   tabledata "O365 C2Graph Event Settings" = R,
                   tabledata "O365 Country/Region" = R,
                   tabledata "O365 Coupon Claim" = R,
@@ -873,19 +1140,25 @@ permissionset 6121 "INTELLIGENT CLOUD"
                   tabledata "O365 Cust. Invoice Discount" = R,
                   tabledata "O365 Customer" = R,
                   tabledata "O365 Default Email Message" = R,
+#endif
                   tabledata "O365 Device Setup Instructions" = R,
+#if not CLEAN21
                   tabledata "O365 Document Sent History" = R,
                   tabledata "O365 Email Setup" = R,
                   tabledata "O365 Field Excel Mapping" = R,
+#endif
                   tabledata "O365 Getting Started" = R,
                   tabledata "O365 Getting Started Page Data" = R,
                   tabledata "O365 HTML Template" = R,
+#if not CLEAN21
                   tabledata "O365 Item Basket Entry" = R,
                   tabledata "O365 Payment History Buffer" = R,
                   tabledata "O365 Payment Instr. Transl." = R,
                   tabledata "O365 Payment Instructions" = R,
                   tabledata "O365 Payment Method" = R,
+#endif
                   tabledata "O365 Payment Service Logo" = R,
+#if not CLEAN21
                   tabledata "O365 Payment Terms" = R,
                   tabledata "O365 Posted Coupon Claim" = R,
                   tabledata "O365 Sales Cue" = RIMD,
@@ -896,6 +1169,7 @@ permissionset 6121 "INTELLIGENT CLOUD"
                   tabledata "O365 Sales Invoice Document" = R,
                   tabledata "O365 Settings Menu" = R,
                   tabledata "O365 Social Network" = R,
+#endif
                   tabledata "OAuth 2.0 Setup" = R,
                   tabledata "Object Translation" = R,
                   tabledata "OCR Service Document Template" = R,
@@ -921,18 +1195,6 @@ permissionset 6121 "INTELLIGENT CLOUD"
                   tabledata "Order Promising Setup" = R,
                   tabledata "Order Tracking Entry" = R,
                   tabledata "Organizational Level" = R,
-#if not CLEAN19
-                  tabledata "Outlook Synch. Dependency" = R,
-                  tabledata "Outlook Synch. Entity" = R,
-                  tabledata "Outlook Synch. Entity Element" = R,
-                  tabledata "Outlook Synch. Field" = R,
-                  tabledata "Outlook Synch. Filter" = R,
-                  tabledata "Outlook Synch. Link" = R,
-                  tabledata "Outlook Synch. Lookup Name" = R,
-                  tabledata "Outlook Synch. Option Correl." = R,
-                  tabledata "Outlook Synch. Setup Detail" = R,
-                  tabledata "Outlook Synch. User Setup" = R,
-#endif
                   tabledata "Outstanding Bank Transaction" = R,
                   tabledata "Over-Receipt Code" = R,
                   tabledata "Overdue Approval Entry" = R,
@@ -940,13 +1202,18 @@ permissionset 6121 "INTELLIGENT CLOUD"
                   tabledata "Payable Employee Ledger Entry" = R,
                   tabledata "Payable Vendor Ledger Entry" = R,
                   tabledata "Payment Application Proposal" = R,
+#if not CLEAN22
                   tabledata "Payment Buffer" = R,
+#endif
+                  tabledata "Vendor Payment Buffer" = R,
                   tabledata "Payment Export Data" = R,
                   tabledata "Payment Export Remittance Text" = R,
                   tabledata "Payment Jnl. Export Error Text" = R,
                   tabledata "Payment Matching Details" = R,
                   tabledata "Payment Method" = R,
                   tabledata "Payment Method Translation" = R,
+                  tabledata "Payment Rec. Related Entry" = R,
+                  tabledata "Pmt. Rec. Applied-to Entry" = R,
                   tabledata "Payment Registration Buffer" = R,
                   tabledata "Payment Registration Setup" = R,
                   tabledata "Payment Reporting Argument" = R,
@@ -971,9 +1238,6 @@ permissionset 6121 "INTELLIGENT CLOUD"
                   tabledata "Phys. Invt. Record Line" = R,
                   tabledata "Phys. Invt. Tracking" = R,
                   tabledata "Picture Entity" = R,
-#if not CLEAN20
-                  tabledata "Plan Permission Set" = R,
-#endif
                   tabledata "Planning Assignment" = R,
                   tabledata "Planning Buffer" = R,
                   tabledata "Planning Component" = R,
@@ -1007,19 +1271,24 @@ permissionset 6121 "INTELLIGENT CLOUD"
                   tabledata "Posted Whse. Receipt Line" = R,
                   tabledata "Posted Whse. Shipment Header" = R,
                   tabledata "Posted Whse. Shipment Line" = R,
-                  tabledata "Power BI Chart Buffer" = RIMD,
-                  tabledata "Power BI Customer Reports" = R,
-#if not CLEAN18
-                  tabledata "Power BI Ongoing Deployments" = RIMD,
-#endif
+#if not CLEAN21
                   tabledata "Power BI Report Buffer" = R,
-                  tabledata "Power BI Report Configuration" = RIMD,
-                  tabledata "Power BI Report Labels" = RIMD,
-                  tabledata "Power BI Report Uploads" = R,
-                  tabledata "Power BI Service Status Setup" = R,
-                  tabledata "Power BI User Configuration" = RIMD,
                   tabledata "Power BI User License" = R,
+#endif
+#if not CLEAN22
+                  tabledata "Power BI Service Status Setup" = R,
+#endif
+#if not CLEAN23
+                  tabledata "Power BI User Configuration" = RIMD,
+                  tabledata "Power BI Report Configuration" = RIMD,
                   tabledata "Power BI User Status" = RIMD,
+#endif
+                  tabledata "Power BI Chart Buffer" = RIMD,
+                  tabledata "Power BI Context Settings" = RIMD,
+                  tabledata "Power BI Customer Reports" = R,
+                  tabledata "Power BI Displayed Element" = RIMD,
+                  tabledata "Power BI Report Labels" = R,
+                  tabledata "Power BI Report Uploads" = R,
                   tabledata "Prepayment Inv. Line Buffer" = R,
                   tabledata "Price Asset" = R,
                   tabledata "Price Calculation Buffer" = R,
@@ -1061,13 +1330,14 @@ permissionset 6121 "INTELLIGENT CLOUD"
                   tabledata "Pstd. Phys. Invt. Tracking" = R,
                   tabledata "Purch. Comment Line" = R,
                   tabledata "Purch. Comment Line Archive" = R,
+                  tabledata "Purch. Cr. Memo Entity Buffer" = R,
                   tabledata "Purch. Cr. Memo Hdr." = R,
                   tabledata "Purch. Cr. Memo Line" = R,
                   tabledata "Purch. Inv. Entity Aggregate" = R,
                   tabledata "Purch. Inv. Header" = R,
                   tabledata "Purch. Inv. Line" = R,
                   tabledata "Purch. Inv. Line Aggregate" = R,
-#if not CLEAN19
+#if not CLEAN21
                   tabledata "Purch. Price Line Disc. Buff." = R,
 #endif
                   tabledata "Purch. Rcpt. Header" = R,
@@ -1078,12 +1348,12 @@ permissionset 6121 "INTELLIGENT CLOUD"
                   tabledata "Purchase Header Archive" = R,
                   tabledata "Purchase Line" = R,
                   tabledata "Purchase Line Archive" = R,
-#if not CLEAN19
+#if not CLEAN21
                   tabledata "Purchase Line Discount" = R,
 #endif
                   tabledata "Purchase Order Entity Buffer" = R,
                   tabledata "Purchase Prepayment %" = R,
-#if not CLEAN19
+#if not CLEAN21
                   tabledata "Purchase Price" = R,
 #endif
                   tabledata "Purchase Price Access" = R,
@@ -1122,6 +1392,7 @@ permissionset 6121 "INTELLIGENT CLOUD"
                   tabledata "Reminder Terms Translation" = R,
                   tabledata "Reminder Text" = R,
                   tabledata "Reminder/Fin. Charge Entry" = R,
+                  tabledata "Remit Address" = R,
                   tabledata "Repair Status" = R,
                   tabledata "Report Inbox" = R,
                   tabledata "Report Layout Selection" = R,
@@ -1144,12 +1415,12 @@ permissionset 6121 "INTELLIGENT CLOUD"
                   tabledata "Reservation Entry Buffer" = R,
                   tabledata "Resolution Code" = R,
                   tabledata Resource = R,
-#if not CLEAN19
+#if not CLEAN21
                   tabledata "Resource Cost" = R,
 #endif
                   tabledata "Resource Group" = R,
                   tabledata "Resource Location" = R,
-#if not CLEAN19
+#if not CLEAN21
                   tabledata "Resource Price" = R,
                   tabledata "Resource Price Change" = R,
 #endif
@@ -1200,17 +1471,17 @@ permissionset 6121 "INTELLIGENT CLOUD"
                   tabledata "Sales Invoice Line Aggregate" = R,
                   tabledata "Sales Line" = R,
                   tabledata "Sales Line Archive" = R,
-#if not CLEAN19
+#if not CLEAN21
                   tabledata "Sales Line Discount" = R,
 #endif
                   tabledata "Sales Order Entity Buffer" = R,
                   tabledata "Sales Planning Line" = R,
                   tabledata "Sales Prepayment %" = R,
-#if not CLEAN19
+#if not CLEAN21
                   tabledata "Sales Price" = R,
 #endif
                   tabledata "Sales Price Access" = R,
-#if not CLEAN19
+#if not CLEAN21
                   tabledata "Sales Price and Line Disc Buff" = R,
                   tabledata "Sales Price Worksheet" = R,
 #endif
@@ -1288,11 +1559,6 @@ permissionset 6121 "INTELLIGENT CLOUD"
                   tabledata "Shop Calendar Holiday" = R,
                   tabledata "Shop Calendar Working Days" = R,
                   tabledata "Skill Code" = R,
-#if not CLEAN19
-                  tabledata "SmartList Designer Setup" = R,
-                  tabledata "SmartList Export Results" = R,
-                  tabledata "SmartList Import Results" = R,
-#endif
                   tabledata "Sorting Table" = R,
                   tabledata "Source Code" = R,
                   tabledata "Source Code Setup" = R,
@@ -1327,7 +1593,9 @@ permissionset 6121 "INTELLIGENT CLOUD"
                   tabledata "SWIFT Code" = R,
                   tabledata "Symptom Code" = R,
                   tabledata "Table Filter" = R,
+#if not CLEAN21
                   tabledata "Table Permission Buffer" = R,
+#endif
                   tabledata "Tariff Number" = R,
                   tabledata "Tax Area" = R,
                   tabledata "Tax Area Buffer" = R,
@@ -1394,11 +1662,13 @@ permissionset 6121 "INTELLIGENT CLOUD"
                   tabledata "Unlinked Attachment" = R,
                   tabledata "Unplanned Demand" = R,
                   tabledata "Untracked Planning Element" = R,
+#if not CLEAN22
                   tabledata "User Group" = R,
                   tabledata "User Group Access Control" = R,
                   tabledata "User Group Member" = R,
                   tabledata "User Group Permission Set" = R,
                   tabledata "User Group Plan" = R,
+#endif
                   tabledata "User Preference" = R,
                   tabledata "User Security Status" = RIMD,
                   tabledata "User Setup" = R,
@@ -1420,6 +1690,8 @@ permissionset 6121 "INTELLIGENT CLOUD"
                   tabledata "VAT Entry" = R,
                   tabledata "VAT Posting Setup" = R,
                   tabledata "VAT Product Posting Group" = R,
+                  tabledata "VAT Setup" = R,
+                  tabledata "VAT Posting Parameters" = R,
                   tabledata "VAT Rate Change Conversion" = R,
                   tabledata "VAT Rate Change Log Entry" = R,
                   tabledata "VAT Rate Change Setup" = R,
@@ -1515,17 +1787,6 @@ permissionset 6121 "INTELLIGENT CLOUD"
                   tabledata "Workflow Webhook Sub Buffer" = R,
                   tabledata "Workflow Webhook Subscription" = R,
                   tabledata "Workflows Entries Buffer" = R,
-#if not CLEAN20
-                  tabledata "XBRL Comment Line" = R,
-                  tabledata "XBRL G/L Map Line" = R,
-                  tabledata "XBRL Line Constant" = R,
-                  tabledata "XBRL Linkbase" = R,
-                  tabledata "XBRL Rollup Line" = R,
-                  tabledata "XBRL Schema" = R,
-                  tabledata "XBRL Taxonomy" = R,
-                  tabledata "XBRL Taxonomy Label" = R,
-                  tabledata "XBRL Taxonomy Line" = R,
-#endif
                   tabledata "XML Buffer" = R,
                   tabledata "XML Schema" = R,
                   tabledata "XML Schema Element" = R,

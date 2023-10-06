@@ -1,3 +1,24 @@
+namespace System.Security.AccessControl;
+
+using Microsoft.Warehouse.Structure;
+using Microsoft.Inventory.BOM;
+using Microsoft.Foundation.Comment;
+using Microsoft.Finance.Dimension;
+using Microsoft.Foundation.ExtendedText;
+using Microsoft.Inventory.Item;
+using Microsoft.Inventory.Ledger;
+using Microsoft.Inventory.Item.Catalog;
+using Microsoft.Inventory.Item.Substitution;
+using Microsoft.Inventory.Tracking;
+using Microsoft.Inventory.Location;
+using Microsoft.Inventory.Planning;
+using Microsoft.Manufacturing.Document;
+using Microsoft.Manufacturing.ProductionBOM;
+using Microsoft.Manufacturing.Routing;
+using Microsoft.Inventory.MarketingText;
+using Microsoft.Foundation.UOM;
+using Microsoft.Finance.VAT.RateChange;
+
 permissionset 9346 "Inventory - View"
 {
     Access = Public;
@@ -12,9 +33,6 @@ permissionset 9346 "Inventory - View"
                   tabledata "Extended Text Line" = R,
                   tabledata Item = R,
                   tabledata "Item Application Entry" = R,
-#if not CLEAN19
-                  tabledata "Item Cross Reference" = R,
-#endif
                   tabledata "Item Ledger Entry" = R,
                   tabledata "Item Reference" = R,
                   tabledata "Item Substitution" = R,
@@ -23,6 +41,7 @@ permissionset 9346 "Inventory - View"
                   tabledata "Item Variant" = R,
                   tabledata Location = R,
                   tabledata "Lot No. Information" = R,
+                  tabledata "Marketing Text Attributes" = R,
                   tabledata "Nonstock Item" = R,
                   tabledata "Package No. Information" = R,
                   tabledata "Planning Component" = Rm,

@@ -1,3 +1,27 @@
+namespace System.Security.AccessControl;
+
+using Microsoft;
+using Microsoft.CRM.BusinessRelation;
+using Microsoft.Integration.Dataverse;
+using Microsoft.Integration.D365Sales;
+using Microsoft.Inventory.BOM.Tree;
+using Microsoft.Inventory.Costing;
+#if not CLEAN22
+using Microsoft.Inventory.Intrastat;
+#endif
+using Microsoft.Sales.Analysis;
+using Microsoft.Warehouse.Availability;
+using Microsoft.Utilities;
+using System.AI;
+using System.Email;
+using System.Integration;
+using System.Environment.Configuration;
+using System.DataAdministration;
+using System.Telemetry;
+using System.Environment;
+using System.Threading;
+using System.Diagnostics;
+
 permissionset 23 "Internal BaseApp Obj. - Exec"
 {
     Access = Public;
@@ -14,9 +38,6 @@ permissionset 23 "Internal BaseApp Obj. - Exec"
                   Table "OData Initialized Status" = X,
                   Table "Permission Conflicts" = X,
                   Table "Permission Conflicts Overview" = X,
-#if not CLEAN19
-                  Table "SmartList Designer Setup" = X,
-#endif
                   Codeunit "Application Area Cache" = X,
                   Codeunit "Base Application Logs Delete" = X,
                   Codeunit "CDS Environment" = X,
@@ -41,15 +62,12 @@ permissionset 23 "Internal BaseApp Obj. - Exec"
                   Codeunit "BOM Tree Node Dictionary Impl." = X,
                   Codeunit "BOM Tree Nodes Bucket" = X,
                   Codeunit "Global Admin Notifier" = X,
+#if not CLEAN22
                   Codeunit "Intrastat File Writer" = X,
+#endif
                   Codeunit "Job Queue Start Report" = X,
                   codeunit "Monitored Field Notification" = X,
                   Codeunit "Scheduled Tasks" = X,
-#if not CLEAN19
-                  Codeunit "SmartList Designer Impl" = X,
-                  Codeunit "SmartList Mgmt" = X,
-                  Codeunit "Query Navigation Builder" = X,
-#endif
                   Query CalcRsvQtyOnPicksShipsWithIT = X,
                   Query "Calculate Actual Material Cost" = X,
                   Query "Sales by Cust. Grp. Chart Mgt." = X;

@@ -1,3 +1,5 @@
+namespace Microsoft.Utilities;
+
 page 823 "Name/Value Lookup"
 {
     Caption = 'Name/Value Lookup';
@@ -13,14 +15,14 @@ page 823 "Name/Value Lookup"
             repeater(Control1000)
             {
                 ShowCaption = false;
-                field(Name; Name)
+                field(Name; Rec.Name)
                 {
-                    ApplicationArea = Basic, Suite, Invoicing;
+                    ApplicationArea = Invoicing, Basic, Suite;
                     ToolTip = 'Specifies the name.';
                 }
-                field(Value; Value)
+                field(Value; Rec.Value)
                 {
-                    ApplicationArea = Basic, Suite, Invoicing;
+                    ApplicationArea = Invoicing, Basic, Suite;
                     ToolTip = 'Specifies the value.';
                 }
             }
@@ -35,17 +37,17 @@ page 823 "Name/Value Lookup"
     var
         NextID: Integer;
     begin
-        LockTable();
-        if FindLast() then
-            NextID := ID + 1
+        Rec.LockTable();
+        if Rec.FindLast() then
+            NextID := Rec.ID + 1
         else
             NextID := 1;
 
-        Init;
-        ID := NextID;
-        Name := ItemName;
-        Value := ItemValue;
-        Insert;
+        Rec.Init();
+        Rec.ID := NextID;
+        Rec.Name := ItemName;
+        Rec.Value := ItemValue;
+        Rec.Insert();
     end;
 }
 

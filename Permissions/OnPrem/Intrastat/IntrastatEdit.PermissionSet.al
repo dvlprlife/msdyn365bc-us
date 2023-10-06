@@ -1,3 +1,10 @@
+namespace System.Security.AccessControl;
+
+using Microsoft.Foundation.Address;
+using Microsoft.Inventory.Item;
+using Microsoft.Inventory.Ledger;
+using Microsoft.Inventory.Intrastat;
+
 permissionset 2345 "Intrastat - Edit"
 {
     Access = Public;
@@ -7,13 +14,12 @@ permissionset 2345 "Intrastat - Edit"
     Permissions = tabledata Area = R,
                   tabledata "Country/Region" = R,
                   tabledata "Entry/Exit Point" = R,
-#if not CLEAN19
-                  tabledata "Intrastat Checklist Setup" = RIMD,
-#endif
+#if not CLEAN22
                   tabledata "Advanced Intrastat Checklist" = RIMD,
                   tabledata "Intrastat Jnl. Batch" = RIMD,
                   tabledata "Intrastat Jnl. Line" = RIMD,
                   tabledata "Intrastat Jnl. Template" = RIMD,
+#endif
                   tabledata Item = R,
                   tabledata "Item Ledger Entry" = R,
                   tabledata "Item Variant" = R,

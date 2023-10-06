@@ -1,5 +1,17 @@
+#if not CLEAN22
+namespace System.Environment.Configuration;
+
+using Microsoft.Integration.Dataverse;
+using Microsoft.Integration.SyncEngine;
+using Microsoft.Foundation.Navigate;
+using Microsoft.Integration.D365Sales;
+
 codeunit 5408 "Feature - Option Mapping" implements "Feature Data Update"
 {
+    ObsoleteReason = 'Feature OptionMapping will be enabled by default in version 22.0.';
+    ObsoleteState = Pending;
+    ObsoleteTag = '22.0';
+
     procedure IsDataUpdateRequired(): Boolean;
     begin
         CountRecords();
@@ -31,7 +43,6 @@ codeunit 5408 "Feature - Option Mapping" implements "Feature Data Update"
         FeatureDataUpdateMgt.LogTask(FeatureDataUpdateStatus, TempIntegrationFieldMapping.TableCaption(), StartDateTime);
 
         StartDateTime := CurrentDateTime;
-        SetCouplingFlags();
         FeatureDataUpdateMgt.LogTask(FeatureDataUpdateStatus, CRMOptionMapping.TableCaption(), StartDateTime);
     end;
 
@@ -56,8 +67,8 @@ codeunit 5408 "Feature - Option Mapping" implements "Feature Data Update"
 
         TempIntegrationFieldMapping.SetFilter("Integration Table Mapping Name", 'CUSTOMER|VENDOR|PAYMENT TERMS|SHIPMENT METHOD|SHIPPING AGENT');
         TempIntegrationFieldMapping.SetFilter("Field No.", '15|75|80');
-        InsertDocumentEntry(Database::"CRM Option Mapping", TempIntegrationFieldMapping.TableCaption, TempIntegrationFieldMapping.CountApprox);
-        InsertDocumentEntry(Database::"CRM Option Mapping", CRMOptionMapping.TableCaption, CRMOptionMapping.Count());
+        InsertDocumentEntry(Database::"CRM Option Mapping", TempIntegrationFieldMapping.TableCaption(), TempIntegrationFieldMapping.CountApprox);
+        InsertDocumentEntry(Database::"CRM Option Mapping", CRMOptionMapping.TableCaption(), CRMOptionMapping.Count());
     end;
 
     local procedure AdjustCRMConnectionSetup()
@@ -129,17 +140,6 @@ codeunit 5408 "Feature - Option Mapping" implements "Feature Data Update"
         CDSFailedOptionMapping.DeleteAll();
     end;
 
-    local procedure SetCouplingFlags()
-    var
-        CRMOptionMapping: Record "CRM Option Mapping";
-        CRMIntegrationManagement: Codeunit "CRM Integration Management";
-    begin
-        if CRMOptionMapping.FindSet() then
-            repeat
-                CRMIntegrationManagement.SetCoupledFlag(CRMOptionMapping, true);
-            until CRMOptionMapping.Next() = 0;
-    end;
-
     local procedure InsertDocumentEntry(TableID: Integer; TableName: Text; RecordCount: Integer)
     begin
         if RecordCount = 0 then
@@ -154,3 +154,4 @@ codeunit 5408 "Feature - Option Mapping" implements "Feature Data Update"
         TempDocumentEntry.Insert();
     end;
 }
+#endif

@@ -1,3 +1,12 @@
+namespace System.Environment;
+
+using Microsoft.Foundation.Company;
+using Microsoft.Upgrade;
+using System.Integration;
+using System.Text;
+using System.Security.AccessControl;
+using System.Upgrade;
+
 codeunit 6060 "Hybrid Deployment"
 {
     Permissions = TableData "Hybrid Deployment Setup" = rimd,
@@ -42,6 +51,8 @@ codeunit 6060 "Hybrid Deployment"
         SqlTimeoutErr: Label 'The server timed out while attempting to connect to the specified SQL server.';
         TooManyReplicationRunsErr: Label 'Cannot start replication because a replication is currently in progress. Please try again at a later time.';
         NoAdfCapacityErr: Label 'The cloud migration service is temporarily unable to process your request. Please try again at a later time.';
+        RaisingOnCanStartUpgradeForCompanyTxt: Label 'Raising OnCanStartUpgrade for company %1.', Locked = true;
+        VerifyingIfUpgradeCanBeStartedMsg: Label 'Verifying if upgrade can be started. Target version %1.%2, current version %3.%4', Locked = true;
         CloudMigrationTok: Label 'CloudMigration', Locked = true;
 
     [Scope('OnPrem')]
@@ -120,6 +131,7 @@ codeunit 6060 "Hybrid Deployment"
         ServiceNotificationUrl: Text;
         ServiceSubscriptionId: Text[150];
         ServiceClientState: Text[50];
+        Handled: Boolean;
     begin
         OnBeforeEnableReplication(
           SourceProduct, NotificationUrl, SubscriptionId, ClientState,
@@ -134,7 +146,11 @@ codeunit 6060 "Hybrid Deployment"
         RetryGetStatus(InstanceId, FailedEnableReplicationErr, Output);
 
         EnableIntelligentCloud(true);
-        PermissionManager.ResetUsersToIntelligentCloudUserGroup();
+        OnBeforeResetUsersToIntelligentCloudPermissions(Handled);
+        if Handled then
+            exit;
+
+        PermissionManager.ResetUsersToIntelligentCloudPermissions();
     end;
 
     [Scope('OnPrem')]
@@ -276,6 +292,12 @@ codeunit 6060 "Hybrid Deployment"
 
         JSONManagement.InitializeObject(JsonOutput);
         JSONManagement.GetStringPropertyValueByName('RunId', RunId);
+    end;
+
+    [Scope('OnPrem')]
+    procedure StartDataUpgrade()
+    begin
+        OnStartDataUpgrade();
     end;
 
     [Scope('OnPrem')]
@@ -649,6 +671,9 @@ codeunit 6060 "Hybrid Deployment"
     var
         IntelligentCloud: Record "Intelligent Cloud";
         CurrentModuleInfo: ModuleInfo;
+        CanStartUpgrade: Boolean;
+        Handled: Boolean;
+        SkipVersionCheck: Boolean;
     begin
         if not IntelligentCloud.Get() then
             exit(true);
@@ -656,19 +681,47 @@ codeunit 6060 "Hybrid Deployment"
         if not IntelligentCloud.Enabled then
             exit(true);
 
+        OnHandleVerifyCanStartUpgrade(CanStartUpgrade, Handled);
+        if Handled then
+            exit(CanStartUpgrade);
+
         NavApp.GetCurrentModuleInfo(CurrentModuleInfo);
 
-        // Skip HFes
-        if (CurrentModuleInfo.AppVersion().Major = CurrentModuleInfo.DataVersion().Major) and
-        (CurrentModuleInfo.AppVersion().Minor = CurrentModuleInfo.DataVersion().Minor) then
-            exit(false);
+        Session.LogMessage('0000IGD', StrSubstNo(VerifyingIfUpgradeCanBeStartedMsg, CurrentModuleInfo.AppVersion().Major, CurrentModuleInfo.AppVersion().Minor, CurrentModuleInfo.DataVersion().Major, CurrentModuleInfo.DataVersion().Minor), Verbosity::Normal, DataClassification::SystemMetadata, TelemetryScope::ExtensionPublisher, 'Category', CloudMigrationTok);
 
+        // Skip HFes
+        OnSkipMinorAndMajorVersionCheck(SkipVersionCheck);
+        if not SkipVersionCheck then
+            if (CurrentModuleInfo.AppVersion().Major = CurrentModuleInfo.DataVersion().Major) and (CurrentModuleInfo.AppVersion().Minor = CurrentModuleInfo.DataVersion().Minor) then
+                exit(false);
+
+        Session.LogMessage('0000IGE', StrSubstNo(RaisingOnCanStartUpgradeForCompanyTxt, CompanyName), Verbosity::Normal, DataClassification::SystemMetadata, TelemetryScope::ExtensionPublisher, 'Category', CloudMigrationTok);
         OnCanStartUpgrade(CompanyName);
         exit(true);
     end;
 
     [IntegrationEvent(false, false)]
     local procedure OnCanStartUpgrade(CompanyName: Text)
+    begin
+    end;
+
+    [IntegrationEvent(false, false)]
+    local procedure OnStartDataUpgrade()
+    begin
+    end;
+
+    [IntegrationEvent(false, false)]
+    local procedure OnHandleVerifyCanStartUpgrade(var CanStartUpgrade: Boolean; var Handled: Boolean)
+    begin
+    end;
+
+    [IntegrationEvent(false, false)]
+    local procedure OnSkipMinorAndMajorVersionCheck(var SkipVersionCheck: Boolean)
+    begin
+    end;
+
+    [IntegrationEvent(false, false)]
+    local procedure OnBeforeResetUsersToIntelligentCloudPermissions(var Handled: Boolean)
     begin
     end;
 }

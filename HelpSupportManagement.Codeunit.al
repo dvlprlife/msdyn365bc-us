@@ -1,3 +1,9 @@
+namespace System.Environment;
+
+using Microsoft;
+using Microsoft.Foundation.Navigate;
+using System.Utilities;
+
 codeunit 9165 "Help & Support Management"
 {
     Permissions = TableData "Support Contact Information" = rimd;
@@ -19,7 +25,7 @@ codeunit 9165 "Help & Support Management"
         if not SupportContactInformation.ReadPermission then
             exit;
 
-        if not SupportContactInformation.Get then
+        if not SupportContactInformation.Get() then
             exit;
 
         Name := SupportContactInformation.Name;

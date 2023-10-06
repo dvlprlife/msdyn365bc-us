@@ -1,3 +1,17 @@
+namespace System.Security.AccessControl;
+
+using Microsoft.Finance.GeneralLedger.Setup;
+using Microsoft.Finance.Dimension;
+using Microsoft.Foundation.Period;
+using Microsoft.Projects.Project.Job;
+using Microsoft.Projects.Project.Journal;
+using Microsoft.Projects.Project.Ledger;
+using Microsoft.Projects.Project.Planning;
+using Microsoft.Projects.Project.WIP;
+using Microsoft.Projects.TimeSheet;
+using Microsoft.Finance.VAT.RateChange;
+using Microsoft.Finance.VAT.Setup;
+
 permissionset 3414 "Jobs Journals - Post"
 {
     Access = Public;
@@ -25,5 +39,6 @@ permissionset 3414 "Jobs Journals - Post"
                   tabledata "Time Sheet Header" = R,
                   tabledata "Time Sheet Line" = Rm,
                   tabledata "Time Sheet Posting Entry" = R,
-                  tabledata "VAT Rate Change Log Entry" = Ri;
+                  tabledata "VAT Rate Change Log Entry" = Ri,
+                  tabledata "VAT Setup" = R;
 }

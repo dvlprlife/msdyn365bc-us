@@ -1,3 +1,5 @@
+namespace System.Environment;
+
 page 670 "Concurrent Session List"
 {
     Caption = 'Concurrent Session List';
@@ -5,7 +7,7 @@ page 670 "Concurrent Session List"
     PageType = List;
     ShowFilter = false;
     SourceTable = "Active Session";
-    SourceTableView = WHERE("Client Type" = FILTER(<> "Web Service" & <> "Management Client" & <> NAS & <> "Client Service"));
+    SourceTableView = where("Client Type" = filter(<> "Web Service" & <> "Management Client" & <> NAS & <> "Client Service"));
 
     layout
     {
@@ -13,25 +15,25 @@ page 670 "Concurrent Session List"
         {
             repeater(Group)
             {
-                field(CurrentSession; IsCurrentSession)
+                field(CurrentSession; IsCurrentSession())
                 {
                     ApplicationArea = Suite;
                     Caption = 'Current Session';
                     ToolTip = 'Specifies if the line describes the current session.';
                 }
-                field("Session ID"; "Session ID")
+                field("Session ID"; Rec."Session ID")
                 {
                     ApplicationArea = Suite;
                 }
-                field("User ID"; "User ID")
+                field("User ID"; Rec."User ID")
                 {
                     ApplicationArea = Suite;
                 }
-                field("Client Type"; "Client Type")
+                field("Client Type"; Rec."Client Type")
                 {
                     ApplicationArea = Suite;
                 }
-                field("Client Computer Name"; "Client Computer Name")
+                field("Client Computer Name"; Rec."Client Computer Name")
                 {
                     ApplicationArea = Suite;
                 }
@@ -45,12 +47,12 @@ page 670 "Concurrent Session List"
 
     trigger OnOpenPage()
     begin
-        SetRange("Server Instance ID", ServiceInstanceId);
+        Rec.SetRange("Server Instance ID", ServiceInstanceId());
     end;
 
     local procedure IsCurrentSession(): Boolean
     begin
-        exit("Session ID" = SessionId);
+        exit(Rec."Session ID" = SessionId());
     end;
 }
 

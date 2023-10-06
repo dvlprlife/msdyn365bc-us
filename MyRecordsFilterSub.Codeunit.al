@@ -1,3 +1,14 @@
+// ------------------------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+// ------------------------------------------------------------------------------------------------
+namespace Microsoft.RoleCenters;
+
+using Microsoft.Inventory.Item;
+using Microsoft.Purchases.Vendor;
+using Microsoft.Sales.Customer;
+using System.Text;
+
 codeunit 9150 "My Records Filter Sub."
 {
 
@@ -44,10 +55,7 @@ codeunit 9150 "My Records Filter Sub."
         IsHandled := false;
         IsMyTable := MyTableNo in [DATABASE::"My Customer", DATABASE::"My Vendor", DATABASE::"My Item"];
         OnBeforeGetMyFilterText(TextFilterText, MyTableNo, IsMyTable, IsHandled);
-#if not CLEAN19
-        OnGeforeGetMyFilterText(TextFilterText, MyTableNo, IsMyTable, IsHandled);
-#endif
-        if IsHandled then 
+        if IsHandled then
             exit;
 
         if not IsMyTable then
@@ -64,7 +72,7 @@ codeunit 9150 "My Records Filter Sub."
                 AddToFilter(TextFilterText, Format(FieldRef.Value));
                 NoOfValues += 1;
             until (RecRef.Next() = 0) or (NoOfValues > 2000);
-        RecRef.Close;
+        RecRef.Close();
 
         if NoOfValues > 2000 then
             Message(OverflowMsg);
@@ -82,13 +90,5 @@ codeunit 9150 "My Records Filter Sub."
     local procedure OnBeforeGetMyFilterText(var TextFilterText: Text; MyTableNo: Integer; var IsMyTable: Boolean; var IsHandled: Boolean)
     begin
     end;
-
-#if not CLEAN19
-    [Obsolete('Replaced by event OnBeforeGetMyFilterText().', '19.0')]
-    [IntegrationEvent(false, false)]
-    local procedure OnGeforeGetMyFilterText(var TextFilterText: Text; MyTableNo: Integer; var IsMyTable: Boolean; var IsHandled: Boolean)
-    begin
-    end;
-#endif
 }
 

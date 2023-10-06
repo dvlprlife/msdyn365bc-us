@@ -1,12 +1,19 @@
+namespace Microsoft.EServices.EDocument;
+
+using Microsoft.Sales.History;
+using Microsoft.Service.History;
+using Microsoft.Utilities;
+using System.Reflection;
+
 codeunit 1420 "Doc. Exch. Serv.- Doc. Status"
 {
 
     trigger OnRun()
     begin
-        CheckPostedInvoices;
-        CheckPostedCrMemos;
-        CheckPostedServiceInvoices;
-        CheckPostedServiceCrMemos;
+        CheckPostedInvoices();
+        CheckPostedCrMemos();
+        CheckPostedServiceInvoices();
+        CheckPostedServiceCrMemos();
     end;
 
     var

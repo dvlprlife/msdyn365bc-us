@@ -1,3 +1,27 @@
+namespace System.Security.AccessControl;
+
+using Microsoft.Sales.Customer;
+using Microsoft.Foundation.Address;
+using Microsoft.Finance.Currency;
+using Microsoft.Sales.FinanceCharge;
+using Microsoft.Sales.Reminder;
+using Microsoft.Sales.Receivables;
+using Microsoft.Finance.GeneralLedger.Ledger;
+using Microsoft.Finance.GeneralLedger.Journal;
+using Microsoft.Finance.GeneralLedger.Setup;
+using Microsoft.Inventory.Item;
+using Microsoft.Inventory.Ledger;
+using Microsoft.Sales.History;
+using Microsoft.Sales.Document;
+using Microsoft.Finance.SalesTax;
+using Microsoft.Foundation.Period;
+using Microsoft.Projects.Project.Ledger;
+using Microsoft.Foundation.AuditCodes;
+using Microsoft.Finance.VAT.Setup;
+using Microsoft.Finance.VAT.RateChange;
+using Microsoft.Finance.VAT.Reporting;
+using Microsoft.Finance.VAT.Calculation;
+
 permissionset 7071 "Recievables - Edit"
 {
     Access = Public;
@@ -5,6 +29,7 @@ permissionset 7071 "Recievables - Edit"
     Caption = 'S&R  periodic activities';
 
     Permissions = tabledata "Additional Fee Setup" = R,
+                  tabledata "Alt. Customer Posting Group" = r,
                   tabledata "Country/Region" = R,
                   tabledata Currency = rm,
                   tabledata "Currency for Fin. Charge Terms" = R,
@@ -36,9 +61,6 @@ permissionset 7071 "Recievables - Edit"
                   tabledata "Item Variant" = R,
                   tabledata "Job Ledger Entry" = R,
                   tabledata "Line Fee Note on Report Hist." = R,
-#if not CLEAN20
-                  tabledata "Native - Payment" = RImd,
-#endif
                   tabledata "Reminder Comment Line" = RIMD,
                   tabledata "Reminder Header" = RIMD,
                   tabledata "Reminder Level" = R,
@@ -67,5 +89,7 @@ permissionset 7071 "Recievables - Edit"
                   tabledata "VAT Rate Change Log Entry" = Ri,
                   tabledata "VAT Rate Change Setup" = R,
                   tabledata "VAT Reporting Code" = R,
-                  tabledata "VAT Setup Posting Groups" = R;
+                  tabledata "VAT Setup Posting Groups" = R,
+                  tabledata "VAT Setup" = R,
+                  tabledata "VAT Posting Parameters" = R;
 }

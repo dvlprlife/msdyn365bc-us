@@ -1,3 +1,12 @@
+namespace System.Security.AccessControl;
+
+using Microsoft.Finance.FinancialReports;
+using Microsoft.Finance.Analysis;
+using Microsoft.Finance.Consolidation;
+using Microsoft.Finance.Dimension;
+using Microsoft.Finance.GeneralLedger.Account;
+using Microsoft.Finance.GeneralLedger.Budget;
+
 permissionset 3632 "Account Schedules - Edit"
 {
     Access = Public;
@@ -7,6 +16,8 @@ permissionset 3632 "Account Schedules - Edit"
     Permissions = tabledata "Acc. Sched. Chart Setup Line" = RIMD,
                   tabledata "Acc. Schedule Line" = RIMD,
                   tabledata "Acc. Schedule Name" = RIMD,
+                  tabledata "Financial Report" = RIMD,
+                  tabledata "Financial Report User Filters" = RIMD,
                   tabledata "Account Schedules Chart Setup" = RIMD,
                   tabledata "Analysis View" = R,
                   tabledata "Analysis View Budget Entry" = R,

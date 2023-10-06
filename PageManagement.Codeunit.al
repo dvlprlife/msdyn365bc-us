@@ -1,3 +1,35 @@
+﻿namespace Microsoft.Utilities;
+
+using Microsoft.Bank.Reconciliation;
+using Microsoft.CashFlow.Setup;
+using Microsoft.EServices.EDocument;
+using Microsoft.Finance.GeneralLedger.Journal;
+using Microsoft.Finance.GeneralLedger.Setup;
+#if not CLEAN21
+using Microsoft.FixedAssets.Journal;
+#endif
+using Microsoft.Foundation.Company;
+using Microsoft.HumanResources.Employee;
+using Microsoft.Intercompany.Journal;
+using Microsoft.Inventory.Analysis;
+using Microsoft.Manufacturing.Document;
+using Microsoft.Projects.Project.Journal;
+using Microsoft.Projects.Resources.Journal;
+using Microsoft.Purchases.Analysis;
+using Microsoft.Purchases.Archive;
+using Microsoft.Purchases.Document;
+using Microsoft.Purchases.Setup;
+using Microsoft.Sales.Analysis;
+using Microsoft.Sales.Archive;
+using Microsoft.Sales.Document;
+using Microsoft.Sales.History;
+using Microsoft.Service.Contract;
+using Microsoft.Service.Document;
+using System.Automation;
+using System.Reflection;
+using System.Security.AccessControl;
+using System.Security.User;
+
 codeunit 700 "Page Management"
 {
 
@@ -32,6 +64,7 @@ codeunit 700 "Page Management"
 
         PageID := GetPageID(RecRef);
 
+        OnPageRunAtFieldOnBeforeRunPage(RecRef, PageID);
         if PageID <> 0 then begin
             RecordRefVariant := RecRef;
             if Modal then
@@ -133,58 +166,60 @@ codeunit 700 "Page Management"
             exit(CardPageID);
 
         case RecRef.Number of
-            DATABASE::"Gen. Journal Template":
+            Database::"Gen. Journal Template":
                 exit(PAGE::"General Journal Templates");
-            DATABASE::"Company Information":
+            Database::"Company Information":
                 exit(PAGE::"Company Information");
-            DATABASE::"Sales Header":
+            Database::"Sales Header":
                 exit(GetSalesHeaderPageID(RecRef));
-            DATABASE::"Purchase Header":
+            Database::"Purchase Header":
                 exit(GetPurchaseHeaderPageID(RecRef));
-            DATABASE::"Service Header":
+            Database::"Service Header":
                 exit(GetServiceHeaderPageID(RecRef));
-            DATABASE::"Gen. Journal Batch":
+            Database::"Service Contract Header":
+                exit(GetServiceContractHeaderPageID(RecRef));
+            Database::"Gen. Journal Batch":
                 exit(GetGenJournalBatchPageID(RecRef));
-            DATABASE::"Gen. Journal Line":
+            Database::"Gen. Journal Line":
                 exit(GetGenJournalLinePageID(RecRef));
-            DATABASE::"User Setup":
+            Database::"User Setup":
                 exit(PAGE::"User Setup");
-            DATABASE::"General Ledger Setup":
+            Database::"General Ledger Setup":
                 exit(PAGE::"General Ledger Setup");
-            DATABASE::"Sales Header Archive":
+            Database::"Sales Header Archive":
                 exit(GetSalesHeaderArchivePageID(RecRef));
-            DATABASE::"Purchase Header Archive":
+            Database::"Purchase Header Archive":
                 exit(GetPurchaseHeaderArchivePageID(RecRef));
-            DATABASE::"Res. Journal Line":
+            Database::"Res. Journal Line":
                 exit(PAGE::"Resource Journal");
-            DATABASE::"Job Journal Line":
+            Database::"Job Journal Line":
                 exit(PAGE::"Job Journal");
-            DATABASE::"Item Analysis View":
+            Database::"Item Analysis View":
                 exit(GetAnalysisViewPageID(RecRef));
-            DATABASE::"Purchases & Payables Setup":
+            Database::"Purchases & Payables Setup":
                 exit(PAGE::"Purchases & Payables Setup");
-            DATABASE::"Approval Entry":
+            Database::"Approval Entry":
                 exit(GetApprovalEntryPageID(RecRef));
-            DATABASE::"Doc. Exch. Service Setup":
+            Database::"Doc. Exch. Service Setup":
                 exit(PAGE::"Doc. Exch. Service Setup");
-            DATABASE::"Incoming Documents Setup":
+            Database::"Incoming Documents Setup":
                 exit(PAGE::"Incoming Documents Setup");
-            DATABASE::"Text-to-Account Mapping":
+            Database::"Text-to-Account Mapping":
                 exit(PAGE::"Text-to-Account Mapping Wksh.");
-            DATABASE::"Cash Flow Setup":
+            Database::"Cash Flow Setup":
                 exit(PAGE::"Cash Flow Setup");
-            DATABASE::"Sales Invoice Header":
+            Database::"Sales Invoice Header":
                 exit(PAGE::"Posted Sales Invoice");
-            DATABASE::"Production Order":
+            Database::"Production Order":
                 exit(GetProductionOrderPageID(RecRef));
             Database::User:
                 exit(Page::"User Card");
             Database::Employee:
                 Exit(Page::"Employee Card");
             else begin
-                    OnConditionalCardPageIDNotFound(RecRef, CardPageID);
-                    exit(CardPageID);
-                end;
+                OnConditionalCardPageIDNotFound(RecRef, CardPageID);
+                exit(CardPageID);
+            end;
         end;
         exit(0);
     end;
@@ -200,9 +235,9 @@ codeunit 700 "Page Management"
             exit(PageID);
 
         case RecRef.Number of
-            DATABASE::"Sales Header":
+            Database::"Sales Header":
                 exit(GetSalesHeaderListPageID(RecRef));
-            DATABASE::"Purchase Header":
+            Database::"Purchase Header":
                 exit(GetPurchaseHeaderListPageID(RecRef));
         end;
         exit(0);
@@ -229,41 +264,58 @@ codeunit 700 "Page Management"
         end;
     end;
 
-    local procedure GetPurchaseHeaderPageID(RecRef: RecordRef): Integer
+    local procedure GetPurchaseHeaderPageID(RecRef: RecordRef) Result: Integer
     var
         PurchaseHeader: Record "Purchase Header";
     begin
         RecRef.SetTable(PurchaseHeader);
         case PurchaseHeader."Document Type" of
             PurchaseHeader."Document Type"::Quote:
-                exit(PAGE::"Purchase Quote");
+                Result := PAGE::"Purchase Quote";
             PurchaseHeader."Document Type"::Order:
-                exit(PAGE::"Purchase Order");
+                Result := PAGE::"Purchase Order";
             PurchaseHeader."Document Type"::Invoice:
-                exit(PAGE::"Purchase Invoice");
+                Result := PAGE::"Purchase Invoice";
             PurchaseHeader."Document Type"::"Credit Memo":
-                exit(PAGE::"Purchase Credit Memo");
+                Result := PAGE::"Purchase Credit Memo";
             PurchaseHeader."Document Type"::"Blanket Order":
-                exit(PAGE::"Blanket Purchase Order");
+                Result := PAGE::"Blanket Purchase Order";
             PurchaseHeader."Document Type"::"Return Order":
-                exit(PAGE::"Purchase Return Order");
+                Result := PAGE::"Purchase Return Order";
         end;
+        OnAfterGetPurchaseHeaderPageID(RecRef, PurchaseHeader, Result);
     end;
 
-    local procedure GetServiceHeaderPageID(RecRef: RecordRef): Integer
+    local procedure GetServiceHeaderPageID(RecRef: RecordRef) Result: Integer
     var
         ServiceHeader: Record "Service Header";
     begin
         RecRef.SetTable(ServiceHeader);
         case ServiceHeader."Document Type" of
             ServiceHeader."Document Type"::Quote:
-                exit(PAGE::"Service Quote");
+                Result := PAGE::"Service Quote";
             ServiceHeader."Document Type"::Order:
-                exit(PAGE::"Service Order");
+                Result := PAGE::"Service Order";
             ServiceHeader."Document Type"::Invoice:
-                exit(PAGE::"Service Invoice");
+                Result := PAGE::"Service Invoice";
             ServiceHeader."Document Type"::"Credit Memo":
-                exit(PAGE::"Service Credit Memo");
+                Result := PAGE::"Service Credit Memo";
+        end;
+        OnAfterGetServiceHeaderPageID(RecRef, ServiceHeader, Result);
+    end;
+
+    local procedure GetServiceContractHeaderPageID(RecRef: RecordRef): Integer
+    var
+        ServiceContractHeader: Record "Service Contract Header";
+    begin
+        RecRef.SetTable(ServiceContractHeader);
+        case ServiceContractHeader."Contract Type" of
+            ServiceContractHeader."Contract Type"::Contract:
+                exit(PAGE::"Service Contract");
+            ServiceContractHeader."Contract Type"::Quote:
+                exit(PAGE::"Service Contract Quote");
+            ServiceContractHeader."Contract Type"::Template:
+                exit(PAGE::"Service Contract Template");
         end;
     end;
 
@@ -311,8 +363,10 @@ codeunit 700 "Page Management"
                 exit(PAGE::"Cash Receipt Journal");
             GenJournalTemplate.Type::Payments:
                 exit(PAGE::"Payment Journal");
+#if not CLEAN21                
             GenJournalTemplate.Type::Assets:
                 exit(PAGE::"Fixed Asset G/L Journal");
+#endif
             GenJournalTemplate.Type::Intercompany:
                 exit(PAGE::"IC General Journal");
             GenJournalTemplate.Type::Jobs:
@@ -446,7 +500,7 @@ codeunit 700 "Page Management"
     procedure GetWebUrl(var RecRef: RecordRef; PageID: Integer): Text
     begin
         if not RecRef.HasFilter then
-            RecRef.SetRecFilter;
+            RecRef.SetRecFilter();
 
         if not VerifyPageID(RecRef.Number, PageID) then
             PageID := GetPageID(RecRef);
@@ -457,7 +511,13 @@ codeunit 700 "Page Management"
     local procedure VerifyPageID(TableID: Integer; PageID: Integer): Boolean
     var
         PageMetadata: Record "Page Metadata";
+        IsHandled, Result : Boolean;
     begin
+        IsHandled := false;
+        OnBeforeVerifyPageID(TableID, PageID, Result, IsHandled);
+        if IsHandled then
+            exit(Result);
+
         exit(PageMetadata.Get(PageID) and (PageMetadata.SourceTable = TableID));
     end;
 
@@ -482,7 +542,17 @@ codeunit 700 "Page Management"
     end;
 
     [IntegrationEvent(false, false)]
-    local procedure OnAfterGetPageID(RecordRef: RecordRef; var PageID: Integer)
+    local procedure OnAfterGetPageID(var RecordRef: RecordRef; var PageID: Integer)
+    begin
+    end;
+
+    [IntegrationEvent(false, false)]
+    local procedure OnAfterGetPurchaseHeaderPageID(RecRef: RecordRef; PurchaseHeader: Record "Purchase Header"; var Result: Integer)
+    begin
+    end;
+
+    [IntegrationEvent(false, false)]
+    local procedure OnAfterGetServiceHeaderPageID(RecRef: RecordRef; ServiceHeader: Record "Service Header"; var Result: Integer)
     begin
     end;
 
@@ -498,6 +568,16 @@ codeunit 700 "Page Management"
 
     [IntegrationEvent(false, false)]
     local procedure OnConditionalCardPageIDNotFound(RecordRef: RecordRef; var CardPageID: Integer)
+    begin
+    end;
+
+    [IntegrationEvent(false, false)]
+    local procedure OnPageRunAtFieldOnBeforeRunPage(var RecordRef: RecordRef; var PageID: Integer)
+    begin
+    end;
+
+    [IntegrationEvent(false, false)]
+    local procedure OnBeforeVerifyPageID(TableID: Integer; PageID: Integer; var Result: Boolean; var IsHandled: Boolean)
     begin
     end;
 }

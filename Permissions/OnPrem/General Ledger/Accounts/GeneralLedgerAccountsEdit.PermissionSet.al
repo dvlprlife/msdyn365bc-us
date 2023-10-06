@@ -1,3 +1,50 @@
+namespace System.Security.AccessControl;
+
+using Microsoft.Purchases.Vendor;
+using Microsoft.Purchases.Payables;
+using Microsoft.Finance.VAT.Calculation;
+using Microsoft.Finance.GeneralLedger.Setup;
+using Microsoft.Finance.Analysis;
+using Microsoft.Bank.Ledger;
+using Microsoft.Bank.BankAccount;
+using Microsoft.Bank.Check;
+using Microsoft.Foundation.Comment;
+using Microsoft.Finance.Currency;
+using Microsoft.Sales.Receivables;
+using Microsoft.Sales.Customer;
+using Microsoft.Finance.Dimension;
+using Microsoft.HumanResources.Payables;
+using Microsoft.HumanResources.Employee;
+using Microsoft.Foundation.ExtendedText;
+using Microsoft.FixedAssets.FixedAsset;
+using Microsoft.FixedAssets.Ledger;
+using Microsoft.Finance.GeneralLedger.Account;
+using Microsoft.Finance.GeneralLedger.Budget;
+using Microsoft.Finance.GeneralLedger.Ledger;
+using Microsoft.Finance.GeneralLedger.Journal;
+using Microsoft.Intercompany.BankAccount;
+using Microsoft.Intercompany.GLAccount;
+using Microsoft.Intercompany.Partner;
+using Microsoft.FixedAssets.Maintenance;
+using Microsoft.Purchases.History;
+using Microsoft.Purchases.Document;
+using Microsoft.Purchases.Archive;
+using Microsoft.Sales.History;
+using Microsoft.Sales.Document;
+using Microsoft.Sales.Archive;
+using Microsoft.Service.Contract;
+using Microsoft.Service.Pricing;
+using Microsoft.Finance.SalesTax;
+using Microsoft.Foundation.Period;
+using Microsoft.Inventory.Item;
+using Microsoft.Projects.Project.Journal;
+using Microsoft.Projects.Project.Ledger;
+using Microsoft.Projects.Project.Planning;
+using Microsoft.Projects.Project.Job;
+using Microsoft.Finance.VAT.Setup;
+using Microsoft.Finance.VAT.RateChange;
+using Microsoft.Finance.VAT.Reporting;
+
 permissionset 9111 "General Ledger Accounts - Edit"
 {
     Access = Public;
@@ -35,6 +82,7 @@ permissionset 9111 "General Ledger Accounts - Edit"
                   tabledata "Gen. Journal Template" = r,
                   tabledata "Gen. Product Posting Group" = R,
                   tabledata "General Posting Setup" = r,
+                  tabledata "IC Bank Account" = r,
                   tabledata "IC G/L Account" = Rm,
                   tabledata "IC Partner" = r,
                   tabledata "Inventory Posting Setup" = r,
@@ -44,9 +92,6 @@ permissionset 9111 "General Ledger Accounts - Edit"
                   tabledata "Job Planning Line" = r,
                   tabledata "Job Posting Group" = r,
                   tabledata "Maintenance Ledger Entry" = r,
-#if not CLEAN20
-                  tabledata "Native - Payment" = r,
-#endif
                   tabledata "Payment Method" = r,
                   tabledata "Purch. Cr. Memo Hdr." = r,
                   tabledata "Purch. Cr. Memo Line" = r,
@@ -88,6 +133,8 @@ permissionset 9111 "General Ledger Accounts - Edit"
                   tabledata "VAT Rate Change Setup" = r,
                   tabledata "VAT Reporting Code" = R,
                   tabledata "VAT Setup Posting Groups" = r,
+                  tabledata "VAT Setup" = R,
+                  tabledata "VAT Posting Parameters" = R,
                   tabledata "Vendor Ledger Entry" = r,
                   tabledata "Vendor Posting Group" = r;
 }

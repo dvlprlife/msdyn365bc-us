@@ -1,3 +1,25 @@
+// ------------------------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+// ------------------------------------------------------------------------------------------------
+namespace Microsoft.Utilities;
+
+using System.Environment.Configuration;
+using System.Environment;
+using System.Reflection;
+using Microsoft.Finance.RoleCenters;
+using Microsoft.Sales.Customer;
+using Microsoft.Inventory.Item;
+using Microsoft.Finance.GeneralLedger.Account;
+using Microsoft.Bank.BankAccount;
+using Microsoft.Sales.Document;
+using Microsoft.Sales.History;
+using Microsoft.Sales.RoleCenters;
+using System.Azure.Identity;
+using System.Integration;
+using System.Security.User;
+using System.Email;
+
 codeunit 1997 "Checklist Events"
 {
     var
@@ -47,13 +69,18 @@ codeunit 1997 "Checklist Events"
         GuidedExperienceType: Enum "Guided Experience Type";
         SpotlightTourType: Enum "Spotlight Tour Type";
     begin
-        // Business Manager
+        // Business Manager Evaluation
         GetRolesForEvaluationCompany(TempAllProfileBusinessManagerEval);
 
         Checklist.Insert(GuidedExperienceType::Tour, ObjectType::Page, Page::"Business Manager Role Center", 1000, TempAllProfileBusinessManagerEval, true);
         Checklist.Insert(Page::"Customer List", SpotlightTourType::"Open in Excel", 2000, TempAllProfileBusinessManagerEval, true);
+
         Checklist.Insert(Page::"Item Card", SpotlightTourType::"Share to Teams", 3000, TempAllProfileBusinessManagerEval, true);
+
         Checklist.Insert(GuidedExperienceType::Video, YourSalesWithinOutlookVideoLinkTxt, 4000, TempAllProfileBusinessManagerEval, true);
+
+        Checklist.Insert(Page::"Item Card", SpotlightTourType::Copilot, 5000, TempAllProfileBusinessManagerEval, true);
+
         if not TenantLicenseState.IsPaidMode() then
             Checklist.Insert(enum::"Guided Experience Type"::Learn, ReadyToGoLinkTxt, 9000, TempAllProfileBusinessManagerEval, true);
 

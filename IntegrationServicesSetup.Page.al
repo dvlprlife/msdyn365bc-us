@@ -1,3 +1,9 @@
+namespace System.Integration;
+
+using Microsoft.API;
+using Microsoft.Finance.GeneralLedger.Journal;
+using Microsoft.Integration.Graph;
+
 page 1876 "Integration Services Setup"
 {
     Caption = 'Integration Services Setup';
@@ -13,7 +19,7 @@ page 1876 "Integration Services Setup"
         {
             group("Customer Payments Service")
             {
-                field("Customer Payments Batch Name"; "Customer Payments Batch Name")
+                field("Customer Payments Batch Name"; Rec."Customer Payments Batch Name")
                 {
                     ApplicationArea = All;
                     Caption = 'Default Customer Payments Batch Name';
@@ -27,8 +33,8 @@ page 1876 "Integration Services Setup"
                     begin
                         GraphMgtCustomerPaymentsLines.SetCustomerPaymentsFilters(GenJournalLine);
 
-                        CurrPage.SaveRecord;
-                        GenJnlManagement.LookupName("Customer Payments Batch Name", GenJournalLine);
+                        CurrPage.SaveRecord();
+                        GenJnlManagement.LookupName(Rec."Customer Payments Batch Name", GenJournalLine);
                         CurrPage.Update(true);
                     end;
                 }
@@ -42,7 +48,7 @@ page 1876 "Integration Services Setup"
 
     trigger OnOpenPage()
     begin
-        SafeGet;
+        Rec.SafeGet();
     end;
 
     var

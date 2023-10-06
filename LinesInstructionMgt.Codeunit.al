@@ -1,3 +1,13 @@
+// ------------------------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+// ------------------------------------------------------------------------------------------------
+namespace Microsoft.Utilities;
+
+using Microsoft.Purchases.Document;
+using Microsoft.Sales.Document;
+using System.Environment.Configuration;
+
 codeunit 1320 "Lines Instruction Mgt."
 {
 
@@ -38,7 +48,13 @@ codeunit 1320 "Lines Instruction Mgt."
     var
         PurchaseLine: Record "Purchase Line";
         MyNotifications: Record "My Notifications";
+        IsHandled: Boolean;
     begin
+        IsHandled := false;
+        OnBeforePurchaseCheckAllLinesHaveQuantityAssigned(PurchaseHeader, IsHandled);
+        if IsHandled then
+            exit;
+
         PurchaseLine.SetRange("Document No.", PurchaseHeader."No.");
         PurchaseLine.SetRange("Document Type", PurchaseHeader."Document Type");
         PurchaseLine.SetFilter(Type, '<>%1', PurchaseLine.Type::" ");
@@ -61,6 +77,11 @@ codeunit 1320 "Lines Instruction Mgt."
 
     [IntegrationEvent(false, false)]
     local procedure OnAfterSetPurchaseLineFilters(var PurchaseLine: Record "Purchase Line"; PurchaseHeader: Record "Purchase Header")
+    begin
+    end;
+
+    [IntegrationEvent(false, false)]
+    local procedure OnBeforePurchaseCheckAllLinesHaveQuantityAssigned(PurchaseHeader: Record "Purchase Header"; var IsHandled: Boolean)
     begin
     end;
 

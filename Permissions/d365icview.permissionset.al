@@ -1,3 +1,14 @@
+namespace System.Security.AccessControl;
+
+using Microsoft.Intercompany.Comment;
+using Microsoft.Intercompany.Inbox;
+using Microsoft.Intercompany.Outbox;
+using Microsoft.Intercompany.BankAccount;
+using Microsoft.Intercompany.Dimension;
+using Microsoft.Intercompany.GLAccount;
+using Microsoft.Intercompany.Partner;
+using Microsoft.Intercompany.Setup;
+
 permissionset 3814 "D365 IC, VIEW"
 {
     Assignable = true;
@@ -15,6 +26,7 @@ permissionset 3814 "D365 IC, VIEW"
                   tabledata "Handled IC Outbox Sales Header" = R,
                   tabledata "Handled IC Outbox Sales Line" = R,
                   tabledata "Handled IC Outbox Trans." = R,
+                  tabledata "IC Bank Account" = R,
                   tabledata "IC Comment Line" = R,
                   tabledata "IC Dimension" = R,
                   tabledata "IC Dimension Value" = R,

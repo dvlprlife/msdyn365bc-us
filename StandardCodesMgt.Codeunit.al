@@ -1,3 +1,9 @@
+namespace Microsoft.Utilities;
+
+using Microsoft.Purchases.Document;
+using Microsoft.Sales.Document;
+using System.Environment.Configuration;
+
 codeunit 170 "Standard Codes Mgt."
 {
 
@@ -18,10 +24,10 @@ codeunit 170 "Standard Codes Mgt."
         if not CanCreatePurchRecurringLines(PurchHeader) then
             exit;
 
-        IF NOT TryFindFirstStandardPurchCodeToAdd(PurchHeader, StandardVendorPurchaseCode) THEN
+        if not TryFindFirstStandardPurchCodeToAdd(PurchHeader, StandardVendorPurchaseCode) then
             exit;
 
-        IF (StandardVendorPurchaseCode.Count = 1) AND
+        if (StandardVendorPurchaseCode.Count = 1) and
            StandardVendorPurchaseCode.IsInsertRecurringLinesOnDocumentAutomatic(PurchHeader)
         then
             StandardVendorPurchaseCode.ApplyStdCodesToPurchaseLines(PurchHeader, StandardVendorPurchaseCode)
@@ -33,13 +39,13 @@ codeunit 170 "Standard Codes Mgt."
     var
         StandardCustomerSalesCode: Record "Standard Customer Sales Code";
     begin
-        IF NOT CanCreateSalesRecurringLines(SalesHeader) THEN
+        if not CanCreateSalesRecurringLines(SalesHeader) then
             exit;
 
-        IF NOT TryFindFirstStandardSalesCodeToAdd(SalesHeader, StandardCustomerSalesCode) THEN
+        if not TryFindFirstStandardSalesCodeToAdd(SalesHeader, StandardCustomerSalesCode) then
             exit;
 
-        IF (StandardCustomerSalesCode.Count = 1) AND
+        if (StandardCustomerSalesCode.Count = 1) and
            StandardCustomerSalesCode.IsInsertRecurringLinesOnDocumentAutomatic(SalesHeader)
         then
             StandardCustomerSalesCode.ApplyStdCodesToSalesLines(SalesHeader, StandardCustomerSalesCode)
@@ -201,7 +207,7 @@ codeunit 170 "Standard Codes Mgt."
         if IsHandled then
             exit;
 
-        StandardCodesExistNotification.Id := GetSalesRecurringLinesNotificationId;
+        StandardCodesExistNotification.Id := GetSalesRecurringLinesNotificationId();
         StandardCodesExistNotification.Message := StrSubstNo(GetSalesRecurringLinesQst, SalesHeader."Sell-to Customer No.");
         StandardCodesExistNotification.AddAction(
           GetRecurringLinesTxt, CODEUNIT::"Standard Codes Mgt.", 'GetSalesRecurringLinesFromNotification');
@@ -209,7 +215,7 @@ codeunit 170 "Standard Codes Mgt."
         StandardCodesExistNotification.SetData(SalesHeader.FieldName("Document Type"), Format(SalesHeader."Document Type"));
         StandardCodesExistNotification.SetData(SalesHeader.FieldName("No."), SalesHeader."No.");
         NotificationLifecycleMgt.SendNotificationWithAdditionalContext(
-          StandardCodesExistNotification, SalesHeader.RecordId, GetSalesRecurringLinesNotificationId);
+          StandardCodesExistNotification, SalesHeader.RecordId, GetSalesRecurringLinesNotificationId());
     end;
 
     procedure ShowGetPurchRecurringLinesNotification(PurchHeader: Record "Purchase Header")
@@ -223,7 +229,7 @@ codeunit 170 "Standard Codes Mgt."
         if IsHandled then
             exit;
 
-        StandardCodesExistNotification.Id := GetPurchRecurringLinesNotificationId;
+        StandardCodesExistNotification.Id := GetPurchRecurringLinesNotificationId();
         StandardCodesExistNotification.Message := StrSubstNo(GetPurchRecurringLinesQst, PurchHeader."Buy-from Vendor No.");
         StandardCodesExistNotification.AddAction(
           GetRecurringLinesTxt, CODEUNIT::"Standard Codes Mgt.", 'GetPurchRecurringLinesFromNotification');
@@ -231,7 +237,7 @@ codeunit 170 "Standard Codes Mgt."
         StandardCodesExistNotification.SetData(PurchHeader.FieldName("Document Type"), Format(PurchHeader."Document Type"));
         StandardCodesExistNotification.SetData(PurchHeader.FieldName("No."), PurchHeader."No.");
         NotificationLifecycleMgt.SendNotificationWithAdditionalContext(
-          StandardCodesExistNotification, PurchHeader.RecordId, GetPurchRecurringLinesNotificationId);
+          StandardCodesExistNotification, PurchHeader.RecordId, GetPurchRecurringLinesNotificationId());
     end;
 
     procedure GetSalesRecurringLinesNotificationId(): Guid
@@ -280,7 +286,7 @@ codeunit 170 "Standard Codes Mgt."
     var
         StandardCustomerSalesCode: Record "Standard Customer Sales Code";
     begin
-        IF not CanCreateSalesRecurringLines(SalesHeader) then
+        if not CanCreateSalesRecurringLines(SalesHeader) then
             exit;
 
         StandardCustomerSalesCode.SetFilterByAutomaticAndAlwaysAskCodes(SalesHeader);

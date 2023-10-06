@@ -1,6 +1,26 @@
+// ------------------------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+// ------------------------------------------------------------------------------------------------
+namespace Microsoft.Utilities;
+
+using Microsoft.Bank.BankAccount;
+using Microsoft.Finance.GeneralLedger.Ledger;
+using Microsoft.Finance.GeneralLedger.Setup;
+using Microsoft.Foundation.Company;
+using Microsoft.Foundation.Period;
+using System.Environment.Configuration;
+using System.IO;
+using System.Threading;
+using System.Environment;
+using System.Media;
+using System.Globalization;
+
 codeunit 1800 "Assisted Company Setup"
 {
     Permissions = tabledata "Assisted Company Setup Status" = r;
+    InherentPermissions = X;
+    InherentEntitlements = X;
 
     trigger OnRun()
     begin
@@ -47,10 +67,10 @@ codeunit 1800 "Assisted Company Setup"
         if not GuiAllowed then
             exit;
 
-        if CompanyActive then
+        if CompanyActive() then
             exit;
 
-        if not AssistedSetupEnabled then
+        if not AssistedSetupEnabled() then
             exit;
 
         if GuidedExperience.IsAssistedSetupComplete(ObjectType::Page, Page::"Assisted Company Setup Wizard") then
@@ -64,7 +84,7 @@ codeunit 1800 "Assisted Company Setup"
     procedure ApplyUserInput(var TempConfigSetup: Record "Config. Setup" temporary; var BankAccount: Record "Bank Account"; AccountingPeriodStartDate: Date; SkipSetupCompanyInfo: Boolean)
     begin
         if not SkipSetupCompanyInfo then
-            TempConfigSetup.CopyCompInfo;
+            TempConfigSetup.CopyCompInfo();
         CreateAccountingPeriod(AccountingPeriodStartDate);
         SetupCompanyBankAccount(BankAccount);
     end;
@@ -83,7 +103,7 @@ codeunit 1800 "Assisted Company Setup"
         ConfigurationPackageFile.CalcFields(Package);
         ConfigurationPackageFile.Package.CreateInStream(InStream);
         CopyStream(OutStream, InStream);
-        TempFile.Close;
+        TempFile.Close();
     end;
 
     procedure CreateAccountingPeriod(StartDate: Date)
@@ -144,7 +164,7 @@ codeunit 1800 "Assisted Company Setup"
         if IsNullGuid(AssistedCompanySetupStatus."Task ID") then
             exit(false);
         JobQueueLogEntry.SetRange(ID, AssistedCompanySetupStatus."Task ID");
-        exit(JobQueueLogEntry.FindLast);
+        exit(JobQueueLogEntry.FindLast());
     end;
 
     local procedure GetCompanySetupStatus(Name: Text[30]): Enum "Company Setup Status"
@@ -190,7 +210,7 @@ codeunit 1800 "Assisted Company Setup"
             Window.Open(CompanyIsBeingSetUpMsg);
             while IsCompanySetupInProgress(CompanyName) do
                 Sleep(1000);
-            Window.Close;
+            Window.Close();
         end;
     end;
 
@@ -206,11 +226,11 @@ codeunit 1800 "Assisted Company Setup"
             Company."Evaluation Company" := true;
             Company.Modify();
             Commit();
-            DataClassificationEvalData.CreateEvaluationData;
-            Session.LogMessage('0000HUJ', StrSubstNo(CompanyEvaluationTxt, Company."Evaluation Company"), Verbosity::Normal, DataClassification::SystemMetadata, TelemetryScope::All, 'Category', CompanyEvaluationCategoryTok);
+            DataClassificationEvalData.CreateEvaluationData();
+            Session.LogMessage('0000HUJ', StrSubstNo(CompanyEvaluationTxt, Company."Evaluation Company"), Verbosity::Normal, DataClassification::SystemMetadata, TelemetryScope::ExtensionPublisher, 'Category', CompanyEvaluationCategoryTok);
         end;
 
-        UserPersonalization.Get(UserSecurityId);
+        UserPersonalization.Get(UserSecurityId());
         if FindConfigurationPackageFile(ConfigurationPackageFile, NewCompanyData) then
             ScheduleConfigPackageImport(ConfigurationPackageFile, NewCompanyName);
     end;
@@ -246,7 +266,7 @@ codeunit 1800 "Assisted Company Setup"
     procedure FindConfigurationPackageFile(var ConfigurationPackageFile: Record "Configuration Package File"; CompanyData: Option): Boolean
     begin
         if FilterConfigurationPackageFile(ConfigurationPackageFile, CompanyData) then
-            exit(ConfigurationPackageFile.FindFirst);
+            exit(ConfigurationPackageFile.FindFirst());
         exit(false);
     end;
 
@@ -332,7 +352,7 @@ codeunit 1800 "Assisted Company Setup"
 
         Commit();
 
-        Window.Close;
+        Window.Close();
     end;
 
     [Scope('OnPrem')]
@@ -361,22 +381,6 @@ codeunit 1800 "Assisted Company Setup"
                 exit(true);
         exit(false);
     end;
-
-#if not CLEAN19
-    [Scope('OnPrem')]
-    [Obsolete('Replaced with GetAllowedCompaniesForCurrentUser.', '19.0')]
-    procedure GetAllowedCompaniesForCurrnetUser(var TempCompany: Record Company temporary)
-    begin
-        GetAllowedCompaniesForCurrentUser(TempCompany)
-    end;
-
-    [Scope('OnPrem')]
-    [Obsolete('Replaced with IsAllowedCompanyForCurrentUser.', '19.0')]
-    procedure HasCurrentUserAccessToCompany(CompanyName: Text[30]): Boolean
-    begin
-        exit(IsAllowedCompanyForCurrentUser(CompanyName));
-    end;
-#endif
 
     procedure AddAssistedCompanySetup()
     var
@@ -436,14 +440,6 @@ codeunit 1800 "Assisted Company Setup"
         RunAssistedCompanySetup();
     end;
 
-#if not CLEAN19
-    [EventSubscriber(ObjectType::Page, Page::"Allowed Companies", 'OnBeforeActionEvent', 'Create New Company', false, false)]
-    local procedure OnBeforeCreateNewCompanyActionOpenCompanyCreationWizard(var Rec: Record Company)
-    begin
-        PAGE.RunModal(PAGE::"Company Creation Wizard");
-    end;
-#endif
-
     [EventSubscriber(ObjectType::Page, Page::"Accessible Companies", 'OnBeforeActionEvent', 'Create New Company', false, false)]
     local procedure OnBeforeCreateNewCompanyActionAccessibleCompanies(var Rec: Record Company)
     begin
@@ -474,32 +470,10 @@ codeunit 1800 "Assisted Company Setup"
         IsSetupInProgress := IsCompanySetupInProgress(NewCompanyName);
     end;
 
-#if not CLEAN19
-    [EventSubscriber(ObjectType::Table, Database::"Assisted Company Setup Status", 'OnGetCompanySetupStatus', '', false, false)]
-    local procedure OnGetIsCompanySetupInProgress(Name: Text[30]; var SetupStatus: Integer)
-    var
-        SetupStatusEnum: Enum "Company Setup Status";
-    begin
-        SetupStatusEnum := GetCompanySetupStatus(Name);
-        SetupStatus := SetupStatusEnum.AsInteger();
-    end;
-#endif
-
     [EventSubscriber(ObjectType::Table, Database::"Assisted Company Setup Status", 'OnGetCompanySetupStatusValue', '', false, false)]
     local procedure OnGetIsCompanySetupInProgressValue(Name: Text[30]; var SetupStatus: Enum "Company Setup Status")
-#if not CLEAN19
-    var
-        AssistedCompanySetupStatus: Record "Assisted Company Setup Status";
-        SetupStatusInteger: Integer;
-#endif
     begin
-#if CLEAN19
         SetupStatus := GetCompanySetupStatus(Name);
-#else
-        SetupStatusInteger := SetupStatus.AsInteger();
-        AssistedCompanySetupStatus.OnGetCompanySetupStatus(Name, SetupStatusInteger);
-        SetupStatus := Enum::"Company Setup Status".FromInteger(SetupStatusInteger);
-#endif
     end;
 
     [EventSubscriber(ObjectType::Table, Database::"Assisted Company Setup Status", 'OnSetupStatusDrillDown', '', false, false)]

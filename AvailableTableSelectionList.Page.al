@@ -1,3 +1,5 @@
+namespace System.Reflection;
+
 page 9628 "Available Table Selection List"
 {
     Caption = 'Select Table';
@@ -12,7 +14,7 @@ page 9628 "Available Table Selection List"
             repeater(Control2)
             {
                 ShowCaption = false;
-                field(Name; Name)
+                field(Name; Rec.Name)
                 {
                     ApplicationArea = Basic, Suite;
                     Caption = 'Name';

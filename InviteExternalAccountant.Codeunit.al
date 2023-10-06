@@ -1,3 +1,12 @@
+namespace Microsoft.AccountantPortal;
+
+using System;
+using System.Text;
+using System.Azure.Identity;
+using System.Environment.Configuration;
+using System.Integration;
+using System.Utilities;
+
 codeunit 9033 "Invite External Accountant"
 {
 
@@ -6,6 +15,8 @@ codeunit 9033 "Invite External Accountant"
     end;
 
     var
+        UrlHelper: Codeunit "Url Helper";
+
         ErrorAcquiringTokenErr: Label 'Failed to acquire an access token.  This is necessary to invite the external accountant.  Contact your administrator.', Locked = true;
         InviteReedemUrlTxt: Label 'inviteRedeemUrl', Locked = true;
         InvitedUserIdTxt: Label 'invitedUser', Locked = true;
@@ -25,7 +36,7 @@ codeunit 9033 "Invite External Accountant"
         InviteExternalAccountantTelemetryStartTxt: Label 'Invite External Accountant process started.', Locked = true;
         InviteExternalAccountantTelemetryEndTxt: Label 'Invite External Accountant process ended with the following result:  %1:  License is %2.', Locked = true;
         InviteExternalAccountantTelemetryLicenseFailTxt: Label 'Invite External Accountant wizard failed to start due to there being no external accountant license available.', Locked = true;
-        InviteExternalAccountantTelemetryAADPermissionFailTxt: Label 'Invite External Accountant wizard failed to start due to the user not having the necessary AAD permissions.', Locked = true;
+        InviteExternalAccountantTelemetryAADPermissionFailTxt: Label 'Invite External Accountant wizard failed to start due to the user not having the necessary Microsoft Entra permissions.', Locked = true;
         InviteExternalAccountantTelemetryUserTablePermissionFailTxt: Label 'Invite External Accountant wizard failed to start due to the session not being admin or the user being Super in all companies.', Locked = true;
         InviteExternalAccountantTelemetryCreateNewUserSuccessTxt: Label 'Invite External Accountant wizard successfully created a new user.', Locked = true;
         InviteExternalAccountantTelemetryCreateNewUserFailedTxt: Label 'Invite External Accountant wizard was unable to create a new user.', Locked = true;
@@ -35,7 +46,6 @@ codeunit 9033 "Invite External Accountant"
         InsufficientDataReturnedFromInvitationsApiTxt: Label 'Insufficient information was returned when inviting the user. Please contact your administrator.';
         WidsClaimNameTok: Label 'WIDS', Locked = true;
         ExternalAccountantLicenseAvailabilityErr: Label 'Failed to determine if an External Accountant license is available. Please try again later.';
-        UrlHelper: Codeunit "Url Helper";
 
     [Scope('OnPrem')]
     procedure InvokeInvitationsRequest(DisplayName: Text; EmailAddress: Text; WebClientUrl: Text; var InvitedUserId: Guid; var InviteReedemUrl: Text; var ErrorMessage: Text): Boolean
@@ -57,7 +67,7 @@ codeunit 9033 "Invite External Accountant"
         Body := Body + '"sendInvitationMessage" : "false"';
         Body := Body + '}';
 
-        if InvokeRequestWithGraphAccessToken(GetGraphInvitationsUrl, 'POST', Body, ResponseContent) then begin
+        if InvokeRequestWithGraphAccessToken(GetGraphInvitationsUrl(), 'POST', Body, ResponseContent) then begin
             JSONManagement.InitializeObject(ResponseContent);
             JSONManagement.GetJSONObject(JsonObject);
             FoundInviteRedeemUrlValue :=
@@ -86,7 +96,7 @@ codeunit 9033 "Invite External Accountant"
         ResponseContent: Text;
         GraphUserUrl: Text;
     begin
-        GraphUserUrl := GetGraphUserUrl + '/' + GuestGraphUser.ObjectId;
+        GraphUserUrl := GetGraphUserUrl() + '/' + GuestGraphUser.ObjectId;
         Body := '{"usageLocation" : "' + CountryLetterCode + '"}';
 
         // Set usage location on guest user to current tenant's country letter code.
@@ -104,7 +114,7 @@ codeunit 9033 "Invite External Accountant"
         ResponseContent: Text;
         Url: Text;
     begin
-        Url := GetGraphUserUrl + '/' + GraphUser.ObjectId + '/assignLicense';
+        Url := GetGraphUserUrl() + '/' + GraphUser.ObjectId + '/assignLicense';
 
         Body := '{';
         Body := Body + '"addLicenses": [';
@@ -136,7 +146,7 @@ codeunit 9033 "Invite External Accountant"
         PrepaidUnitsValue: Text;
         EnabledUnitsValue: Decimal;
     begin
-        if InvokeRequestWithGraphAccessToken(GetGraphSubscribedSkusUrl, 'GET', '', ResponseContent) then begin
+        if InvokeRequestWithGraphAccessToken(GetGraphSubscribedSkusUrl(), 'GET', '', ResponseContent) then begin
             if not JSONManagement.TryParseJObjectFromString(JsonObject, ResponseContent) then
                 Error(ExternalAccountantLicenseAvailabilityErr);
 
@@ -144,7 +154,7 @@ codeunit 9033 "Invite External Accountant"
                 Error(ExternalAccountantLicenseAvailabilityErr);
             JSONManagement.InitializeCollectionFromJArray(JsonArray);
 
-            NumberSkus := JSONManagement.GetCollectionCount;
+            NumberSkus := JSONManagement.GetCollectionCount();
             while NumberSkus > 0 do begin
                 NumberSkus := NumberSkus - 1;
                 if JSONManagement.GetJObjectFromCollectionByIndex(JsonObject, NumberSkus) then begin
@@ -265,7 +275,7 @@ codeunit 9033 "Invite External Accountant"
 
     local procedure InvokeRequestWithGraphAccessToken(Url: Text; Verb: Text; Body: Text; var ResponseContent: Text): Boolean
     begin
-        exit(InvokeRequest(Url, Verb, Body, UrlHelper.GetGraphUrl, ResponseContent));
+        exit(InvokeRequest(Url, Verb, Body, UrlHelper.GetGraphUrl(), ResponseContent));
     end;
 
     local procedure InvokeRequest(Url: Text; Verb: Text; Body: Text; AuthResourceUrl: Text; var ResponseContent: Text): Boolean
@@ -279,13 +289,13 @@ codeunit 9033 "Invite External Accountant"
         ResponseErrorDetails: Text;
         AccessToken: Text;
     begin
-        AccessToken := AzureADMgt.GetGuestAccessToken(AuthResourceUrl, AzureADTenant.GetAadTenantId);
+        AccessToken := AzureADMgt.GetGuestAccessToken(AuthResourceUrl, AzureADTenant.GetAadTenantId());
 
         if AccessToken = '' then
             Error(ErrorAcquiringTokenErr);
 
         HttpWebRequestMgt.Initialize(Url);
-        HttpWebRequestMgt.DisableUI;
+        HttpWebRequestMgt.DisableUI();
         HttpWebRequestMgt.SetReturnType('application/json');
         HttpWebRequestMgt.SetContentType('application/json');
         HttpWebRequestMgt.SetMethod(Verb);
@@ -324,17 +334,17 @@ codeunit 9033 "Invite External Accountant"
 
     local procedure GetGraphInvitationsUrl(): Text
     begin
-        exit(UrlHelper.GetGraphUrl + 'v1.0/invitations');
+        exit(UrlHelper.GetGraphUrl() + 'v1.0/invitations');
     end;
 
     local procedure GetGraphUserUrl(): Text
     begin
-        exit(UrlHelper.GetGraphUrl + 'v1.0/users');
+        exit(UrlHelper.GetGraphUrl() + 'v1.0/users');
     end;
 
     local procedure GetGraphSubscribedSkusUrl(): Text
     begin
-        exit(UrlHelper.GetGraphUrl + 'v1.0/subscribedSkus');
+        exit(UrlHelper.GetGraphUrl() + 'v1.0/subscribedSkus');
     end;
 
     procedure SendTelemetryForWizardFailure(stepFailed: Text; ErrorMessage: Text)

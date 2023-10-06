@@ -1,3 +1,8 @@
+namespace System.Privacy;
+
+using Microsoft.EServices.EDocument;
+using System.IO;
+
 codeunit 1181 "Prvacy Data Mgmt Excel"
 {
     TableNo = "Config. Package Table";
@@ -21,10 +26,10 @@ codeunit 1181 "Prvacy Data Mgmt Excel"
                 ReportInbox."Report Output".CreateOutStream(OutStr);
                 CopyStream(OutStr, InStr);
 
-                ReportInbox."User ID" := UserId;
+                ReportInbox."User ID" := CopyStr(UserId(), 1, MaxStrLen(ReportInbox."User ID"));
                 ReportInbox.Validate("Output Type", ReportInbox."Output Type"::Excel);
-                ReportInbox.Description := StrSubstNo(PrivacyDataTxt, "Package Code");
-                ReportInbox."Report Name" := StrSubstNo(PrivacyDataTxt, "Package Code");
+                ReportInbox.Description := StrSubstNo(PrivacyDataTxt, Rec."Package Code");
+                ReportInbox."Report Name" := StrSubstNo(PrivacyDataTxt, Rec."Package Code");
                 ReportInbox."Created Date-Time" := RoundDateTime(CurrentDateTime, 60000);
                 if not ReportInbox.Insert(true) then
                     ReportInbox.Modify(true);

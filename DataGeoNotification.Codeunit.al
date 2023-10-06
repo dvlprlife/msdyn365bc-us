@@ -1,5 +1,18 @@
+// ------------------------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+// ------------------------------------------------------------------------------------------------
+namespace Microsoft;
+
+using System.Environment.Configuration;
+using System.Apps;
+using System.Environment;
+using Microsoft.Foundation.Company;
+
 codeunit 1760 "Data Geo. Notification"
 {
+    Permissions = TableData "NAV App Installed App" = r;
+
     var
         DontShowAgainMsg: Label 'Don''t show me again';
         LearnMoreMsg: Label 'Click here to learn more about what that means';
@@ -34,9 +47,10 @@ codeunit 1760 "Data Geo. Notification"
     var
         MyNotifications: Record "My Notifications";
     begin
-        if not MyNotifications.Disable(Notification.Id) then
-            MyNotifications.InsertDefault(Notification.Id, GeoNotificationTxt,
-                          GeoNotificationDescTxt, false);
+        If MyNotifications.WritePermission then
+            if not MyNotifications.Disable(Notification.Id) then
+                MyNotifications.InsertDefault(Notification.Id, GeoNotificationTxt,
+                              GeoNotificationDescTxt, false);
     end;
 
     [Scope('OnPrem')]

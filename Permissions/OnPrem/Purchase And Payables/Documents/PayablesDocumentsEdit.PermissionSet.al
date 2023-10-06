@@ -1,10 +1,63 @@
+namespace System.Security.AccessControl;
+
+using Microsoft.Purchases.Vendor;
+using Microsoft.Sales.Customer;
+using Microsoft.Inventory.Intrastat;
+using Microsoft.Sales.Document;
+using Microsoft.CRM.Team;
+using Microsoft.Projects.Project.Job;
+using Microsoft.Inventory.Location;
+using Microsoft.Foundation.Reporting;
+using Microsoft.Finance.VAT.Reporting;
+using Microsoft.Projects.Project.Planning;
+using Microsoft.Foundation.AuditCodes;
+using Microsoft.Foundation.Shipping;
+using Microsoft.Foundation.UOM;
+using Microsoft.Finance.VAT.Calculation;
+using Microsoft.Finance.VAT.Setup;
+using Microsoft.Finance.VAT.RateChange;
+using Microsoft.Bank.BankAccount;
+using Microsoft.Warehouse.Structure;
+using Microsoft.Inventory.BOM;
+using Microsoft.Foundation.Comment;
+using Microsoft.Foundation.Company;
+using Microsoft.Foundation.Address;
+using Microsoft.Finance.Currency;
+using Microsoft.Finance.Dimension;
+using Microsoft.Purchases.Payables;
+using Microsoft.Pricing.Calculation;
+using Microsoft.Pricing.PriceList;
+using Microsoft.HumanResources.Payables;
+using Microsoft.HumanResources.Employee;
+using Microsoft.Inventory.Tracking;
+using Microsoft.Foundation.ExtendedText;
+using Microsoft.Finance.GeneralLedger.Account;
+using Microsoft.Finance.GeneralLedger.Setup;
+using Microsoft.Inventory.Item;
+using Microsoft.Purchases.Document;
+using Microsoft.Inventory.Journal;
+using Microsoft.Inventory.Ledger;
+using Microsoft.Inventory.Item.Catalog;
+using Microsoft.Foundation.PaymentTerms;
+using Microsoft.Inventory.Planning;
+using Microsoft.Pricing.Asset;
+using Microsoft.Pricing.Source;
+using Microsoft.Pricing.Worksheet;
+using Microsoft.Manufacturing.Document;
+using Microsoft.Purchases.Comment;
+using Microsoft.Purchases.History;
+using Microsoft.Purchases.Pricing;
+using Microsoft.Purchases.Archive;
+using Microsoft.Purchases.Remittance;
+using Microsoft.Inventory.Requisition;
+using Microsoft.Finance.SalesTax;
+using System.Security.User;
+
 permissionset 7946 "Payables Documents - Edit"
 {
     Access = Public;
     Assignable = false;
     Caption = 'Create purchase orders, etc.';
-
-    IncludedPermissionSets = "Language - Read";
 
     Permissions = tabledata "Bank Account" = R,
                   tabledata Bin = R,
@@ -37,9 +90,6 @@ permissionset 7946 "Payables Documents - Edit"
                   tabledata "Item Charge" = R,
                   tabledata "Item Charge Assignment (Purch)" = RIMD,
                   tabledata "Item Charge Assignment (Sales)" = Rm,
-#if not CLEAN19
-                  tabledata "Item Cross Reference" = R,
-#endif
                   tabledata "Item Journal Line" = Rm,
                   tabledata "Item Ledger Entry" = Rm,
                   tabledata "Item Reference" = R,
@@ -81,12 +131,13 @@ permissionset 7946 "Payables Documents - Edit"
                   tabledata "Purchase Header Archive" = RIMD,
                   tabledata "Purchase Line" = RIMD,
                   tabledata "Purchase Line Archive" = RIMD,
-#if not CLEAN19
+#if not CLEAN21
                   tabledata "Purchase Line Discount" = R,
                   tabledata "Purchase Price" = R,
 #endif
                   tabledata "Purchase Price Access" = R,
                   tabledata "Reason Code" = R,
+                  tabledata "Remit Address" = R,
                   tabledata "Report Selections" = R,
                   tabledata "Requisition Line" = Rim,
                   tabledata "Reservation Entry" = Rimd,
@@ -126,6 +177,8 @@ permissionset 7946 "Payables Documents - Edit"
                   tabledata "VAT Rate Change Setup" = R,
                   tabledata "VAT Reporting Code" = R,
                   tabledata "VAT Setup Posting Groups" = R,
+                  tabledata "VAT Setup" = R,
+                  tabledata "VAT Posting Parameters" = R,
                   tabledata Vendor = R,
                   tabledata "Vendor Bank Account" = R,
                   tabledata "Vendor Invoice Disc." = R,

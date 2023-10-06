@@ -1,3 +1,20 @@
+// ------------------------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+// ------------------------------------------------------------------------------------------------
+namespace Microsoft.Utilities;
+
+using Microsoft.CashFlow.Forecast;
+using Microsoft.Finance.FinancialReports;
+using Microsoft.Finance.GeneralLedger.Account;
+using Microsoft.Finance.RoleCenters;
+using Microsoft.Foundation.Task;
+using Microsoft.Integration.Entity;
+using Microsoft.Purchases.Document;
+using Microsoft.RoleCenters;
+using Microsoft.Sales.Receivables;
+using System.Integration.PowerBI;
+
 page 1156 "Company Detail"
 {
     Caption = 'Company Details';
@@ -45,8 +62,8 @@ page 1156 "Company Detail"
                             trigger OnDrillDown()
                             begin
                                 SelectedUserTaskFilterTile := PendingUserTasksFilterTxt;
-                                TotalUserTasks := CalculatePendingUserTasks;
-                                CurrPage.UserTasksCtrl.PAGE.SetFilterForPendingTasks;
+                                TotalUserTasks := CalculatePendingUserTasks();
+                                CurrPage.UserTasksCtrl.Page.SetFilterForPendingTasks();
                             end;
                         }
                         field("<Due Today>"; UserTasksDueToday)
@@ -59,8 +76,8 @@ page 1156 "Company Detail"
                             trigger OnDrillDown()
                             begin
                                 SelectedUserTaskFilterTile := UserTasksDueTodayFilterTxt;
-                                TotalUserTasks := CalculateUserTasksDueToday;
-                                CurrPage.UserTasksCtrl.PAGE.SetFilterForTasksDueToday;
+                                TotalUserTasks := CalculateUserTasksDueToday();
+                                CurrPage.UserTasksCtrl.Page.SetFilterForTasksDueToday();
                             end;
                         }
                         field("<Due This Week>"; UserTasksDueThisWeek)
@@ -73,8 +90,8 @@ page 1156 "Company Detail"
                             trigger OnDrillDown()
                             begin
                                 SelectedUserTaskFilterTile := UserTasksDueThisWeekFilterTxt;
-                                TotalUserTasks := CalculateUserTasksDueThisWeek;
-                                CurrPage.UserTasksCtrl.PAGE.SetFilterForTasksDueThisWeek;
+                                TotalUserTasks := CalculateUserTasksDueThisWeek();
+                                CurrPage.UserTasksCtrl.Page.SetFilterForTasksDueThisWeek();
                             end;
                         }
                     }
@@ -102,14 +119,32 @@ page 1156 "Company Detail"
             group("Power BI")
             {
                 Caption = 'Power BI';
+                part(PowerBIEmbeddedReportPart1; "Power BI Embedded Report Part")
+                {
+                    ApplicationArea = All;
+                }
+                part(PowerBIEmbeddedReportPart2; "Power BI Embedded Report Part")
+                {
+                    ApplicationArea = All;
+                }
+#if not CLEAN21
                 part(PowerBIPartOne; "Power BI Report Spinner Part")
                 {
                     ApplicationArea = All;
+                    ObsoleteState = Pending;
+                    ObsoleteReason = 'Replaced by PowerBIEmbeddedReportPart1';
+                    Visible = false;
+                    ObsoleteTag = '21.0';
                 }
                 part(PowerBIPartTwo; "Power BI Report Spinner Part")
                 {
                     ApplicationArea = All;
+                    ObsoleteState = Pending;
+                    ObsoleteReason = 'Replaced by PowerBIEmbeddedReportPart2';
+                    Visible = false;
+                    ObsoleteTag = '21.0';
                 }
+#endif
             }
             group(Purchase)
             {
@@ -132,7 +167,7 @@ page 1156 "Company Detail"
                             begin
                                 SelectedPurchFilterTile := OverduePurchInvoiceAmtFilterTxt;
                                 TotalPurch := OverDuePurchInvoiceAmt;
-                                CurrPage.PurchaseDocumentsCtrl.PAGE.SetFilterForOverduePurInvoiceAmount;
+                                CurrPage.PurchaseDocumentsCtrl.Page.SetFilterForOverduePurInvoiceAmount();
                             end;
                         }
                         field("<PurchDocsDueToday>"; PurchDocsDueToday)
@@ -147,7 +182,7 @@ page 1156 "Company Detail"
                             begin
                                 SelectedPurchFilterTile := PurchDocsDueTodayFilterTxt;
                                 TotalPurch := PurchDocsDueToday;
-                                CurrPage.PurchaseDocumentsCtrl.PAGE.SetFilterForPurchDocsDueToday;
+                                CurrPage.PurchaseDocumentsCtrl.Page.SetFilterForPurchDocsDueToday();
                             end;
                         }
                         field(PurchInvoicesDueNextWeek; PurchInvoicesDueNextWeek)
@@ -162,7 +197,7 @@ page 1156 "Company Detail"
                             begin
                                 SelectedPurchFilterTile := PurchInvoicesDueNextWeekFilterTxt;
                                 TotalPurch := PurchInvoicesDueNextWeek;
-                                CurrPage.PurchaseDocumentsCtrl.PAGE.SetFilterForPurchInvoicesDueNextWeek;
+                                CurrPage.PurchaseDocumentsCtrl.Page.SetFilterForPurchInvoicesDueNextWeek();
                             end;
                         }
                     }
@@ -211,7 +246,7 @@ page 1156 "Company Detail"
                             begin
                                 SelectedSalesFilterTile := OverdueSalesInvoiceAmtFilterTxt;
                                 TotalSales := OverDueSalesInvoiceAmt;
-                                CurrPage.SalesDocumentsCtrl.PAGE.SetFilterForOverdueSalesInvoiceAmount;
+                                CurrPage.SalesDocumentsCtrl.Page.SetFilterForOverdueSalesInvoiceAmount();
                             end;
                         }
                         field("<SalesDocsDueToday>"; SalesDocsDueToday)
@@ -226,7 +261,7 @@ page 1156 "Company Detail"
                             begin
                                 SelectedSalesFilterTile := SalesDocsDueTodayFilterTxt;
                                 TotalSales := SalesDocsDueToday;
-                                CurrPage.SalesDocumentsCtrl.PAGE.SetFilterForSalesDocsDueToday;
+                                CurrPage.SalesDocumentsCtrl.Page.SetFilterForSalesDocsDueToday();
                             end;
                         }
                         field("<SalesDocsDueNextWeek>"; SalesDocsDueNextWeek)
@@ -241,7 +276,7 @@ page 1156 "Company Detail"
                             begin
                                 SelectedSalesFilterTile := SalesDocsDueNextWeekFilterTxt;
                                 TotalSales := SalesDocsDueNextWeek;
-                                CurrPage.SalesDocumentsCtrl.PAGE.SetFilterForSalesDocsDueNextWeek;
+                                CurrPage.SalesDocumentsCtrl.Page.SetFilterForSalesDocsDueNextWeek();
                             end;
                         }
                     }
@@ -288,9 +323,6 @@ page 1156 "Company Detail"
                         ApplicationArea = All;
                         Caption = 'Balance Sheet';
                         Image = Excel;
-                        Promoted = true;
-                        PromotedCategory = "Report";
-                        PromotedOnly = true;
                         RunObject = Codeunit "Run Template Balance Sheet";
                         ToolTip = 'Open a spreadsheet that shows your company''s assets, liabilities, and equity.';
                     }
@@ -299,9 +331,6 @@ page 1156 "Company Detail"
                         ApplicationArea = All;
                         Caption = 'Income Statement';
                         Image = Excel;
-                        Promoted = true;
-                        PromotedCategory = "Report";
-                        PromotedOnly = true;
                         RunObject = Codeunit "Run Template Income Stmt.";
                         ToolTip = 'Open a spreadsheet that shows your company''s income and expenses.';
                     }
@@ -310,9 +339,6 @@ page 1156 "Company Detail"
                         ApplicationArea = All;
                         Caption = 'Cash Flow Statement';
                         Image = Excel;
-                        Promoted = true;
-                        PromotedCategory = "Report";
-                        PromotedOnly = true;
                         RunObject = Codeunit "Run Template CashFlow Stmt.";
                         ToolTip = 'Open a spreadsheet that shows how changes in balance sheet accounts and income affect the company''s cash holdings.';
                     }
@@ -321,9 +347,6 @@ page 1156 "Company Detail"
                         ApplicationArea = All;
                         Caption = 'Retained Earnings Statement';
                         Image = Excel;
-                        Promoted = true;
-                        PromotedCategory = "Report";
-                        PromotedOnly = true;
                         RunObject = Codeunit "Run Template Retained Earn.";
                         ToolTip = 'Open a spreadsheet that shows your company''s changes in retained earnings based on net income from the other financial statements.';
                     }
@@ -332,9 +355,6 @@ page 1156 "Company Detail"
                         ApplicationArea = All;
                         Caption = 'Trial Balance';
                         Image = Excel;
-                        Promoted = true;
-                        PromotedCategory = "Report";
-                        PromotedOnly = true;
                         RunObject = Codeunit "Run Template Trial Balance";
                         ToolTip = 'Open a spreadsheet that shows a summary trial balance by account.';
                     }
@@ -343,9 +363,6 @@ page 1156 "Company Detail"
                         ApplicationArea = All;
                         Caption = 'Aged Accounts Payable';
                         Image = Excel;
-                        Promoted = true;
-                        PromotedCategory = "Report";
-                        PromotedOnly = true;
                         RunObject = Codeunit "Run Template Aged Acc. Pay.";
                         ToolTip = 'Open a spreadsheet that shows a list of aged remaining balances for each vendor by period.';
                     }
@@ -354,9 +371,6 @@ page 1156 "Company Detail"
                         ApplicationArea = All;
                         Caption = 'Aged Accounts Receivable';
                         Image = Excel;
-                        Promoted = true;
-                        PromotedCategory = "Report";
-                        PromotedOnly = true;
                         RunObject = Codeunit "Run Template Aged Acc. Rec.";
                         ToolTip = 'Open a spreadsheet that shows when customer payments are due or overdue by period.';
                     }
@@ -370,16 +384,50 @@ page 1156 "Company Detail"
                     ApplicationArea = All;
                     Caption = 'Go To Client';
                     Image = Link;
-                    Promoted = true;
-                    PromotedCategory = Process;
-                    PromotedOnly = true;
                     ToolTip = 'Log into this client company.';
 
                     trigger OnAction()
                     begin
                         HyperLink(GetUrl(CLIENTTYPE::Web, CompanyName));
-                        OnGoToCompany;
+                        OnGoToCompany();
                     end;
+                }
+            }
+        }
+        area(Promoted)
+        {
+            group(Category_Process)
+            {
+                Caption = 'Process';
+
+                actionref(GoToClientCompany_Promoted; GoToClientCompany)
+                {
+                }
+            }
+            group(Category_Report)
+            {
+                Caption = 'Reports';
+
+                actionref(ExcelTemplatesBalanceSheet_Promoted; ExcelTemplatesBalanceSheet)
+                {
+                }
+                actionref(ExcelTemplateIncomeStmt_Promoted; ExcelTemplateIncomeStmt)
+                {
+                }
+                actionref(ExcelTemplateCashFlowStmt_Promoted; ExcelTemplateCashFlowStmt)
+                {
+                }
+                actionref(ExcelTemplateRetainedEarn_Promoted; ExcelTemplateRetainedEarn)
+                {
+                }
+                actionref(ExcelTemplateTrialBalance_Promoted; ExcelTemplateTrialBalance)
+                {
+                }
+                actionref(ExcelTemplateAgedAccPay_Promoted; ExcelTemplateAgedAccPay)
+                {
+                }
+                actionref(ExcelTemplateAgedAccRec_Promoted; ExcelTemplateAgedAccRec)
+                {
                 }
             }
         }
@@ -387,13 +435,18 @@ page 1156 "Company Detail"
 
     trigger OnOpenPage()
     begin
-        CalculatePurchCues;
-        CalculateSalesCues;
-        CalculateUserTasksCues;
+        CalculatePurchCues();
+        CalculateSalesCues();
+        CalculateUserTasksCues();
 
+#if not CLEAN21
         // Set up context for power bi part pages.
-        CurrPage.PowerBIPartOne.PAGE.SetContext(PowerBiPartOneIdTxt);
-        CurrPage.PowerBIPartTwo.PAGE.SetContext(PowerBiPartTwoIdTxt);
+        CurrPage.PowerBIPartOne.Page.SetContext(PowerBiPartOneIdTxt);
+        CurrPage.PowerBIPartTwo.Page.SetContext(PowerBiPartTwoIdTxt);
+#endif
+
+        CurrPage.PowerBIEmbeddedReportPart1.Page.SetPageContext(PowerBiPartOneIdTxt);
+        CurrPage.PowerBIEmbeddedReportPart2.Page.SetPageContext(PowerBiPartTwoIdTxt);
     end;
 
     var
@@ -438,13 +491,13 @@ page 1156 "Company Detail"
         TotalPurch := OverDuePurchInvoiceAmt;
 
         // Calculate purchase documents due today
-        FinanceCue.SetFilter("Due Date Filter", '<=%1', WorkDate);
+        FinanceCue.SetFilter("Due Date Filter", '<=%1', WorkDate());
         FinanceCue.CalcFields("Purchase Documents Due Today");
         PurchDocsDueToday := FinanceCue."Purchase Documents Due Today";
         Clear(FinanceCue);
 
         // Calculate purchase invoices due next week
-        FinanceCue.SetFilter("Due Next Week Filter", '%1..%2', CalcDate('<1D>', WorkDate), CalcDate('<1W>', WorkDate));
+        FinanceCue.SetFilter("Due Next Week Filter", '%1..%2', CalcDate('<1D>', WorkDate()), CalcDate('<1W>', WorkDate()));
         FinanceCue.CalcFields("Purch. Invoices Due Next Week");
         PurchInvoicesDueNextWeek := FinanceCue."Purch. Invoices Due Next Week";
         Clear(FinanceCue);
@@ -461,13 +514,13 @@ page 1156 "Company Detail"
         TotalSales := OverDueSalesInvoiceAmt;
 
         // Calculate sales documents due today
-        FinanceCue.SetFilter("Overdue Date Filter", '<=%1', WorkDate);
+        FinanceCue.SetFilter("Overdue Date Filter", '<=%1', WorkDate());
         FinanceCue.CalcFields("Overdue Sales Documents");
         SalesDocsDueToday := FinanceCue."Overdue Sales Documents";
         Clear(FinanceCue);
 
         // Calculate sales documents due next week
-        FinanceCue.SetFilter("Overdue Date Filter", '%1..%2', CalcDate('<1D>', WorkDate), CalcDate('<1W>', WorkDate));
+        FinanceCue.SetFilter("Overdue Date Filter", '%1..%2', CalcDate('<1D>', WorkDate()), CalcDate('<1W>', WorkDate()));
         FinanceCue.CalcFields("Overdue Sales Documents");
         SalesDocsDueNextWeek := FinanceCue."Overdue Sales Documents";
         Clear(FinanceCue);
@@ -479,29 +532,29 @@ page 1156 "Company Detail"
         SelectedUserTaskFilterTile := PendingUserTasksFilterTxt;
 
         // Calculate pending tasks
-        PendingTasks := CalculatePendingUserTasks;
+        PendingTasks := CalculatePendingUserTasks();
         TotalUserTasks := PendingTasks;
 
         // Calculate tasks due today
-        UserTasksDueToday := CalculateUserTasksDueToday;
+        UserTasksDueToday := CalculateUserTasksDueToday();
 
         // Calculate tasks due this week
-        UserTasksDueThisWeek := CalculateUserTasksDueThisWeek;
+        UserTasksDueThisWeek := CalculateUserTasksDueThisWeek();
     end;
 
     local procedure CalculatePendingUserTasks(): Integer
     begin
-        exit(UserTaskManagement.GetMyPendingUserTasksCount);
+        exit(UserTaskManagement.GetMyPendingUserTasksCount());
     end;
 
     local procedure CalculateUserTasksDueToday(): Integer
     begin
-        exit(UserTaskManagement.GetMyPendingUserTasksCountDueToday);
+        exit(UserTaskManagement.GetMyPendingUserTasksCountDueToday());
     end;
 
     local procedure CalculateUserTasksDueThisWeek(): Integer
     begin
-        exit(UserTaskManagement.GetMyPendingUserTasksCountDueThisWeek);
+        exit(UserTaskManagement.GetMyPendingUserTasksCountDueThisWeek());
     end;
 
     [IntegrationEvent(false, false)]

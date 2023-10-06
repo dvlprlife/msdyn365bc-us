@@ -1,3 +1,5 @@
+namespace Microsoft.Foundation.Reporting;
+
 page 365 "Post and Send Confirmation"
 {
     Caption = 'Post and Send Confirmation';
@@ -9,7 +11,7 @@ page 365 "Post and Send Confirmation"
     {
         area(content)
         {
-            field(SelectedSendingProfiles; GetRecordAsText)
+            field(SelectedSendingProfiles; Rec.GetRecordAsText())
             {
                 ApplicationArea = Basic, Suite;
                 Caption = 'Send Document to';
@@ -28,8 +30,8 @@ page 365 "Post and Send Confirmation"
                     TempDocumentSendingProfile.Insert();
 
                     if PAGE.RunModal(PAGE::"Select Sending Options", TempDocumentSendingProfile) = ACTION::LookupOK then begin
-                        Copy(TempDocumentSendingProfile);
-                        UpdatePromptMessage;
+                        Rec.Copy(TempDocumentSendingProfile);
+                        UpdatePromptMessage();
                     end;
                 end;
             }
@@ -54,8 +56,8 @@ page 365 "Post and Send Confirmation"
 
     trigger OnAfterGetCurrRecord()
     begin
-        UpdatePromptMessage;
-        CurrentDocumentSendingProfileCode := Code;
+        UpdatePromptMessage();
+        CurrentDocumentSendingProfileCode := Rec.Code;
     end;
 
     var
@@ -65,7 +67,7 @@ page 365 "Post and Send Confirmation"
 
     local procedure UpdatePromptMessage()
     begin
-        if WillUserBePrompted then
+        if Rec.WillUserBePrompted() then
             ChoicesForSendingTxt := PromptsForAdditionalSettingsTxt
         else
             ChoicesForSendingTxt := '';

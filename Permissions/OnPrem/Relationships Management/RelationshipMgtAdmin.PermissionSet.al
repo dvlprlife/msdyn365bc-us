@@ -1,3 +1,15 @@
+namespace System.Security.AccessControl;
+
+using Microsoft.CRM.Task;
+using Microsoft.CRM.Interaction;
+using Microsoft.CRM.BusinessRelation;
+using Microsoft.CRM.Opportunity;
+using Microsoft.CRM.Duplicates;
+using Microsoft.CRM.Setup;
+using Microsoft.CRM.Profiling;
+using Microsoft.CRM.Segment;
+using Microsoft.CRM.Team;
+
 permissionset 6423 "Relationship Mgt - Admin"
 {
     Access = Public;
@@ -11,8 +23,6 @@ permissionset 6423 "Relationship Mgt - Admin"
                   tabledata "Close Opportunity Code" = RIMD,
                   tabledata "Duplicate Search String Setup" = RIMD,
                   tabledata "Industry Group" = RIMD,
-                  tabledata "Integration Record" = RIMD,
-                  tabledata "Integration Record Archive" = RIMD,
                   tabledata "Interaction Group" = RIMD,
                   tabledata "Interaction Template" = RIMD,
                   tabledata "Interaction Template Setup" = RIMD,

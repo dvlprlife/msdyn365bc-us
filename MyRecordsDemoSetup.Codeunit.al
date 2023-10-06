@@ -1,3 +1,17 @@
+// ------------------------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+// ------------------------------------------------------------------------------------------------
+namespace Microsoft.RoleCenters;
+
+using Microsoft.Finance.GeneralLedger.Account;
+using Microsoft.Foundation.Company;
+using Microsoft.Inventory.Item;
+using Microsoft.Purchases.Vendor;
+using Microsoft.Sales.Customer;
+using System.Environment;
+using System.Environment.Configuration;
+
 codeunit 280 "My Records Demo Setup"
 {
     Permissions = TableData Customer = r,
@@ -29,16 +43,16 @@ codeunit 280 "My Records Demo Setup"
         if not CompanyInformationMgt.IsDemoCompany() then
             exit;
 
-        if SetupMyCustomer then
+        if SetupMyCustomer() then
             exit;
 
-        if SetupMyItem then
+        if SetupMyItem() then
             exit;
 
-        if SetupMyVendor then
+        if SetupMyVendor() then
             exit;
 
-        SetupMyAccount;
+        SetupMyAccount();
     end;
 
     local procedure SetupMyCustomer(): Boolean
@@ -61,7 +75,7 @@ codeunit 280 "My Records Demo Setup"
         if Customer.FindSet() then
             repeat
                 I += 1;
-                MyCustomer."User ID" := UserId;
+                MyCustomer."User ID" := CopyStr(UserId(), 1, MaxStrLen(MyCustomer."User ID"));
                 MyCustomer.Validate("Customer No.", Customer."No.");
                 if MyCustomer.Insert() then;
             until (Customer.Next() = 0) or (I >= MaxCustomersToAdd);
@@ -88,7 +102,7 @@ codeunit 280 "My Records Demo Setup"
         if Item.FindSet() then
             repeat
                 I += 1;
-                MyItem."User ID" := UserId;
+                MyItem."User ID" := CopyStr(UserId(), 1, MaxStrLen(MyItem."User ID"));
                 MyItem.Validate("Item No.", Item."No.");
                 if MyItem.Insert() then;
             until (Item.Next() = 0) or (I >= MaxItemsToAdd);
@@ -114,7 +128,7 @@ codeunit 280 "My Records Demo Setup"
         if Vendor.FindSet() then
             repeat
                 I += 1;
-                MyVendor."User ID" := UserId;
+                MyVendor."User ID" := CopyStr(UserId(), 1, MaxStrLen(MyVendor."User ID"));
                 MyVendor.Validate("Vendor No.", Vendor."No.");
                 if MyVendor.Insert() then;
             until (Vendor.Next() = 0) or (I >= MaxVendorsToAdd);
@@ -140,7 +154,7 @@ codeunit 280 "My Records Demo Setup"
         if GLAccount.FindSet() then
             repeat
                 I += 1;
-                MyAccount."User ID" := UserId;
+                MyAccount."User ID" := CopyStr(UserId(), 1, MaxStrLen(MyAccount."User ID"));
                 MyAccount.Validate("Account No.", GLAccount."No.");
                 if MyAccount.Insert() then;
             until (GLAccount.Next() = 0) or (I >= MaxAccountsToAdd);

@@ -1,3 +1,16 @@
+#if not CLEAN22
+namespace System.EMail;
+
+using Microsoft.CRM.Outlook;
+using Microsoft.CRM.Interaction;
+using Microsoft.CRM.Setup;
+using System;
+using System.Environment;
+using System.Environment.Configuration;
+using System.Integration;
+using System.Security.Encryption;
+using System.Utilities;
+
 page 1811 "Setup Email Logging"
 {
     Caption = 'Email Logging Setup';
@@ -6,6 +19,9 @@ page 1811 "Setup Email Logging"
     LinksAllowed = false;
     PageType = NavigatePage;
     ShowFilter = false;
+    ObsoleteReason = 'Feature EmailLoggingUsingGraphApi will be enabled by default in version 22.0';
+    ObsoleteState = Pending;
+    ObsoleteTag = '22.0';
 
     layout
     {
@@ -691,6 +707,7 @@ page 1811 "Setup Email Logging"
         MarketingSetup: Record "Marketing Setup";
         EnvironmentInfo: Codeunit "Environment Information";
         IsolatedStorageManagement: Codeunit "Isolated Storage Management";
+        [NonDebuggable]
         ClientSecretLocal: Text;
     begin
         LoadTopBanners();
@@ -753,9 +770,13 @@ page 1811 "Setup Email Logging"
         ExchangeWebServicesClient: Codeunit "Exchange Web Services Client";
         AdminOAuthCredentials: DotNet OAuthCredentials;
         Step: Option Intro,Client,OAuth2,Email,PublicFolders,Done;
+        [NonDebuggable]
         UserEmail: Text[80];
+        [NonDebuggable]
         Password: Text[30];
+        [NonDebuggable]
         ClientId: Text[250];
+        [NonDebuggable]
         ClientSecret: Text[250];
         RedirectURL: Text[2048];
         RootQueueStorageFolder: Text;
@@ -1050,4 +1071,4 @@ page 1811 "Setup Email Logging"
     begin
     end;
 }
-
+#endif

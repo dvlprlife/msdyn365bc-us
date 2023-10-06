@@ -1,3 +1,11 @@
+// ------------------------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+// ------------------------------------------------------------------------------------------------
+namespace Microsoft;
+
+using System.Environment;
+
 page 9901 "Export Data"
 {
     Caption = 'Export to a Data File';
@@ -33,7 +41,7 @@ page 9901 "Export Data"
 
                         trigger OnValidate()
                         begin
-                            MarkAll;
+                            MarkAll();
                         end;
                     }
                     field(IncludeGlobalData; IncludeGlobalData)
@@ -67,16 +75,16 @@ page 9901 "Export Data"
                         trigger OnValidate()
                         begin
                             if Selected then begin
-                                SelectedCompany := Rec;
-                                if SelectedCompany.Insert() then;
+                                TempSelectedCompany := Rec;
+                                if TempSelectedCompany.Insert() then;
                             end else begin
                                 IncludeAllCompanies := false;
-                                if SelectedCompany.Get(Name) then
-                                    SelectedCompany.Delete();
+                                if TempSelectedCompany.Get(Rec.Name) then
+                                    TempSelectedCompany.Delete();
                             end;
                         end;
                     }
-                    field(Name; Name)
+                    field(Name; Rec.Name)
                     {
                         ApplicationArea = Basic, Suite;
                         Caption = 'Company Name';
@@ -94,14 +102,14 @@ page 9901 "Export Data"
 
     trigger OnAfterGetRecord()
     begin
-        Selected := SelectedCompany.Get(Name);
+        Selected := TempSelectedCompany.Get(Rec.Name);
     end;
 
     trigger OnInit()
     var
         EnvironmentInfo: Codeunit "Environment Information";
     begin
-        if EnvironmentInfo.IsSaaS then
+        if EnvironmentInfo.IsSaaS() then
             error(OnPremiseOnlyErr);
         FileName := 'ExportData.navdata';
     end;
@@ -118,10 +126,10 @@ page 9901 "Export Data"
         if Company.FindSet() then
             repeat
                 Rec := Company;
-                Insert;
+                Rec.Insert();
             until Company.Next() = 0;
 
-        MarkAll;
+        MarkAll();
     end;
 
     trigger OnQueryClosePage(CloseAction: Action): Boolean
@@ -136,7 +144,7 @@ page 9901 "Export Data"
                  IncludeApplication,
                  IncludeApplicationData,
                  IncludeGlobalData,
-                 SelectedCompany)
+                 TempSelectedCompany)
             then begin
                 Message(CompletedMsg);
                 exit(true)
@@ -148,7 +156,7 @@ page 9901 "Export Data"
     end;
 
     var
-        SelectedCompany: Record Company temporary;
+        TempSelectedCompany: Record Company temporary;
         FileName: Text;
         Description: Text;
         IncludeApplication: Boolean;
@@ -162,14 +170,13 @@ page 9901 "Export Data"
 
     local procedure MarkAll()
     begin
-        SelectedCompany.DeleteAll();
-        if IncludeAllCompanies then begin
-            if FindSet() then
+        TempSelectedCompany.DeleteAll();
+        if IncludeAllCompanies then
+            if Rec.FindSet() then
                 repeat
-                    SelectedCompany := Rec;
-                    SelectedCompany.Insert();
-                until Next() = 0;
-        end;
+                    TempSelectedCompany := Rec;
+                    TempSelectedCompany.Insert();
+                until Rec.Next() = 0;
 
         CurrPage.Update(false);
     end;

@@ -1,3 +1,7 @@
+namespace Microsoft.CRM.Outlook;
+
+using System;
+
 page 1600 "Outlook Mail Engine"
 {
     Caption = 'Outlook Mail Engine';
@@ -16,32 +20,32 @@ page 1600 "Outlook Mail Engine"
         {
             repeater(Group)
             {
-                field(Email; Email)
+                field(Email; Rec.Email)
                 {
                     ApplicationArea = Basic, Suite;
                     ExtendedDatatype = EMail;
                     ToolTip = 'Specifies the email address of the Outlook contact.';
                 }
-                field(Name; Name)
+                field(Name; Rec.Name)
                 {
                     ApplicationArea = Basic, Suite;
                     ToolTip = 'Specifies the display name of the Outlook contact.';
                 }
-                field("Document Type"; "Document Type")
+                field("Document Type"; Rec."Document Type")
                 {
                     ApplicationArea = Basic, Suite;
                     ToolTip = 'Specifies the type that the involved document belongs to.';
                 }
-                field("Document No."; "Document No.")
+                field("Document No."; Rec."Document No.")
                 {
                     ApplicationArea = Basic, Suite;
                     ToolTip = 'Specifies the number of the involved document.';
                 }
-                field(Company; Company)
+                field(Company; Rec.Company)
                 {
                     ApplicationArea = Basic, Suite;
                 }
-                field("Contact No."; "Contact No.")
+                field("Contact No."; Rec."Contact No.")
                 {
                     ApplicationArea = Basic, Suite;
                 }
@@ -61,21 +65,21 @@ page 1600 "Outlook Mail Engine"
         [RunOnClient]
         OfficeHost: DotNet OfficeHost;
     begin
-        if OfficeHost.IsAvailable then begin
-            OfficeHost := OfficeHost.Create;
+        if OfficeHost.IsAvailable() then begin
+            OfficeHost := OfficeHost.Create();
             OfficeMgt.InitializeHost(OfficeHost, OfficeHost.HostType);
         end;
 
-        GetDetailsFromFilters;
+        GetDetailsFromFilters();
         SendTelemetryOnAddinStarted();
 
-        if Email = 'donotreply@contoso.com' then
+        if Rec.Email = 'donotreply@contoso.com' then
             Page.Run(Page::"Office Welcome Dlg")
         else
             OfficeMgt.InitializeContext(Rec);
 
-        CurrPage.Close;
-        OfficeMgt.CloseEnginePage;
+        CurrPage.Close();
+        OfficeMgt.CloseEnginePage();
     end;
 
     var
@@ -106,7 +110,7 @@ page 1600 "Outlook Mail Engine"
         Filter := FieldRef.GetFilter;
         Filter := FilterPrefixRegEx.Replace(Filter, '$1');
         Filter := SingleQuoteRegEx.Replace(Filter, '$1');
-        if Filter <> '' then begin
+        if Filter <> '' then
             if FieldRef.Type = FieldType::Option then
                 while true do begin
                     OptionValue += 1;
@@ -117,7 +121,6 @@ page 1600 "Outlook Mail Engine"
                 end
             else
                 FieldRef.Value(Filter);
-        end;
     end;
 
     local procedure SendTelemetryOnAddinStarted()
@@ -134,7 +137,7 @@ page 1600 "Outlook Mail Engine"
         end;
         FieldValuesText := DelChr(FieldValuesText, '>', ',');
 
-        Session.LogMessage('0000BOY', StrSubstNo(OfficeAddinStartedTelemetryMsg, GetFilters(), FieldValuesText), Verbosity::Normal, DataClassification::CustomerContent, TelemetryScope::ExtensionPublisher, 'Category', OfficeMgt.GetOfficeAddinTelemetryCategory());
+        Session.LogMessage('0000BOY', StrSubstNo(OfficeAddinStartedTelemetryMsg, Rec.GetFilters(), FieldValuesText), Verbosity::Normal, DataClassification::CustomerContent, TelemetryScope::ExtensionPublisher, 'Category', OfficeMgt.GetOfficeAddinTelemetryCategory());
     end;
 }
 
