@@ -22,3 +22,4 @@ For further reference, visit:
 | us-21 | Microsoft Dynamics 365 Business Central 2022 Wave 2 (Version 21) | 21.17|
 | us-22 | Microsoft Dynamics 365 Business Central 2023 Wave 1 (Version 22) | 22.11|
 | us-23 | Microsoft Dynamics 365 Business Central 2023 Wave 2 (Version 23) | 23.5 |
+| us-24 | Microsoft Dynamics 365 Business Central 2024 Wave 1 (Version 24) | 24.0 |
